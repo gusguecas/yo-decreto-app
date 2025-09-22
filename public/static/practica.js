@@ -13,11 +13,15 @@ const Practica = {
     mainContent.innerHTML = UI.renderLoading('Cargando práctica...')
     
     try {
+      console.log('🌟 Iniciando carga de práctica...')
       await this.loadPracticaData()
+      console.log('✅ Datos cargados:', this.data)
       mainContent.innerHTML = this.renderPracticaView()
       this.renderModals()
+      console.log('✅ Práctica renderizada exitosamente')
     } catch (error) {
-      mainContent.innerHTML = this.renderError()
+      console.error('❌ Error en práctica:', error)
+      mainContent.innerHTML = this.renderError(error.message)
     }
   },
 
@@ -425,12 +429,13 @@ const Practica = {
     }
   },
 
-  renderError() {
+  renderError(errorMsg = 'Error desconocido') {
     return `
       <div class="container mx-auto px-4 py-8 text-center">
         <div class="text-6xl mb-4">⚠️</div>
         <h2 class="text-2xl font-bold mb-4">Error al cargar práctica</h2>
-        <p class="text-slate-400 mb-6">No se pudo cargar la información de práctica.</p>
+        <p class="text-slate-400 mb-2">No se pudo cargar la información de práctica.</p>
+        <p class="text-red-400 text-sm mb-6">${errorMsg}</p>
         <button onclick="Practica.render()" class="btn-primary px-6 py-2 rounded-lg">
           Reintentar
         </button>

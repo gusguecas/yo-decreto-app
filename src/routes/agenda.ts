@@ -303,7 +303,7 @@ agendaRoutes.get('/pendientes/:fecha', async (c) => {
 
     return c.json({
       success: true,
-      data: tareas_pendientes.results
+      data: tareasPendientes.results
     })
   } catch (error) {
     return c.json({ success: false, error: 'Error al obtener tareas pendientes' }, 500)
