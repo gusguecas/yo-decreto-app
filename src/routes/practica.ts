@@ -112,7 +112,40 @@ practicaRoutes.get('/rutinas/progreso', async (c) => {
 })
 
 // Obtener progreso global de rutinas (barra de progreso total del día)
-practicaRoutes.get('/rutinas/progreso-dia/:fecha?', async (c) => {
+practicaRoutes.get('/rutinas/progreso-dia', async (c) => {
+  try {
+    const fecha = new Date().toISOString().split('T')[0]
+    
+    const totalRutinas = await c.env.DB.prepare(
+      'SELECT COUNT(*) as total FROM rutinas_matutinas WHERE activa = 1'
+    ).first()
+
+    const completadasHoy = await c.env.DB.prepare(`
+      SELECT COUNT(*) as completadas 
+      FROM rutinas_completadas rc
+      JOIN rutinas_matutinas rm ON rc.rutina_id = rm.id
+      WHERE rc.fecha_completada = ? AND rm.activa = 1
+    `).bind(fecha).first()
+
+    const total = totalRutinas?.total || 0
+    const completadas = completadasHoy?.completadas || 0
+    const porcentaje = total > 0 ? Math.round((completadas / total) * 100) : 0
+
+    return c.json({
+      success: true,
+      data: {
+        total_rutinas: total,
+        completadas_hoy: completadas,
+        porcentaje_progreso: porcentaje,
+        fecha
+      }
+    })
+  } catch (error) {
+    return c.json({ success: false, error: 'Error al obtener progreso del día' }, 500)
+  }
+})
+
+practicaRoutes.get('/rutinas/progreso-dia/:fecha', async (c) => {
   try {
     const fecha = c.req.param('fecha') || new Date().toISOString().split('T')[0]
     

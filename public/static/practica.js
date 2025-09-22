@@ -26,15 +26,32 @@ const Practica = {
   },
 
   async loadPracticaData() {
-    const [rutinas, afirmaciones, progresoRutinas] = await Promise.all([
-      API.practica.getRutinas(),
-      API.practica.getAfirmaciones(),
-      API.practica.getProgresoDia()
-    ])
+    try {
+      console.log('🔄 Cargando rutinas...')
+      const rutinas = await API.practica.getRutinas()
+      console.log('✅ Rutinas cargadas:', rutinas.data.length, 'elementos')
+      
+      console.log('🔄 Cargando afirmaciones...')
+      const afirmaciones = await API.practica.getAfirmaciones()
+      console.log('✅ Afirmaciones cargadas:', afirmaciones.data.length, 'elementos')
+      
+      console.log('🔄 Cargando progreso...')
+      const progresoRutinas = await API.practica.getProgresoDia()
+      console.log('✅ Progreso cargado:', progresoRutinas.data.porcentaje_progreso + '%')
 
-    this.data.rutinas = rutinas.data
-    this.data.afirmaciones = afirmaciones.data
-    this.data.progresoRutinas = progresoRutinas.data
+      this.data.rutinas = rutinas.data || []
+      this.data.afirmaciones = afirmaciones.data || []
+      this.data.progresoRutinas = progresoRutinas.data || {}
+      
+      console.log('🎯 Datos finales:', {
+        rutinas: this.data.rutinas.length,
+        afirmaciones: this.data.afirmaciones.length,
+        progreso: this.data.progresoRutinas.porcentaje_progreso
+      })
+    } catch (error) {
+      console.error('💥 Error en loadPracticaData:', error)
+      throw new Error('Error al cargar datos: ' + error.message)
+    }
   },
 
   renderPracticaView() {
@@ -59,7 +76,8 @@ const Practica = {
   },
 
   renderRutinaMatutina() {
-    const progreso = this.data.progresoRutinas
+    const progreso = this.data.progresoRutinas || {}
+    console.log('🏃 Renderizando rutinas:', this.data.rutinas.length, 'progreso:', progreso)
     
     return `
       <div class="gradient-card p-8 rounded-xl mb-12">
@@ -91,7 +109,7 @@ const Practica = {
 
         <!-- Lista de rutinas -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          ${this.data.rutinas.map(rutina => `
+          ${(this.data.rutinas || []).map(rutina => `
             <div class="bg-slate-800 rounded-lg p-4 border border-slate-700 hover:border-slate-600 transition-colors">
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center space-x-3">
@@ -173,7 +191,7 @@ const Practica = {
 
   renderAfirmacionesDelDia() {
     // Seleccionar algunas afirmaciones favoritas
-    const favoritas = this.data.afirmaciones.filter(a => a.es_favorita).slice(0, 3)
+    const favoritas = (this.data.afirmaciones || []).filter(a => a.es_favorita).slice(0, 3)
     
     return `
       <div class="bg-slate-800 rounded-lg p-6 mb-6">
@@ -219,7 +237,7 @@ const Practica = {
   },
 
   renderAfirmacionesList() {
-    return this.data.afirmaciones.map(afirmacion => `
+    return (this.data.afirmaciones || []).map(afirmacion => `
       <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
         <div class="flex items-start justify-between">
           <div class="flex-1">
