@@ -491,11 +491,11 @@ const Router = {
         <div class="container mx-auto px-4 py-6">
           <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div class="text-sm text-slate-400 text-center md:text-left">
-              <p>© ${new Date().getFullYear()} <strong>Gustavo Adolfo Guerrero Castaños</strong> - Todos los derechos reservados</p>
+              <p>© ${new Date().getFullYear()} <strong>www.yo-decreto.com</strong> - Todos los derechos reservados</p>
               <p class="text-xs mt-1">Aplicación desarrollada independientemente para uso personal</p>
             </div>
             <div class="flex items-center space-x-4 text-xs text-slate-500">
-              <span>📧 gusguecas@gmail.com</span>
+              <span>📧 info@yo-decreto.com</span>
               <span>⚖️ Términos de uso aplicables</span>
             </div>
           </div>

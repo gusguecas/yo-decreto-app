@@ -192,12 +192,12 @@ const Acerca = {
         <div class="mt-16 pt-8 border-t border-slate-700">
           <div class="text-center space-y-4">
             <div class="text-sm text-slate-400">
-              <p><strong>© ${new Date().getFullYear()} Gustavo Adolfo Guerrero Castaños</strong> - Todos los derechos reservados</p>
+              <p><strong>© ${new Date().getFullYear()} www.yo-decreto.com</strong> - Todos los derechos reservados</p>
               <p>Esta aplicación y su contenido están protegidos por derechos de autor</p>
             </div>
             
             <div class="flex flex-wrap justify-center gap-6 text-xs text-slate-500">
-              <span>📧 Contacto: gusguecas@gmail.com</span>
+              <span>📧 Contacto: info@yo-decreto.com</span>
               <span>🌐 Aplicación desarrollada independientemente</span>
               <span>⚖️ Uso sujeto a términos y condiciones</span>
             </div>
