@@ -8,6 +8,7 @@ import { decretosRoutes } from './routes/decretos'
 import { agendaRoutes } from './routes/agenda'
 import { progresoRoutes } from './routes/progreso'
 import { practicaRoutes } from './routes/practica'
+import authRoutes from './routes/auth'
 
 type Bindings = {
   DB: D1Database;
@@ -25,6 +26,7 @@ app.use('/api/*', cors())
 app.use('/static/*', serveStatic())
 
 // Rutas API
+app.route('/api/auth', authRoutes)  // 🔐 Rutas de autenticación PRIMERO
 app.route('/api/decretos', decretosRoutes)
 app.route('/api/agenda', agendaRoutes)
 app.route('/api/progreso', progresoRoutes)

@@ -540,9 +540,18 @@ const Router = {
   }
 }
 
-// Inicialización de la aplicación
+// Inicialización de la aplicación CON AUTENTICACIÓN
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('🎯 Iniciando Yo Decreto...')
+  
+  // 🔐 VERIFICAR AUTENTICACIÓN PRIMERO
+  const isAuthenticated = await Auth.init()
+  if (!isAuthenticated) {
+    console.log('❌ Usuario no autenticado, mostrando login')
+    return // Auth.init() ya mostró la pantalla de login
+  }
+  
+  console.log('✅ Usuario autenticado, cargando aplicación...')
   
   try {
     // Configurar extensiones de dayjs (si están disponibles)

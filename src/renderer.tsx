@@ -74,6 +74,9 @@ export const renderer = jsxRenderer(({ children }) => {
       <body className="bg-slate-900 text-white font-sans">
         {children}
         
+        {/* 🔐 SISTEMA DE AUTENTICACIÓN PRIMERO */}
+        <script src={`/static/auth.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
+        
         {/* Scripts principales con cache busting agresivo */}
         <script src={`/static/app.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
         <script src={`/static/decretos.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>

@@ -9,7 +9,7 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "yo-decreto-production",
+      "database_name": "webapp-production",
       "database_id": "placeholder-for-production"
     }
   ]
