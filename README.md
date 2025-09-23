@@ -1,185 +1,176 @@
-# 🎯 Yo Decreto - Aplicación Ejecutiva de Decretos
+# 🎯 Yo Decreto App - Aplicación de Manifestación Personal
 
-## Resumen del Proyecto
+## 📋 Descripción del Proyecto
 
-**Yo Decreto** es una aplicación web ejecutiva inspirada en el libro "Name it and Claim it" que opera como agenda/CRM de decretos personales. La aplicación permite a Gustavo Adolfo Guerrero Castaños gestionar sus decretos empresariales, materiales y humanos de forma sistemática y con un seguimiento detallado del progreso.
+**Yo Decreto** es una aplicación web completa para el manejo de decretos personales, agenda diaria, seguimiento de progreso y práctica de manifestación. Incluye sistema de autenticación completo con login espectacular y logo gigante.
 
-## 🌟 Funcionalidades Implementadas
+## ✨ Características Principales
 
-### 1. 🎯 Mis Decretos (Portada Principal)
-- **Encabezado personalizado**: Título "Yo Decreto" con nombre del usuario y frase de vida editable
-- **Panel de contadores**: Totales por categoría con porcentajes automáticos
-- **Gestión de decretos**: CRUD completo con tres categorías:
-  - 🏢 **Empresariales** (color verde): Enfoque en crecimiento del negocio
-  - 💰 **Materiales** (color naranja): Objetivos de abundancia financiera  
-  - ❤️ **Humanos** (color azul): Desarrollo personal y relacional
-- **Tarjetas interactivas**: Con progreso visual, acciones rápidas y eliminación
-- **Acciones por decreto**: Sistema completo de tareas con seguimiento y calificaciones
+### 🔐 Sistema de Autenticación
+- **Pantalla de login espectacular** con logo gigante y efectos visuales
+- **Registro de nuevos usuarios** con validación completa
+- **Sesiones persistentes** con tokens seguros
+- **Sistema de "Recordarme"** para sesiones de 30 días
 
-### 2. 📅 Agenda Diaria (Calendario Ejecutivo)
-- **Enfoque del día**: Selección y seguimiento de la tarea más importante
-- **Calendario mensual**: Vista interactiva con estados visuales por día:
-  - 🟢 Completado (todas las tareas completas)
-  - 🟡 Pendiente (tareas abiertas)
-  - 🔴 Vencido (tareas atrasadas)
-  - ⚪ Sin tareas
-- **Métricas diarias**: Total, progreso %, completadas y pendientes
-- **Timeline del día**: Lista cronológica con botones de acción
-- **Filtros avanzados**: Por fecha, estado y decreto
-- **Creación de tareas**: Desde agenda con sincronización automática
-- **Sincronización bidireccional**: Cambios reflejados entre Decretos ↔ Agenda
+### 🎯 Funcionalidades Core
+- **Mis Decretos**: Creación y gestión de decretos personales
+- **Agenda Diaria**: Layout horizontal rediseñado con calendario compacto
+- **Mi Progreso**: Seguimiento visual de avance y estadísticas
+- **Mi Práctica**: Rutinas matutinas y afirmaciones personalizadas
+- **Nombre de usuario editable** para personalización
 
-### 3. 📊 Mi Progreso (Análisis y Métricas)
-- **Dashboard de métricas**: 4 tarjetas principales con indicadores clave
-- **Progreso por decreto**: Barras horizontales con % de avance por área
-- **Timeline de avances**: Historial de logros completados con filtros temporales
-- **Gráficos interactivos**:
-  - Distribución circular por categorías
-  - Evolución temporal de tareas completadas
-- **Estadísticas avanzadas**: Calificaciones promedio, días productivos
-- **Exportar reporte**: Generación de reportes PDF (preparado para implementar)
+### 🎨 Diseño Visual
+- **Logo gigante con efectos glow** y animaciones espectaculares
+- **Layout horizontal** con distribución en 3 columnas iguales
+- **Interfaz responsiva** con Tailwind CSS
+- **Efectos visuales** y transiciones suaves
 
-### 4. 🌟 Mi Práctica (Rutinas y Afirmaciones)
-- **Rutina Matutina**: 5 prácticas esenciales con seguimiento diario:
-  - 🧘 Meditación (10 min)
-  - 💪 Ejercicio (30 min)
-  - 📚 Lectura Inspiracional (15 min)
-  - 📅 Planificación del Día (10 min)
-  - 💎 Afirmaciones (5 min)
-- **Banco de Afirmaciones**: Sistema completo con:
-  - Categorización por área (empresarial, material, humano, general)
-  - Sistema de favoritas y contador de uso
-  - Filtrado dinámico
-  - Afirmaciones sugeridas del día
-  - Creación de afirmaciones personalizadas
+### ⚖️ Cumplimiento Legal
+- **Disclaimers completos** para uso de referencias de libros
+- **Términos y condiciones** integrados
+- **Protección de propiedad intelectual**
 
-## 🛠️ Stack Tecnológico
+## 🌐 URLs de Producción
 
-### Backend
-- **Hono Framework**: Web framework ligero para Cloudflare Workers
-- **TypeScript**: Tipado estático para mayor robustez
-- **Cloudflare D1**: Base de datos SQLite distribuida globalmente
-- **API REST**: Endpoints organizados por módulos
+### 🔗 Aplicación en Vivo
+- **Desarrollo**: `https://3000-id1rtpwr1etw2m59b9fri-6532622b.e2b.dev`
+- **GitHub**: `https://github.com/gusguecas/yo-decreto-app`
+- **Producción**: *Pendiente de despliegue a Cloudflare Pages*
 
-### Frontend  
-- **Vanilla JavaScript**: Sin frameworks pesados, máximo rendimiento
-- **Tailwind CSS**: Framework de utilidades para diseño responsive
-- **CSS Custom**: Estilos personalizados con variables y animaciones
-- **Chart.js**: Visualizaciones interactivas de datos
-- **Day.js**: Manejo ligero de fechas y tiempos
-- **FontAwesome**: Íconos profesionales
+### 🔑 Credenciales de Prueba
+- **Admin**: `admin@yo-decreto.com` / `admin123`
+- **Registro**: Crear nueva cuenta desde la interfaz
 
-### Infraestructura
-- **Cloudflare Pages**: Hosting global con CDN
-- **Cloudflare Workers**: Runtime serverless en el edge
-- **PM2**: Gestión de procesos para desarrollo
-- **Vite**: Build tool optimizado
+## 🏗️ Arquitectura Técnica
 
-## 🎨 Diseño y UX
+### 💻 Stack Tecnológico
+- **Backend**: Hono Framework + TypeScript
+- **Frontend**: JavaScript Vanilla + Tailwind CSS
+- **Base de Datos**: Cloudflare D1 SQLite
+- **Autenticación**: Sistema JWT personalizado
+- **Despliegue**: Cloudflare Pages + Workers
 
-### Paleta de Colores
-- **Fondo principal**: Azul oscuro elegante (#0f172a)
-- **Acentos por categoría**:
-  - Verde (#10b981): Empresarial y completado
-  - Naranja (#f59e0b): Material y pendiente  
-  - Azul (#3b82f6): Humano e información
-  - Morado (#8b5cf6): Seguimiento y acciones secundarias
-  - Rojo (#ef4444): Eliminar y vencido
+### 📊 Modelos de Datos
+- **auth_users**: Sistema de usuarios y autenticación
+- **auth_sessions**: Gestión de sesiones activas
+- **decretos**: Decretos personales del usuario
+- **acciones**: Acciones asociadas a decretos
+- **agenda**: Tareas y eventos de agenda
+- **rutinas_matutinas**: Rutinas de práctica diaria
+- **afirmaciones**: Afirmaciones personalizadas
 
-### Características de Diseño
-- **Estilo oscuro**: Profesional y elegante para uso ejecutivo
-- **Tarjetas con bordes suaves**: Gradientes y sombras sutiles
-- **Efectos hover**: Animaciones fluidas en interacciones
-- **Responsive**: Adaptable a desktop, tablet y móvil
-- **Accesibilidad**: Contrastes adecuados y foco visible
-- **Tipografía**: Inter font para máxima legibilidad
-
-## 📋 URLs y Endpoints Funcionales
-
-### Frontend Routes
-- `/` - Mis Decretos (portada principal)
-- `/#agenda` - Agenda Diaria
-- `/#progreso` - Mi Progreso  
-- `/#practica` - Mi Práctica
-
-### API Endpoints
+### 🗂️ Estructura del Proyecto
 ```
-GET  /api/decretos              - Listar decretos con contadores
-POST /api/decretos              - Crear nuevo decreto
-GET  /api/decretos/:id          - Detalle de decreto con acciones
-PUT  /api/decretos/:id          - Actualizar decreto
-DELETE /api/decretos/:id        - Eliminar decreto
-POST /api/decretos/:id/acciones - Crear acción
-PUT  /api/decretos/:id/acciones/:accionId/completar - Completar acción
-
-GET  /api/agenda/calendario/:year/:month - Estado del calendario
-GET  /api/agenda/timeline/:fecha        - Timeline del día
-GET  /api/agenda/enfoque/:fecha         - Enfoque del día
-POST /api/agenda/tareas                 - Crear tarea desde agenda
-
-GET  /api/progreso/metricas            - Métricas generales
-GET  /api/progreso/por-decreto         - Progreso por área
-GET  /api/progreso/timeline            - Timeline de avances
-
-GET  /api/practica/rutinas             - Rutinas matutinas
-POST /api/practica/rutinas/:id/completar - Completar rutina
-GET  /api/practica/afirmaciones        - Banco de afirmaciones
-POST /api/practica/afirmaciones        - Crear afirmación
+webapp/
+├── src/                    # Backend Hono
+│   ├── index.tsx          # Aplicación principal
+│   ├── renderer.tsx       # Plantilla HTML
+│   └── routes/            # Rutas API
+│       ├── auth.ts        # 🔐 Autenticación
+│       ├── decretos.ts    # Gestión de decretos
+│       ├── agenda.ts      # Agenda diaria
+│       ├── progreso.ts    # Seguimiento
+│       └── practica.ts    # Rutinas y afirmaciones
+├── public/static/         # Frontend
+│   ├── auth.js           # 🔐 Sistema de login/registro
+│   ├── app.js            # Aplicación principal
+│   ├── decretos.js       # Módulo de decretos
+│   ├── agenda.js         # Módulo de agenda
+│   ├── progreso.js       # Módulo de progreso
+│   ├── practica.js       # Módulo de práctica
+│   ├── acerca.js         # Información legal
+│   └── styles.css        # Estilos personalizados
+├── migrations/           # Migraciones de BD
+└── *.sql                # Datos de prueba
 ```
 
-## 🚀 Deploy y Configuración
+## 🚀 Guía de Uso
 
-### URL de Desarrollo
-**🔗 https://3000-id1rtpwr1etw2m59b9fri-6532622b.e2b.dev**
+### 👤 Para Usuarios
+1. **Accede a la aplicación** desde el navegador
+2. **Crea tu cuenta** o inicia sesión
+3. **Agrega tus decretos** personales
+4. **Gestiona tu agenda** diaria
+5. **Sigue tu progreso** y estadísticas
+6. **Practica con rutinas** matutinas
 
-### Estructura de Datos
-- **Base de datos**: 11 tablas con relaciones y índices optimizados
-- **Migraciones**: Sistema versionado de esquemas
-- **Datos iniciales**: Rutinas, afirmaciones y decretos de ejemplo
-- **Sincronización**: Eventos automáticos entre decretos y agenda
-
-### Comandos de Desarrollo
+### 💻 Para Desarrolladores
 ```bash
-npm run build                 # Construir proyecto
-npm run dev:d1               # Servidor local con D1
-npm run db:migrate:local     # Aplicar migraciones
-npm run db:seed              # Cargar datos iniciales
-npm run db:reset             # Reset completo de BD
+# Instalar dependencias
+npm install
+
+# Desarrollo local
+npm run build
+npm run dev:sandbox
+
+# Migraciones
+npm run db:migrate:local
+npm run db:seed
+
+# Despliegue
+npm run deploy
 ```
 
-## ✅ Estado del Proyecto
+## 📈 Estado del Desarrollo
 
-### Completado (100%)
-- [x] Arquitectura base con Hono + Cloudflare
-- [x] Base de datos D1 con migraciones
-- [x] Sección Mis Decretos con CRUD completo
-- [x] Sección Agenda Diaria con calendario interactivo
-- [x] Sección Mi Progreso con métricas y gráficos
-- [x] Sección Mi Práctica con rutinas y afirmaciones
-- [x] Sincronización bidireccional Decretos ↔ Agenda
-- [x] UI/UX elegante con diseño responsive
-- [x] API REST completa y funcional
-- [x] Sistema de seguimiento y calificaciones
+### ✅ Completado
+- [x] Sistema de autenticación completo (login/registro)
+- [x] Interfaz de login con logo gigante espectacular
+- [x] Layout horizontal rediseñado
+- [x] Gestión completa de decretos y acciones
+- [x] Agenda diaria con calendario
+- [x] Sistema de progreso y estadísticas
+- [x] Rutinas matutinas y afirmaciones
+- [x] Nombre de usuario editable
+- [x] Cumplimiento legal completo
+- [x] Base de datos D1 configurada
+- [x] Frontend responsivo
+- [x] Cache busting implementado
 
-### Próximas Mejoras Recomendadas
-- [ ] Deploy a producción en Cloudflare Pages
-- [ ] Exportación de reportes PDF
-- [ ] Notificaciones push para recordatorios
-- [ ] Vista de detalle completa de decretos
-- [ ] Gráficos avanzados con filtros temporales
-- [ ] Sistema de backup y sincronización
+### 🔄 En Progreso
+- [ ] Despliegue a Cloudflare Pages
+- [ ] Configuración de dominio personalizado
+- [ ] Optimizaciones de rendimiento
 
-## 🎯 Objetivos Cumplidos
+### 🎯 Próximos Pasos
+- [ ] Sistema de backup automático
+- [ ] Notificaciones push
+- [ ] Integración con calendarios externos
+- [ ] App móvil nativa
+- [ ] Funciones sociales (opcional)
 
-La aplicación **Yo Decreto** cumple exitosamente con todos los requisitos especificados:
+## 🛡️ Seguridad y Privacidad
 
-1. **✅ Diseño ejecutivo**: Estilo oscuro elegante con paleta consistente
-2. **✅ Gestión completa de decretos**: CRUD con categorización y progreso
-3. **✅ Agenda interactiva**: Calendario, timeline y enfoque diario  
-4. **✅ Seguimiento de progreso**: Métricas, gráficos y timeline de avances
-5. **✅ Práctica diaria**: Rutinas matutinas y banco de afirmaciones
-6. **✅ Sincronización**: Bidireccional entre decretos y agenda
-7. **✅ Persistencia**: Base de datos robusta con relaciones
-8. **✅ Responsivo**: Funcional en desktop, tablet y móvil
+### 🔒 Medidas de Seguridad
+- **Autenticación JWT** con tokens seguros
+- **Validación del lado servidor** en todas las rutas
+- **Sanitización de datos** de entrada
+- **Sesiones con expiración** configurable
+- **HTTPS** obligatorio en producción
 
-La aplicación está lista para uso inmediato y desplegada en el entorno de desarrollo. Representa una implementación completa y profesional del sistema de gestión de decretos solicitado.
+### 📱 Compatibilidad
+- **Desktop**: Todas las resoluciones
+- **Mobile**: Responsive design completo
+- **Navegadores**: Chrome, Firefox, Safari, Edge (últimas versiones)
+
+## 📞 Soporte y Contacto
+
+### 📧 Información de Contacto
+- **Website**: www.yo-decreto.com
+- **Email**: info@yo-decreto.com
+- **Desarrollador**: Gustavo Adolfo Guerrero Castaños
+
+### 📄 Legal
+- **Copyright**: © 2024 www.yo-decreto.com
+- **Términos**: Aplicación desarrollada independientemente
+- **Disclaimer**: Implementación independiente para uso personal
+
+---
+
+## 🎉 ¡Gracias por usar Yo Decreto!
+
+*Tu manifestación, tu poder. Decretar es crear tu realidad.*
+
+**Versión**: 1.0.0 - Production Ready  
+**Última actualización**: Septiembre 2024  
+**Estado**: ✅ Funcional y listo para producción
