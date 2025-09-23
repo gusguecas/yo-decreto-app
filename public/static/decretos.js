@@ -68,7 +68,9 @@ const Decretos = {
           </div>
           <!-- Nombre y frase centrados en el resto del espacio -->
           <div class="flex-grow text-center">
-            <h2 class="text-4xl font-bold mb-6 text-white">${user.nombre_usuario || 'Gustavo Adolfo Guerrero Castaños'}</h2>
+            <h2 class="text-4xl font-bold mb-6 text-white cursor-pointer hover:text-slate-200 transition-colors duration-300" onclick="Decretos.editNombreUsuario()">
+              ${user.nombre_usuario || 'Gustavo Adolfo Guerrero Castaños'}
+            </h2>
             <div class="inline-block">
               <p class="text-xl text-slate-300 cursor-pointer hover:text-white transition-colors duration-300" onclick="Decretos.editFraseVida()">
                 ${user.frase_vida || '(Agregar frase de vida)'}
@@ -1099,6 +1101,25 @@ const Decretos = {
         await this.render()
       } catch (error) {
         Utils.showToast('Error al eliminar decreto', 'error')
+      }
+    }
+  },
+
+  async editNombreUsuario() {
+    const user = AppState.user || {}
+    const nuevoNombre = prompt('Edita tu nombre:', user.nombre_usuario || 'Gustavo Adolfo Guerrero Castaños')
+    
+    if (nuevoNombre !== null && nuevoNombre.trim() !== '') {
+      try {
+        await API.config.update({
+          nombre_usuario: nuevoNombre.trim(),
+          frase_vida: user.frase_vida
+        })
+        AppState.user.nombre_usuario = nuevoNombre.trim()
+        Utils.showToast('Nombre actualizado', 'success')
+        await this.render()
+      } catch (error) {
+        Utils.showToast('Error al actualizar nombre', 'error')
       }
     }
   },
