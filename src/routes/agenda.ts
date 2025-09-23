@@ -251,6 +251,33 @@ agendaRoutes.put('/tareas/:id/completar', async (c) => {
   }
 })
 
+// Marcar tarea como pendiente
+agendaRoutes.put('/tareas/:id/pendiente', async (c) => {
+  try {
+    const tareaId = c.req.param('id')
+    
+    // Marcar evento como pendiente
+    await c.env.DB.prepare(
+      'UPDATE agenda_eventos SET estado = "pendiente", updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+    ).bind(tareaId).run()
+
+    // Marcar acción asociada como pendiente
+    await c.env.DB.prepare(`
+      UPDATE acciones SET 
+        estado = "pendiente", 
+        fecha_cierre = NULL,
+        updated_at = CURRENT_TIMESTAMP 
+      WHERE id = (
+        SELECT accion_id FROM agenda_eventos WHERE id = ?
+      )
+    `).bind(tareaId).run()
+
+    return c.json({ success: true })
+  } catch (error) {
+    return c.json({ success: false, error: 'Error al marcar tarea como pendiente' }, 500)
+  }
+})
+
 // Eliminar tarea
 agendaRoutes.delete('/tareas/:id', async (c) => {
   try {
@@ -307,6 +334,128 @@ agendaRoutes.get('/pendientes/:fecha', async (c) => {
     })
   } catch (error) {
     return c.json({ success: false, error: 'Error al obtener tareas pendientes' }, 500)
+  }
+})
+
+// Obtener detalles completos de una tarea
+agendaRoutes.get('/tareas/:id', async (c) => {
+  try {
+    const tareaId = c.req.param('id')
+    
+    const tarea = await c.env.DB.prepare(`
+      SELECT 
+        ae.*,
+        a.titulo as accion_titulo,
+        a.que_hacer,
+        a.como_hacerlo,
+        a.resultados,
+        a.tipo,
+        a.calificacion,
+        a.proxima_revision,
+        a.tareas_pendientes,
+        d.titulo as decreto_titulo,
+        d.sueno_meta,
+        d.descripcion as decreto_descripcion,
+        d.area,
+        d.id as decreto_id
+      FROM agenda_eventos ae
+      LEFT JOIN acciones a ON ae.accion_id = a.id
+      LEFT JOIN decretos d ON a.decreto_id = d.id
+      WHERE ae.id = ?
+    `).bind(tareaId).first()
+
+    if (!tarea) {
+      return c.json({ success: false, error: 'Tarea no encontrada' }, 404)
+    }
+
+    // Parsear tareas_pendientes si existe
+    if (tarea.tareas_pendientes) {
+      try {
+        tarea.tareas_pendientes = JSON.parse(tarea.tareas_pendientes)
+      } catch (e) {
+        tarea.tareas_pendientes = []
+      }
+    }
+
+    return c.json({
+      success: true,
+      data: tarea
+    })
+  } catch (error) {
+    return c.json({ success: false, error: 'Error al obtener detalles de la tarea' }, 500)
+  }
+})
+
+// Editar tarea
+agendaRoutes.put('/tareas/:id', async (c) => {
+  try {
+    const tareaId = c.req.param('id')
+    const { 
+      titulo,
+      descripcion, 
+      fecha_hora,
+      que_hacer,
+      como_hacerlo,
+      resultados,
+      tipo,
+      calificacion
+    } = await c.req.json()
+    
+    if (!titulo || !fecha_hora) {
+      return c.json({ 
+        success: false, 
+        error: 'Campos requeridos: titulo, fecha_hora' 
+      }, 400)
+    }
+
+    // Dividir fecha y hora
+    const fechaParte = fecha_hora.split('T')[0]
+    const horaParte = fecha_hora.split('T')[1] || '09:00'
+
+    // Actualizar evento de agenda
+    await c.env.DB.prepare(`
+      UPDATE agenda_eventos SET 
+        titulo = ?,
+        descripcion = ?,
+        fecha_evento = ?,
+        hora_evento = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(titulo, descripcion || '', fechaParte, horaParte, tareaId).run()
+
+    // Obtener accion_id para actualizar la acción asociada
+    const evento = await c.env.DB.prepare(
+      'SELECT accion_id FROM agenda_eventos WHERE id = ?'
+    ).bind(tareaId).first()
+
+    // Actualizar acción asociada si existe
+    if (evento?.accion_id) {
+      await c.env.DB.prepare(`
+        UPDATE acciones SET 
+          titulo = ?,
+          que_hacer = ?,
+          como_hacerlo = ?,
+          resultados = ?,
+          tipo = ?,
+          proxima_revision = ?,
+          calificacion = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).bind(
+        titulo,
+        que_hacer || '',
+        como_hacerlo || '',
+        resultados || '',
+        tipo || 'secundaria',
+        fecha_hora,
+        calificacion || null,
+        evento.accion_id
+      ).run()
+    }
+
+    return c.json({ success: true })
+  } catch (error) {
+    return c.json({ success: false, error: 'Error al editar tarea' }, 500)
   }
 })
 

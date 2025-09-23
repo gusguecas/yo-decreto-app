@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Navegación Mi Práctica</title>
+</head>
+<body>
+    <script>
+        console.log('🧪 Test: Navegando a Mi Práctica...')
+        // Navegar a la aplicación y luego a Mi Práctica
+        setTimeout(() => {
+            console.log('🔄 Intentando navegar a Mi Práctica...')
+            if (window.App && window.App.showSection) {
+                console.log('✅ App encontrada, navegando a practica...')
+                window.App.showSection('practica')
+            } else {
+                console.log('❌ App no encontrada')
+            }
+        }, 2000)
+        
+        // Redirigir a la aplicación principal
+        window.location.href = '/#practica'
+    </script>
+</body>
+</html>

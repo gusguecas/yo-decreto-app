@@ -9,7 +9,7 @@ export const renderer = jsxRenderer(({ children }) => {
         <title>Yo Decreto - Gustavo Adolfo Guerrero Castaños</title>
         
         {/* Favicon */}
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>" />
+        <link rel="icon" href="/static/logo-yo-decreto.png" type="image/png" />
         
         {/* Fuentes */}
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -74,12 +74,13 @@ export const renderer = jsxRenderer(({ children }) => {
       <body className="bg-slate-900 text-white font-sans">
         {children}
         
-        {/* Scripts principales */}
-        <script src="/static/app.js"></script>
-        <script src="/static/decretos.js"></script>
-        <script src="/static/agenda.js"></script>
-        <script src="/static/progreso.js"></script>
-        <script src="/static/practica.js"></script>
+        {/* Scripts principales con cache busting agresivo */}
+        <script src={`/static/app.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
+        <script src={`/static/decretos.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
+        <script src={`/static/agenda.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
+        <script src={`/static/progreso.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
+        <script src={`/static/practica.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
+        <script src={`/static/acerca.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
       </body>
     </html>
   )

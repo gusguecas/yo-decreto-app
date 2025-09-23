@@ -312,6 +312,120 @@ practicaRoutes.get('/afirmaciones/del-dia', async (c) => {
   }
 })
 
+// Generar nueva afirmación usando IA
+practicaRoutes.post('/afirmaciones/generar', async (c) => {
+  try {
+    const { categoria = 'general' } = await c.req.json()
+    
+    // Plantillas de afirmaciones por categoría
+    const plantillas = {
+      empresarial: [
+        "Soy un líder natural que inspira confianza y respeto en mi equipo",
+        "Mis ideas innovadoras transforman mi empresa y generan abundantes resultados",
+        "Tengo la capacidad de tomar decisiones sabias que impulsan mi éxito empresarial",
+        "Mi negocio crece exponencialmente mientras mantengo mi integridad y valores",
+        "Soy un imán para las oportunidades de negocio perfectas en el momento ideal",
+        "Mi visión empresarial se materializa con facilidad y genera impacto positivo",
+        "Lidero con sabiduría y compasión, creando un ambiente de trabajo próspero",
+        "Mis habilidades de comunicación abren puertas a alianzas estratégicas valiosas"
+      ],
+      material: [
+        "La abundancia fluye hacia mí desde múltiples fuentes de manera constante",
+        "Soy un canal abierto para recibir prosperidad en todas sus formas",
+        "Mi relación con el dinero es saludable, positiva y equilibrada",
+        "Tengo todo lo que necesito y más para vivir una vida plena y próspera",
+        "Las oportunidades de generar ingresos aparecen naturalmente en mi camino",
+        "Merece vivir en abundancia y celebro cada manifestación de prosperidad",
+        "Mi valor y talento se compensan generosamente en el mercado",
+        "Creo riqueza mientras contribuyo positivamente al bienestar de otros"
+      ],
+      humano: [
+        "Soy digno/a de amor incondicional y atraigo relaciones armoniosas a mi vida",
+        "Mi corazón está abierto para dar y recibir amor en todas sus formas",
+        "Cultivo relaciones basadas en el respeto mutuo, la comprensión y la alegría",
+        "Me rodeo de personas que me apoyan y celebran mi crecimiento personal",
+        "Comunico mis sentimientos con claridad, compasión y autenticidad",
+        "Mi presencia inspira calma, alegría y confianza en quienes me rodean",
+        "Perdono fácilmente y libero cualquier resentimiento que no me sirve",
+        "Cada día fortalezco los vínculos importantes en mi vida con amor y gratitud"
+      ],
+      general: [
+        "Cada día me convierto en la mejor versión de mí mismo/a con alegría y gratitud",
+        "Confío plenamente en mi sabiduría interior para guiar mis decisiones",
+        "Soy resiliente y transformo cada desafío en una oportunidad de crecimiento",
+        "Mi vida está llena de propósito, significado y experiencias enriquecedoras",
+        "Irradio paz, amor y luz positiva donde quiera que vaya",
+        "Soy el/la arquitecto/a consciente de mi realidad y creo con intención clara",
+        "Mi mente es clara, mi corazón está abierto y mi espíritu es libre",
+        "Celebro mis logros y aprendo valiosas lecciones de cada experiencia"
+      ]
+    }
+
+    // Obtener plantillas de la categoría
+    const afirmacionesCategoria = plantillas[categoria] || plantillas.general
+    
+    // Seleccionar una afirmación aleatoria
+    const afirmacionTexto = afirmacionesCategoria[Math.floor(Math.random() * afirmacionesCategoria.length)]
+    
+    // Crear la nueva afirmación
+    const result = await c.env.DB.prepare(`
+      INSERT INTO afirmaciones (texto, categoria, es_favorita, veces_usada)
+      VALUES (?, ?, 0, 0)
+    `).bind(afirmacionTexto, categoria).run()
+
+    // Obtener la afirmación creada
+    const nuevaAfirmacion = await c.env.DB.prepare(`
+      SELECT * FROM afirmaciones WHERE rowid = ?
+    `).bind(result.meta.last_row_id).first()
+
+    return c.json({
+      success: true,
+      data: nuevaAfirmacion
+    })
+  } catch (error) {
+    console.error('Error al generar afirmación:', error)
+    return c.json({ success: false, error: 'Error al generar afirmación' }, 500)
+  }
+})
+
+// Obtener progreso del día para rutinas
+practicaRoutes.get('/rutinas/progreso-dia/:fecha', async (c) => {
+  try {
+    const fecha = c.req.param('fecha')
+    
+    // Obtener todas las rutinas activas
+    const totalRutinas = await c.env.DB.prepare(`
+      SELECT COUNT(*) as total
+      FROM rutinas_matutinas
+      WHERE activa = 1
+    `).first()
+
+    // Obtener rutinas completadas en la fecha especificada
+    const rutinasCompletadas = await c.env.DB.prepare(`
+      SELECT COUNT(*) as completadas
+      FROM rutinas_completadas
+      WHERE fecha_completada = ?
+    `).bind(fecha).first()
+
+    const total = totalRutinas?.total || 0
+    const completadas = rutinasCompletadas?.completadas || 0
+    const porcentaje_progreso = total > 0 ? Math.round((completadas / total) * 100) : 0
+
+    return c.json({
+      success: true,
+      data: {
+        fecha,
+        total_rutinas: total,
+        rutinas_completadas: completadas,
+        rutinas_pendientes: total - completadas,
+        porcentaje_progreso
+      }
+    })
+  } catch (error) {
+    return c.json({ success: false, error: 'Error al obtener progreso del día' }, 500)
+  }
+})
+
 // Obtener estadísticas de práctica
 practicaRoutes.get('/estadisticas', async (c) => {
   try {

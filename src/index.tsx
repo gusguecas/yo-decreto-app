@@ -20,7 +20,9 @@ app.use(renderer)
 app.use('/api/*', cors())
 
 // Servir archivos estáticos
-app.use('/static/*', serveStatic({ root: './public' }))
+// En Cloudflare Pages, los archivos estáticos se sirven automáticamente desde public/
+// Solo configuramos para desarrollo local
+app.use('/static/*', serveStatic())
 
 // Rutas API
 app.route('/api/decretos', decretosRoutes)
@@ -35,8 +37,9 @@ app.get('/', (c) => {
       <div id="app">
         {/* El contenido será renderizado por JavaScript */}
         <div className="loading-screen">
+          <img src="/static/logo-yo-decreto.png" alt="Yo Decreto" className="logo-yo-decreto logo-lg w-auto mx-auto mb-4" />
           <div className="loader"></div>
-          <h2>Cargando Yo Decreto...</h2>
+          <h2>Cargando...</h2>
         </div>
       </div>
     </div>
@@ -49,8 +52,9 @@ app.get('*', (c) => {
     <div>
       <div id="app">
         <div className="loading-screen">
+          <img src="/static/logo-yo-decreto.png" alt="Yo Decreto" className="logo-yo-decreto logo-lg w-auto mx-auto mb-4" />
           <div className="loader"></div>
-          <h2>Cargando Yo Decreto...</h2>
+          <h2>Cargando...</h2>
         </div>
       </div>
     </div>
