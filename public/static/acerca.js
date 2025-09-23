@@ -187,6 +187,28 @@ const Acerca = {
           </div>
 
         </div>
+
+        <!-- Footer Legal -->
+        <div class="mt-16 pt-8 border-t border-slate-700">
+          <div class="text-center space-y-4">
+            <div class="text-sm text-slate-400">
+              <p><strong>© ${new Date().getFullYear()} Gustavo Adolfo Guerrero Castaños</strong> - Todos los derechos reservados</p>
+              <p>Esta aplicación y su contenido están protegidos por derechos de autor</p>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-6 text-xs text-slate-500">
+              <span>📧 Contacto: gusguecas@gmail.com</span>
+              <span>🌐 Aplicación desarrollada independientemente</span>
+              <span>⚖️ Uso sujeto a términos y condiciones</span>
+            </div>
+            
+            <div class="text-xs text-slate-500 max-w-2xl mx-auto">
+              <p><strong>Aviso Legal:</strong> Esta aplicación es una herramienta de desarrollo personal creada de manera independiente. 
+              Las metodologías implementadas se basan en principios generales de manifestación y desarrollo personal disponibles 
+              en el dominio público. No nos hacemos responsables por resultados individuales obtenidos mediante el uso de esta aplicación.</p>
+            </div>
+          </div>
+        </div>
       </div>
     `
   }

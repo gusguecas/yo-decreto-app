@@ -479,9 +479,29 @@ const Router = {
       <main id="main-content" class="min-h-screen bg-slate-900">
         ${UI.renderLoading('Inicializando aplicación...')}
       </main>
+      ${this.renderFooter()}
     `
     
     this.renderCurrentSection()
+  },
+
+  renderFooter() {
+    return `
+      <footer class="bg-slate-800 border-t border-slate-700 mt-16">
+        <div class="container mx-auto px-4 py-6">
+          <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div class="text-sm text-slate-400 text-center md:text-left">
+              <p>© ${new Date().getFullYear()} <strong>Gustavo Adolfo Guerrero Castaños</strong> - Todos los derechos reservados</p>
+              <p class="text-xs mt-1">Aplicación desarrollada independientemente para uso personal</p>
+            </div>
+            <div class="flex items-center space-x-4 text-xs text-slate-500">
+              <span>📧 gusguecas@gmail.com</span>
+              <span>⚖️ Términos de uso aplicables</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    `
   },
 
   renderCurrentSection() {
