@@ -63,7 +63,7 @@ const Practica = {
             <span class="text-3xl mr-3">🌟</span>
             <span class="text-gradient-green">Mi Práctica</span>
           </h1>
-          <p class="text-slate-300">Convierte tus decretos en acción diaria. Aquí aplicas los ejercicios del libro Name it and Claim it para transformar tu vida paso a paso.</p>
+          <p class="text-slate-300">Convierte tus decretos en acción diaria. Aquí aplicas principios de desarrollo personal inspirados en metodologías de manifestación para transformar tu vida paso a paso.</p>
         </div>
 
         <!-- Rutina Matutina -->

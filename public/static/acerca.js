@@ -87,21 +87,24 @@ const Acerca = {
             </div>
           </div>
 
-          <!-- Sección: Name It and Claim It -->
+          <!-- Sección: Inspiración y Metodología -->
           <div class="gradient-card p-8 rounded-xl">
             <h2 class="text-3xl font-bold mb-6 flex items-center">
               <span class="text-3xl mr-3">📚</span>
-              <span class="text-gradient-green">Basado en "Name It and Claim It"</span>
+              <span class="text-gradient-green">Inspiración y Metodología</span>
             </h2>
             <div class="text-lg text-slate-300 space-y-4 leading-relaxed">
               <p>
-                Esta aplicación está inspirada en los principios fundamentales del libro 
-                <span class="text-accent-green font-semibold">"Name It and Claim It"</span>, 
-                una obra transformadora sobre el poder de la declaración consciente y la manifestación dirigida.
+                Esta aplicación está inspirada en principios de desarrollo personal establecidos en la literatura de manifestación consciente, 
+                incluyendo conceptos del libro <span class="text-accent-green font-semibold">"Name It and Claim It"</span>.
               </p>
+              <div class="bg-slate-800/50 p-4 rounded-lg text-sm text-slate-400 border-l-4 border-accent-blue">
+                <p><strong>Disclaimer:</strong> Esta aplicación es una implementación independiente de conceptos generales de desarrollo personal. 
+                No está oficialmente afiliada con ningún autor o editorial específica. Todos los derechos de las obras originales pertenecen a sus respectivos autores.</p>
+              </div>
               
               <div class="bg-gradient-to-r from-accent-green/10 to-accent-blue/10 p-6 rounded-lg border-l-4 border-accent-green">
-                <h4 class="text-xl font-semibold text-accent-green mb-4">Principios Clave del Libro:</h4>
+                <h4 class="text-xl font-semibold text-accent-green mb-4">Principios de Manifestación Aplicados:</h4>
                 <ul class="space-y-3 text-base">
                   <li class="flex items-start">
                     <span class="text-accent-green mr-2">•</span>
@@ -123,10 +126,10 @@ const Acerca = {
               </div>
 
               <p>
-                El libro enseña que cuando combinas una <span class="text-accent-orange font-semibold">declaración clara</span> 
+                La metodología aplicada enseña que cuando combinas una <span class="text-accent-orange font-semibold">declaración clara</span> 
                 con una <span class="text-accent-blue font-semibold">acción consistente</span> y una 
-                <span class="text-accent-green font-semibold">fe inquebrantable</span>, activas las leyes universales 
-                que conspiran para materializar tus decretos en la realidad física.
+                <span class="text-accent-green font-semibold">fe inquebrantable</span>, activas principios universales 
+                que contribuyen a materializar tus objetivos en la realidad física.
               </p>
 
               <p>
