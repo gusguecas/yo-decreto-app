@@ -2280,17 +2280,19 @@ const Agenda = {
           <div class="flex items-center space-x-1 ml-2">
             ${tarea.estado !== 'completada' ? `
               <button 
-                onclick="Agenda.completarTarea(${tarea.id})"
-                class="p-1 text-accent-green hover:bg-accent-green/20 rounded transition-colors text-xs"
-                title="Completar"
+                onclick="Agenda.completarTarea('${tarea.id}')"
+                class="p-2 text-green-400 hover:bg-green-400/20 rounded transition-colors text-sm bg-slate-700/50"
+                title="Completar Tarea"
+                style="min-width: 32px; min-height: 32px;"
               >
                 <i class="fas fa-check"></i>
               </button>
             ` : `
               <button 
-                onclick="Agenda.marcarPendiente(${tarea.id})"
-                class="p-1 text-accent-orange hover:bg-accent-orange/20 rounded transition-colors text-xs"
-                title="Pendiente"
+                onclick="Agenda.marcarPendiente('${tarea.id}')"
+                class="p-2 text-yellow-400 hover:bg-yellow-400/20 rounded transition-colors text-sm bg-slate-700/50"
+                title="Marcar Pendiente"
+                style="min-width: 32px; min-height: 32px;"
               >
                 <i class="fas fa-undo"></i>
               </button>
@@ -2298,18 +2300,20 @@ const Agenda = {
             
             ${tarea.accion_id ? `
               <button 
-                onclick="Agenda.openSeguimientoModal(${tarea.id})"
-                class="p-1 text-accent-blue hover:bg-accent-blue/20 rounded transition-colors text-xs"
-                title="Seguimiento"
+                onclick="Agenda.openSeguimientoModal('${tarea.id}')"
+                class="p-2 text-blue-400 hover:bg-blue-400/20 rounded transition-colors text-sm bg-slate-700/50"
+                title="Ver Seguimiento"
+                style="min-width: 32px; min-height: 32px;"
               >
                 <i class="fas fa-chart-line"></i>
               </button>
             ` : ''}
             
             <button 
-              onclick="Agenda.confirmarEliminarTarea(${tarea.id})"
-              class="p-1 text-red-400 hover:bg-red-400/20 rounded transition-colors text-xs"
-              title="Eliminar"
+              onclick="Agenda.confirmarEliminarTarea('${tarea.id}')"
+              class="p-2 text-red-400 hover:bg-red-400/20 rounded transition-colors text-sm bg-slate-700/50"
+              title="Eliminar Tarea"
+              style="min-width: 32px; min-height: 32px;"
             >
               <i class="fas fa-trash"></i>
             </button>
