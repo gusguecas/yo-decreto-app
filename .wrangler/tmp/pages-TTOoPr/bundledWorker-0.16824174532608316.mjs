@@ -6,7 +6,7 @@ var __publicField = (obj, key, value) => {
   return value;
 };
 
-// ../.wrangler/tmp/bundle-OYBhah/strip-cf-connecting-ip-header.js
+// ../.wrangler/tmp/bundle-S02G7r/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -2936,8 +2936,8 @@ I.post("/:id/acciones", async (e) => {
             INSERT INTO acciones (
               id, decreto_id, titulo, que_hacer, como_hacerlo, resultados, 
               tipo, proxima_revision, origen, tarea_padre_id, nivel_jerarquia
-            ) VALUES (?, ?, ?, ?, ?, '', 'secundaria', ?, 'subtarea', ?, 1)
-          `).bind(_, r, m.titulo, m.que_hacer, m.como_hacerlo || "", y, E).run();
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(_, r, m.titulo, m.que_hacer, m.como_hacerlo || "", "", "secundaria", y, "subtarea", E, 1).run();
           console.log(`\u2705 Sub-tarea ${h + 1} creada en BD:`, { success: O.success, changes: O.changes }), y && (await bs(e.env.DB, _, `[Sub] ${m.titulo}`, m.que_hacer, m.como_hacerlo, "secundaria", y), console.log(`\u2705 Sub-tarea ${h + 1} sincronizada con agenda`)), v++;
         } else
           console.log(`\u23ED\uFE0F Sub-tarea ${h + 1} sin t\xEDtulo, saltando`);
@@ -4255,7 +4255,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env2, _ctx, middlewareCtx
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-OYBhah/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-S02G7r/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -4287,7 +4287,7 @@ function __facade_invoke__(request, env2, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-OYBhah/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-S02G7r/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
@@ -4385,4 +4385,4 @@ export {
   __INTERNAL_WRANGLER_MIDDLEWARE__,
   middleware_loader_entry_default as default
 };
-//# sourceMappingURL=bundledWorker-0.5763361516456367.mjs.map
+//# sourceMappingURL=bundledWorker-0.16824174532608316.mjs.map

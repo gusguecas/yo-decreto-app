@@ -337,10 +337,10 @@ decretosRoutes.post('/:id/acciones', async (c) => {
             INSERT INTO acciones (
               id, decreto_id, titulo, que_hacer, como_hacerlo, resultados, 
               tipo, proxima_revision, origen, tarea_padre_id, nivel_jerarquia
-            ) VALUES (?, ?, ?, ?, ?, '', 'secundaria', ?, 'subtarea', ?, 1)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `).bind(
             subtareaId, decretoId, subtarea.titulo, subtarea.que_hacer,
-            subtarea.como_hacerlo || '', fechaSubtarea, accionId
+            subtarea.como_hacerlo || '', '', 'secundaria', fechaSubtarea, 'subtarea', accionId, 1
           ).run()
           
           console.log(`✅ Sub-tarea ${i + 1} creada en BD:`, {
