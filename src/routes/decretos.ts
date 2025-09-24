@@ -4,7 +4,7 @@ type Bindings = {
   DB: D1Database;
 }
 
-// Función auxiliar para sincronizar acciones con agenda
+// Función auxiliar para sincronizar acciones con agenda - LÓGICA SIMPLE CORRECTA
 async function sincronizarAccionConAgenda(
   db: D1Database, 
   accionId: string, 
@@ -15,23 +15,35 @@ async function sincronizarAccionConAgenda(
   proximaRevision: string | null
 ) {
   try {
+    console.log('📅 Sincronizando con agenda:', { accionId, titulo, proximaRevision })
+    
     if (proximaRevision) {
-      // Crear evento en agenda_eventos
-      await db.prepare(`
+      // LÓGICA SIMPLE: Separar fecha y hora correctamente
+      const fechaParte = proximaRevision.split('T')[0]
+      const horaParte = proximaRevision.split('T')[1] || '09:00'
+      
+      console.log('📅 Creando evento agenda:', { fechaParte, horaParte })
+      
+      // Crear evento en agenda_eventos con campos CORRECTOS
+      const result = await db.prepare(`
         INSERT INTO agenda_eventos (
-          id, titulo, descripcion, fecha_inicio, tipo, accion_id
-        ) VALUES (?, ?, ?, ?, ?, ?)
+          accion_id, titulo, descripcion, fecha_evento, hora_evento, estado,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `).bind(
-        crypto.randomUUID().replace(/-/g, '').substring(0, 32),
-        titulo,
+        accionId,
+        `[Decreto] ${titulo}`,
         `${queHacer}${comoHacerlo ? ' - ' + comoHacerlo : ''}`,
-        proximaRevision,
-        'accion',
-        accionId
+        fechaParte,
+        horaParte
       ).run()
+      
+      console.log('✅ Evento agenda creado:', result.meta.last_row_id)
+    } else {
+      console.log('⏭️ Sin fecha programada, no se crea evento agenda')
     }
   } catch (error) {
-    console.log('Error al sincronizar con agenda:', error)
+    console.error('❌ Error al sincronizar con agenda:', error)
     // No fallar la creación de la acción por esto
   }
 }
