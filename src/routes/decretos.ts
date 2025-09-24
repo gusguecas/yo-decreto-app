@@ -24,23 +24,44 @@ decretosRoutes.put('/config', async (c) => {
 
 // Obtener todos los decretos con contadores
 decretosRoutes.get('/', async (c) => {
-  return c.json({
-    success: true,
-    data: {
-      decretos: [],
-      contadores: {
-        total: 0,
-        empresarial: 0,
-        material: 0,
-        humano: 0
-      },
-      porcentajes: {
-        empresarial: 0,
-        material: 0,
-        humano: 0
-      }
+  try {
+    // Obtener decretos del usuario (por ahora user_id = 1)
+    const decretos = await c.env.DB.prepare(`
+      SELECT id, contenido, area, progreso, estado, created_at, updated_at
+      FROM decretos 
+      WHERE user_id = 1 
+      ORDER BY created_at DESC
+    `).all()
+    
+    const decretosData = decretos.results || []
+    
+    // Calcular contadores
+    const contadores = {
+      total: decretosData.length,
+      empresarial: decretosData.filter((d: any) => d.area === 'empresarial').length,
+      material: decretosData.filter((d: any) => d.area === 'material').length,
+      humano: decretosData.filter((d: any) => d.area === 'humano').length
     }
-  })
+    
+    // Calcular porcentajes
+    const porcentajes = {
+      empresarial: contadores.total > 0 ? Math.round((contadores.empresarial / contadores.total) * 100) : 0,
+      material: contadores.total > 0 ? Math.round((contadores.material / contadores.total) * 100) : 0,
+      humano: contadores.total > 0 ? Math.round((contadores.humano / contadores.total) * 100) : 0
+    }
+    
+    return c.json({
+      success: true,
+      data: {
+        decretos: decretosData,
+        contadores,
+        porcentajes
+      }
+    })
+  } catch (error) {
+    console.error('Error obteniendo decretos:', error)
+    return c.json({ error: 'Error interno del servidor' }, 500)
+  }
 })
 
 // Obtener un decreto específico
@@ -67,13 +88,42 @@ decretosRoutes.get('/:id', async (c) => {
 
 // Crear nuevo decreto
 decretosRoutes.post('/', async (c) => {
-  return c.json({
-    success: true,
-    data: {
-      id: Math.floor(Math.random() * 1000),
-      message: 'Decreto creado exitosamente'
+  try {
+    const { contenido, area } = await c.req.json()
+    
+    // Validar datos
+    if (!contenido || !area) {
+      return c.json({ error: 'Contenido y área son requeridos' }, 400)
     }
-  })
+    
+    if (!['empresarial', 'material', 'humano'].includes(area)) {
+      return c.json({ error: 'Área debe ser empresarial, material o humano' }, 400)
+    }
+    
+    // Por ahora usar user_id = 1 (primer usuario)
+    const result = await c.env.DB.prepare(`
+      INSERT INTO decretos (contenido, area, user_id)
+      VALUES (?, ?, 1)
+    `).bind(contenido, area).run()
+    
+    if (!result.success) {
+      return c.json({ error: 'Error al crear decreto' }, 500)
+    }
+    
+    return c.json({
+      success: true,
+      data: {
+        id: result.meta.last_row_id,
+        contenido,
+        area,
+        progreso: 0,
+        estado: 'activo'
+      }
+    })
+  } catch (error) {
+    console.error('Error creando decreto:', error)
+    return c.json({ error: 'Error interno del servidor' }, 500)
+  }
 })
 
 // Actualizar decreto
