@@ -170,7 +170,7 @@ agendaRoutes.put('/enfoque/:fecha', async (c) => {
   }
 })
 
-// Crear nueva tarea desde agenda
+// Crear nueva tarea desde agenda - LÓGICA SIMPLE DIRECTA
 agendaRoutes.post('/tareas', async (c) => {
   try {
     const { 
@@ -181,46 +181,50 @@ agendaRoutes.post('/tareas', async (c) => {
       tipo 
     } = await c.req.json()
     
-    if (!decreto_id || !nombre || !fecha_hora) {
+    console.log('📝 Creando tarea agenda:', { decreto_id, nombre, fecha_hora, tipo })
+    
+    if (!nombre || !fecha_hora) {
       return c.json({ 
         success: false, 
-        error: 'Campos requeridos: decreto_id, nombre, fecha_hora' 
+        error: 'Campos requeridos: nombre, fecha_hora' 
       }, 400)
     }
 
-    // Crear acción
-    const resultAccion = await c.env.DB.prepare(`
-      INSERT INTO acciones (
-        decreto_id, titulo, que_hacer, como_hacerlo, tipo, 
-        proxima_revision, origen
-      ) VALUES (?, ?, ?, ?, ?, ?, 'agenda')
-    `).bind(
-      decreto_id,
-      nombre,
-      descripcion || 'Tarea creada desde agenda',
-      'Completar según se planificó',
-      tipo || 'secundaria',
-      fecha_hora
-    ).run()
-
-    // Crear evento agenda
+    // LÓGICA SIMPLE: Crear evento de agenda directamente (sin acción)
     const fechaParte = fecha_hora.split('T')[0]
     const horaParte = fecha_hora.split('T')[1] || '09:00'
     
-    await c.env.DB.prepare(`
-      INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento)
-      VALUES (?, ?, ?, ?, ?)
+    const result = await c.env.DB.prepare(`
+      INSERT INTO agenda_eventos (
+        titulo, 
+        descripcion, 
+        fecha_evento, 
+        hora_evento,
+        estado,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
-      resultAccion.meta.last_row_id,
-      `[Agenda] ${nombre}`,
+      nombre,
       descripcion || '',
       fechaParte,
       horaParte
     ).run()
 
-    return c.json({ success: true, id: resultAccion.meta.last_row_id })
+    console.log('✅ Tarea agenda creada:', result.meta.last_row_id)
+    
+    return c.json({ 
+      success: true, 
+      id: result.meta.last_row_id,
+      message: 'Tarea creada correctamente'
+    })
+    
   } catch (error) {
-    return c.json({ success: false, error: 'Error al crear tarea' }, 500)
+    console.error('❌ Error crear tarea:', error)
+    return c.json({ 
+      success: false, 
+      error: `Error al crear tarea: ${error.message}` 
+    }, 500)
   }
 })
 
