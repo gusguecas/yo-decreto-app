@@ -260,16 +260,15 @@ const Auth = {
       const data = await response.json()
 
       if (response.ok) {
-        // Guardar sesión
+        // Guardar sesión SIEMPRE (no solo cuando remember=true)
         this.currentUser = data.user
         this.isAuthenticated = true
         
-        if (remember) {
-          localStorage.setItem(this.config.sessionKey, JSON.stringify({
-            token: data.token,
-            user: data.user
-          }))
-        }
+        // ALWAYS save session (fix for infinite login loop)
+        localStorage.setItem(this.config.sessionKey, JSON.stringify({
+          token: data.token,
+          user: data.user
+        }))
 
         // Mostrar mensaje de éxito y cargar app
         this.showSuccessAndLoadApp()
