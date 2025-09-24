@@ -266,8 +266,37 @@ decretosRoutes.post('/:id/acciones', async (c) => {
       proxima_revision || null, calificacion || null
     ).run()
 
-    // Sincronizar acción principal con agenda
-    await sincronizarAccionConAgenda(c.env.DB, accionId, titulo, que_hacer, como_hacerlo, tipo, proxima_revision)
+    console.log('✅ Acción creada:', accionId)
+
+    // FORZAR CREACIÓN EN AGENDA - SIEMPRE, SIN EXCUSAS
+    if (proxima_revision) {
+      console.log('🔥 FORZANDO creación en agenda para:', { accionId, titulo, proxima_revision })
+      
+      const fechaParte = proxima_revision.split('T')[0]
+      const horaParte = proxima_revision.split('T')[1] || '09:00'
+      
+      try {
+        const agendaResult = await c.env.DB.prepare(`
+          INSERT INTO agenda_eventos (
+            accion_id, titulo, descripcion, fecha_evento, hora_evento, estado,
+            created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `).bind(
+          accionId,
+          `[Decreto] ${titulo}`,
+          `${que_hacer}${como_hacerlo ? ' - ' + como_hacerlo : ''}`,
+          fechaParte,
+          horaParte
+        ).run()
+        
+        console.log('🚀 AGENDA EVENTO CREADO EXITOSAMENTE:', agendaResult.meta.last_row_id)
+      } catch (agendaError) {
+        console.error('💥 ERROR CREANDO AGENDA EVENTO:', agendaError)
+        // PERO NO FALLAR - la acción ya está creada
+      }
+    } else {
+      console.log('⚠️ NO HAY FECHA DE REVISIÓN - NO SE CREA EVENTO AGENDA')
+    }
 
     // Crear sub-tareas si las hay
     let subtareasCreadas = 0
