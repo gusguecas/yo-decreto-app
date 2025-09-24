@@ -6,11 +6,11 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "webapp-production",
-      "database_id": "placeholder-for-production"
-    }
-  ]
+  // "d1_databases": [
+  //   {
+  //     "binding": "DB", 
+  //     "database_name": "webapp-production",
+  //     "database_id": "placeholder-for-production"
+  //   }
+  // ]
 }
