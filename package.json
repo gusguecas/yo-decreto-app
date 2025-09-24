@@ -34,10 +34,10 @@
     "hono": "^4.0.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20250705.0",
+    "@cloudflare/workers-types": "^4.20250922.0",
     "@hono/vite-cloudflare-pages": "^0.4.2",
-    "vite": "^5.0.0",
-    "wrangler": "^3.78.0",
+    "vite": "^6.0.0",
+    "wrangler": "^4.38.0",
     "typescript": "^5.0.0"
   },
   "keywords": [
