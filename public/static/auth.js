@@ -18,22 +18,36 @@ const Auth = {
     
     // Verificar sesión existente
     const session = localStorage.getItem(this.config.sessionKey)
+    console.log('📦 Sesión en localStorage:', session ? 'ENCONTRADA' : 'NO ENCONTRADA')
+    
     if (session) {
       try {
         const userData = JSON.parse(session)
+        console.log('👤 Datos de usuario:', userData)
+        console.log('🔑 Token:', userData.token ? 'EXISTE' : 'FALTA')
+        
         const isValid = await this.validateSession(userData.token)
+        console.log('✅ Validación de sesión:', isValid ? 'VÁLIDA' : 'INVÁLIDA')
+        
         if (isValid) {
           this.isAuthenticated = true
           this.currentUser = userData
+          console.log('🎉 Autenticación exitosa, cargando app...')
           return true
+        } else {
+          console.log('❌ Token inválido, limpiando sesión')
+          localStorage.removeItem(this.config.sessionKey)
         }
       } catch (error) {
-        console.log('Sesión inválida, mostrando login')
+        console.log('💥 Error al procesar sesión:', error)
         localStorage.removeItem(this.config.sessionKey)
       }
+    } else {
+      console.log('📭 No hay sesión guardada')
     }
     
     // Mostrar pantalla de login
+    console.log('🔐 Mostrando pantalla de login...')
     this.showLoginScreen()
     return false
   },
@@ -612,13 +626,25 @@ const Auth = {
   // Validar sesión existente
   async validateSession(token) {
     try {
+      console.log('🔍 Validando token en:', `${this.config.apiBase}/validate`)
+      console.log('🎫 Token:', token?.substring(0, 10) + '...')
+      
       const response = await fetch(`${this.config.apiBase}/validate`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
+      
+      console.log('📡 Respuesta del servidor:', response.status, response.statusText)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.log('❌ Error del servidor:', errorText)
+      }
+      
       return response.ok
     } catch (error) {
+      console.log('💥 Error en validación:', error)
       return false
     }
   },
