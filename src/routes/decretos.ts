@@ -35,8 +35,9 @@ decretosRoutes.get('/', async (c) => {
   try {
     // Intentar obtener decretos reales de la BD
     const decretos = await c.env.DB.prepare(`
-      SELECT id, titulo, sueno_meta, descripcion, area, progreso, created_at, updated_at
+      SELECT id, contenido, area, progreso, estado, user_id, created_at, updated_at
       FROM decretos 
+      WHERE user_id = 1
       ORDER BY created_at DESC
     `).all()
     
@@ -115,12 +116,15 @@ decretosRoutes.post('/', async (c) => {
     
     console.log('Procesando:', { titulo, sueno_meta, descripcion, area })
     
-    // GUARDAR EN BASE DE DATOS REAL
+    // GUARDAR EN BASE DE DATOS REAL con estructura correcta
     try {
+      // Combinar titulo, sueno_meta y descripcion en contenido
+      const contenido = `${titulo}\n\n🎯 Meta: ${sueno_meta}${descripcion ? `\n\n📝 Descripción: ${descripcion}` : ''}`
+      
       const result = await c.env.DB.prepare(`
-        INSERT INTO decretos (titulo, sueno_meta, descripcion, area)
-        VALUES (?, ?, ?, ?)
-      `).bind(titulo, sueno_meta, descripcion, area).run()
+        INSERT INTO decretos (contenido, area, user_id)
+        VALUES (?, ?, 1)
+      `).bind(contenido, area).run()
       
       console.log('Resultado DB:', result)
       
@@ -128,11 +132,11 @@ decretosRoutes.post('/', async (c) => {
         success: true,
         data: {
           id: result.meta?.last_row_id || Math.floor(Math.random() * 1000),
-          titulo,
-          sueno_meta,
-          descripcion,
+          contenido,
           area,
           progreso: 0,
+          estado: 'activo',
+          user_id: 1,
           created_at: new Date().toISOString()
         }
       })
