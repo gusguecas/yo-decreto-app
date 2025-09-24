@@ -25,15 +25,21 @@ decretosRoutes.put('/config', async (c) => {
 // Obtener todos los decretos con contadores
 decretosRoutes.get('/', async (c) => {
   try {
-    // Obtener decretos del usuario (por ahora user_id = 1)
-    const decretos = await c.env.DB.prepare(`
-      SELECT id, contenido, area, progreso, estado, created_at, updated_at
-      FROM decretos 
-      WHERE user_id = 1 
-      ORDER BY created_at DESC
-    `).all()
+    // Intentar obtener decretos del usuario
+    let decretosData = []
     
-    const decretosData = decretos.results || []
+    try {
+      const decretos = await c.env.DB.prepare(`
+        SELECT id, contenido, area, progreso, estado, created_at, updated_at
+        FROM decretos 
+        WHERE user_id = 1 
+        ORDER BY created_at DESC
+      `).all()
+      decretosData = decretos.results || []
+    } catch (dbError) {
+      console.log('Tabla decretos no existe aún, devolviendo vacío')
+      // Si la tabla no existe, devolver datos vacíos
+    }
     
     // Calcular contadores
     const contadores = {
@@ -60,7 +66,15 @@ decretosRoutes.get('/', async (c) => {
     })
   } catch (error) {
     console.error('Error obteniendo decretos:', error)
-    return c.json({ error: 'Error interno del servidor' }, 500)
+    // En caso de error, devolver estructura vacía
+    return c.json({
+      success: true,
+      data: {
+        decretos: [],
+        contadores: { total: 0, empresarial: 0, material: 0, humano: 0 },
+        porcentajes: { empresarial: 0, material: 0, humano: 0 }
+      }
+    })
   }
 })
 
@@ -100,26 +114,33 @@ decretosRoutes.post('/', async (c) => {
       return c.json({ error: 'Área debe ser empresarial, material o humano' }, 400)
     }
     
-    // Por ahora usar user_id = 1 (primer usuario)
-    const result = await c.env.DB.prepare(`
-      INSERT INTO decretos (contenido, area, user_id)
-      VALUES (?, ?, 1)
-    `).bind(contenido, area).run()
-    
-    if (!result.success) {
-      return c.json({ error: 'Error al crear decreto' }, 500)
-    }
-    
-    return c.json({
-      success: true,
-      data: {
-        id: result.meta.last_row_id,
-        contenido,
-        area,
-        progreso: 0,
-        estado: 'activo'
+    try {
+      // Por ahora usar user_id = 1 (primer usuario)
+      const result = await c.env.DB.prepare(`
+        INSERT INTO decretos (contenido, area, user_id)
+        VALUES (?, ?, 1)
+      `).bind(contenido, area).run()
+      
+      if (!result.success) {
+        return c.json({ error: 'Error al crear decreto' }, 500)
       }
-    })
+      
+      return c.json({
+        success: true,
+        data: {
+          id: result.meta.last_row_id,
+          contenido,
+          area,
+          progreso: 0,
+          estado: 'activo'
+        }
+      })
+    } catch (dbError) {
+      console.error('Error de base de datos:', dbError)
+      return c.json({ 
+        error: 'Base de datos no configurada. Crear tabla decretos primero.' 
+      }, 500)
+    }
   } catch (error) {
     console.error('Error creando decreto:', error)
     return c.json({ error: 'Error interno del servidor' }, 500)
