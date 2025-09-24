@@ -175,7 +175,11 @@ auth.post('/login', async (c) => {
       return c.json({ error: 'Credenciales incorrectas' }, 401)
     }
     
-    // Verificar contraseña
+    // Verificar contraseña (debugging)
+    console.log('Password ingresada:', password)
+    console.log('Hash almacenado:', user.password_hash)
+    console.log('Verificación:', AuthUtils.verifyPassword(password, user.password_hash))
+    
     if (!AuthUtils.verifyPassword(password, user.password_hash)) {
       return c.json({ error: 'Credenciales incorrectas' }, 401)
     }
