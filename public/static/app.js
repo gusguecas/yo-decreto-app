@@ -604,8 +604,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const config = await API.config.get()
     AppState.user = config.data
     
-    // Inicializar router
-    Router.init()
+    // Inicializar vista por defecto (sin router por ahora)
+    Decretos.render()
     
     Utils.showToast('¡Aplicación cargada exitosamente!', 'success')
   } catch (error) {
