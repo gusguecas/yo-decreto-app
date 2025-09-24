@@ -2267,10 +2267,17 @@ const Agenda = {
             
             <!-- 📅 INFORMACIÓN DE FECHAS CLARIFICADA -->
             <div class="text-xs text-slate-500 mt-2 space-y-1">
+              <!-- Mostrar fecha de creación (de acción o de tarea) -->
               ${tarea.accion_fecha_creacion ? `
                 <div>📝 Creada: ${dayjs(tarea.accion_fecha_creacion).format('DD/MM/YYYY')}</div>
+              ` : tarea.created_at ? `
+                <div>📝 Creada: ${dayjs(tarea.created_at).format('DD/MM/YYYY HH:mm')}</div>
               ` : ''}
-              <div>🎯 Compromiso: ${dayjs(tarea.fecha_evento + ' ' + tarea.hora_evento).format('DD/MM/YYYY HH:mm')}</div>
+              
+              <!-- Fecha de compromiso SIEMPRE visible -->
+              <div class="text-blue-400">🎯 Compromiso: ${dayjs(tarea.fecha_evento + ' ' + (tarea.hora_evento || '09:00')).format('DD/MM/YYYY HH:mm')}</div>
+              
+              <!-- Fecha de realización si está completada -->
               ${tarea.estado === 'completada' && tarea.fecha_completada ? `
                 <div class="text-green-400">✅ Realizada: ${dayjs(tarea.fecha_completada).format('DD/MM/YYYY HH:mm')}</div>
               ` : ''}
