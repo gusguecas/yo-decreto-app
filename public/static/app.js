@@ -639,3 +639,413 @@ document.addEventListener('click', (e) => {
     Modal.close(modalId)
   }
 })
+
+// ===== ROUTER SIMPLE =====
+const Router = {
+  init() {
+    // Cargar sección por defecto
+    this.navigate('decretos')
+    
+    // Manejar cambios de hash
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.slice(1) || 'decretos'
+      this.navigate(hash)
+    })
+  },
+
+  navigate(section) {
+    AppState.currentSection = section
+    window.location.hash = section
+
+    // Renderizar sección
+    switch(section) {
+      case 'decretos':
+        Decretos.render()
+        break
+      case 'agenda':
+        Agenda.render()
+        break
+      case 'progreso':
+        Progreso.render()
+        break
+      case 'practica':
+        Practica.render()
+        break
+      default:
+        Decretos.render()
+    }
+
+    // Actualizar navegación activa
+    this.updateNavigation(section)
+  },
+
+  updateNavigation(activeSection) {
+    // Actualizar estados activos en la navegación si existe
+    document.querySelectorAll('[data-nav]').forEach(nav => {
+      const section = nav.getAttribute('data-nav')
+      if (section === activeSection) {
+        nav.classList.add('active')
+      } else {
+        nav.classList.remove('active')
+      }
+    })
+  }
+}
+
+// ===== AGENDA DIARIA =====
+const Agenda = {
+  data: {
+    eventos: [],
+    fechaSeleccionada: dayjs().format('YYYY-MM-DD')
+  },
+
+  async render() {
+    try {
+      await this.loadEventos()
+      
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderAgendaView()
+    } catch (error) {
+      console.error('Error al cargar agenda:', error)
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderError()
+    }
+  },
+
+  async loadEventos() {
+    const response = await API.agenda.getAll()
+    this.data.eventos = response.data || []
+  },
+
+  renderAgendaView() {
+    return `
+      <div class="container mx-auto px-4 py-8">
+        <div class="mb-8">
+          <h1 class="text-4xl font-bold text-white mb-2">
+            📅 Agenda Diaria
+          </h1>
+          <p class="text-slate-400">Organiza tu día y mantén el enfoque en tus decretos</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Calendario -->
+          <div class="lg:col-span-1">
+            <div class="bg-slate-800 rounded-xl p-6">
+              <h2 class="text-xl font-bold text-white mb-4">Calendario</h2>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-accent-blue mb-2">
+                  ${dayjs(this.data.fechaSeleccionada).format('DD')}
+                </div>
+                <div class="text-sm text-slate-400">
+                  ${dayjs(this.data.fechaSeleccionada).format('MMMM YYYY')}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Eventos del día -->
+          <div class="lg:col-span-2">
+            <div class="bg-slate-800 rounded-xl p-6">
+              <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-white">Eventos de Hoy</h2>
+                <button class="btn-primary px-4 py-2 rounded-lg">
+                  <i class="fas fa-plus mr-2"></i>
+                  Nuevo Evento
+                </button>
+              </div>
+
+              ${this.data.eventos.length > 0 ? 
+                this.data.eventos.map(evento => this.renderEventoCard(evento)).join('') :
+                `<div class="text-center py-12 text-slate-400">
+                  <div class="text-4xl mb-4">📅</div>
+                  <p class="text-lg mb-2">No hay eventos programados</p>
+                  <p class="text-sm">Agrega tu primer evento del día</p>
+                </div>`
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  renderEventoCard(evento) {
+    return `
+      <div class="bg-slate-700 rounded-lg p-4 mb-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-semibold text-white">${evento.titulo}</h3>
+            <p class="text-slate-400 text-sm">${evento.hora}</p>
+          </div>
+          <div class="text-accent-green">
+            <i class="fas fa-check-circle"></i>
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  renderError() {
+    return `
+      <div class="container mx-auto px-4 py-8 text-center">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h2 class="text-2xl font-bold mb-4">Error al cargar agenda</h2>
+        <p class="text-slate-400 mb-6">No se pudieron cargar los eventos</p>
+        <button onclick="Agenda.render()" class="btn-primary px-6 py-2 rounded-lg">
+          Reintentar
+        </button>
+      </div>
+    `
+  }
+}
+
+// ===== MI PROGRESO =====
+const Progreso = {
+  data: {
+    estadisticas: {}
+  },
+
+  async render() {
+    try {
+      await this.loadProgreso()
+      
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderProgresoView()
+    } catch (error) {
+      console.error('Error al cargar progreso:', error)
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderError()
+    }
+  },
+
+  async loadProgreso() {
+    const response = await API.progreso.get()
+    this.data.estadisticas = response.data
+  },
+
+  renderProgresoView() {
+    const stats = this.data.estadisticas
+    
+    return `
+      <div class="container mx-auto px-4 py-8">
+        <div class="mb-8">
+          <h1 class="text-4xl font-bold text-white mb-2">
+            📊 Mi Progreso
+          </h1>
+          <p class="text-slate-400">Seguimiento de tu evolución y logros</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <!-- Decretos Completados -->
+          <div class="bg-slate-800 rounded-xl p-6 text-center">
+            <div class="text-3xl font-bold text-accent-green mb-2">
+              ${stats.decretosCompletados || 0}
+            </div>
+            <div class="text-slate-400">Decretos Completados</div>
+          </div>
+
+          <!-- Acciones Realizadas -->
+          <div class="bg-slate-800 rounded-xl p-6 text-center">
+            <div class="text-3xl font-bold text-accent-blue mb-2">
+              ${stats.accionesRealizadas || 0}
+            </div>
+            <div class="text-slate-400">Acciones Realizadas</div>
+          </div>
+
+          <!-- Racha Actual -->
+          <div class="bg-slate-800 rounded-xl p-6 text-center">
+            <div class="text-3xl font-bold text-accent-orange mb-2">
+              ${stats.rachaActual || 0}
+            </div>
+            <div class="text-slate-400">Días de Racha</div>
+          </div>
+        </div>
+
+        <!-- Progreso por Áreas -->
+        <div class="bg-slate-800 rounded-xl p-6">
+          <h2 class="text-xl font-bold text-white mb-6">Progreso por Áreas</h2>
+          
+          <div class="space-y-4">
+            ${['empresarial', 'material', 'humano'].map(area => `
+              <div class="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <div class="text-2xl">
+                    ${area === 'empresarial' ? '🏢' : area === 'material' ? '💰' : '❤️'}
+                  </div>
+                  <div>
+                    <div class="font-semibold text-white capitalize">${area}</div>
+                    <div class="text-sm text-slate-400">Área ${area}</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold text-accent-green">
+                    ${stats.areasProgreso?.[area] || 0}%
+                  </div>
+                  <div class="text-xs text-slate-400">Completado</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  renderError() {
+    return `
+      <div class="container mx-auto px-4 py-8 text-center">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h2 class="text-2xl font-bold mb-4">Error al cargar progreso</h2>
+        <p class="text-slate-400 mb-6">No se pudieron cargar las estadísticas</p>
+        <button onclick="Progreso.render()" class="btn-primary px-6 py-2 rounded-lg">
+          Reintentar
+        </button>
+      </div>
+    `
+  }
+}
+
+// ===== MI PRÁCTICA =====
+const Practica = {
+  data: {
+    rutinas: []
+  },
+
+  async render() {
+    try {
+      await this.loadRutinas()
+      
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderPracticaView()
+    } catch (error) {
+      console.error('Error al cargar práctica:', error)
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderError()
+    }
+  },
+
+  async loadRutinas() {
+    const response = await API.practica.getRutinas()
+    this.data.rutinas = response.data || []
+  },
+
+  renderPracticaView() {
+    return `
+      <div class="container mx-auto px-4 py-8">
+        <div class="mb-8">
+          <h1 class="text-4xl font-bold text-white mb-2">
+            🧘‍♂️ Mi Práctica
+          </h1>
+          <p class="text-slate-400">Rutinas matutinas y ejercicios diarios</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Rutinas Matutinas -->
+          <div class="bg-slate-800 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-bold text-white">Rutinas Matutinas</h2>
+              <button class="btn-primary px-4 py-2 rounded-lg">
+                <i class="fas fa-plus mr-2"></i>
+                Nueva Rutina
+              </button>
+            </div>
+
+            ${this.data.rutinas.length > 0 ? 
+              this.data.rutinas.map(rutina => this.renderRutinaCard(rutina)).join('') :
+              `<div class="text-center py-12 text-slate-400">
+                <div class="text-4xl mb-4">🧘‍♂️</div>
+                <p class="text-lg mb-2">No hay rutinas configuradas</p>
+                <p class="text-sm">Crea tu primera rutina matutina</p>
+              </div>`
+            }
+          </div>
+
+          <!-- Progreso Diario -->
+          <div class="bg-slate-800 rounded-xl p-6">
+            <h2 class="text-xl font-bold text-white mb-6">Progreso de Hoy</h2>
+            
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 rounded-full bg-accent-green flex items-center justify-center">
+                    <i class="fas fa-check text-white text-sm"></i>
+                  </div>
+                  <div>
+                    <div class="font-semibold text-white">Meditación</div>
+                    <div class="text-sm text-slate-400">5 minutos</div>
+                  </div>
+                </div>
+                <div class="text-accent-green">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between p-4 bg-slate-700 rounded-lg opacity-60">
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center">
+                    <i class="fas fa-clock text-slate-400 text-sm"></i>
+                  </div>
+                  <div>
+                    <div class="font-semibold text-white">Ejercicio</div>
+                    <div class="text-sm text-slate-400">20 minutos</div>
+                  </div>
+                </div>
+                <div class="text-slate-400">
+                  <i class="fas fa-circle"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  renderRutinaCard(rutina) {
+    return `
+      <div class="bg-slate-700 rounded-lg p-4 mb-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-semibold text-white">${rutina.nombre}</h3>
+            <p class="text-slate-400 text-sm">${rutina.duracion} minutos</p>
+          </div>
+          <div class="text-accent-green">
+            <i class="fas fa-play-circle"></i>
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  renderError() {
+    return `
+      <div class="container mx-auto px-4 py-8 text-center">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h2 class="text-2xl font-bold mb-4">Error al cargar práctica</h2>
+        <p class="text-slate-400 mb-6">No se pudieron cargar las rutinas</p>
+        <button onclick="Practica.render()" class="btn-primary px-6 py-2 rounded-lg">
+          Reintentar
+        </button>
+      </div>
+    `
+  }
+}
+
+// Agregar API endpoints para las nuevas secciones
+API.agenda = {
+  async getAll() {
+    return API.request('/agenda')
+  }
+}
+
+API.progreso = {
+  async get() {
+    return API.request('/progreso')
+  }
+}
+
+API.practica = {
+  async getRutinas() {
+    return API.request('/practica/rutinas')
+  }
+}

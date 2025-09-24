@@ -3085,5 +3085,173 @@ Preparar presentación para próxima reunión"
     })
     
     return subtareas
+  },
+
+  // ===== FUNCIÓN PRINCIPAL DE DETALLE DE DECRETO =====
+  async openDetalleDecreto(decretoId) {
+    try {
+      console.log('📋 Abriendo detalle de decreto:', decretoId)
+      
+      // Cambiar vista a detalle de decreto
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = UI.renderLoading('Cargando detalle del decreto...')
+      
+      // Cargar datos del decreto
+      const response = await API.decretos.get(decretoId)
+      this.data.selectedDecreto = response.data.decreto
+      
+      // Renderizar vista de detalle
+      mainContent.innerHTML = this.renderDetalleDecretoView()
+      this.renderModals()
+      
+    } catch (error) {
+      console.error('Error al abrir detalle:', error)
+      Utils.showToast('Error al cargar detalle del decreto', 'error')
+      this.render() // Volver a la vista principal
+    }
+  },
+
+  renderDetalleDecretoView() {
+    const decreto = this.data.selectedDecreto
+    if (!decreto) return this.renderError('No se encontró el decreto')
+    
+    return `
+      <div class="container mx-auto px-4 py-8">
+        <!-- Botón volver -->
+        <div class="mb-6">
+          <button 
+            onclick="Decretos.render()" 
+            class="btn-secondary px-4 py-2 rounded-lg flex items-center space-x-2"
+          >
+            <i class="fas fa-arrow-left"></i>
+            <span>Volver a Decretos</span>
+          </button>
+        </div>
+        
+        <!-- Detalle del decreto -->
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 mb-8">
+          <div class="flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold text-white">${decreto.contenido}</h1>
+            <div class="flex items-center space-x-3">
+              <span class="px-4 py-2 rounded-full text-sm font-medium ${
+                decreto.area === 'empresarial' ? 'bg-accent-green/20 text-accent-green' :
+                decreto.area === 'material' ? 'bg-accent-orange/20 text-accent-orange' :
+                'bg-accent-blue/20 text-accent-blue'
+              }">
+                ${decreto.area === 'empresarial' ? '🏢 Empresarial' : 
+                  decreto.area === 'material' ? '💰 Material' : '❤️ Humano'}
+              </span>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-white">${decreto.progreso || 0}%</div>
+              <div class="text-slate-400">Progreso</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-white">${decreto.acciones?.length || 0}</div>
+              <div class="text-slate-400">Acciones</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-white">${Utils.formatDate(decreto.created_at)}</div>
+              <div class="text-slate-400">Creado</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Acciones del decreto -->
+        <div class="bg-slate-800 rounded-xl p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-white">Acciones del Decreto</h2>
+            <button 
+              onclick="Decretos.openCreateAccionModal('${decreto.id}')" 
+              class="btn-primary px-4 py-2 rounded-lg flex items-center space-x-2"
+            >
+              <i class="fas fa-plus"></i>
+              <span>Nueva Acción</span>
+            </button>
+          </div>
+          
+          <div id="accionesList">
+            ${decreto.acciones && decreto.acciones.length > 0 ? 
+              decreto.acciones.map(accion => this.renderAccionCard(accion)).join('') :
+              `<div class="text-center py-12 text-slate-400">
+                <div class="text-4xl mb-4">📝</div>
+                <p class="text-lg mb-2">No hay acciones aún</p>
+                <p class="text-sm">Crea la primera acción para este decreto</p>
+              </div>`
+            }
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  renderAccionCard(accion) {
+    const isCompleted = accion.estado === 'completada'
+    const isOverdue = this.isAccionOverdue(accion, isCompleted)
+    
+    return `
+      <div class="bg-slate-700 rounded-lg p-4 mb-4 hover-lift cursor-pointer"
+           onclick="Decretos.openDetalleAccion('${accion.id}')">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-2 ${isCompleted ? 'line-through text-slate-400' : ''}">${accion.titulo}</h3>
+            <p class="text-slate-300 text-sm mb-3">${accion.que_hacer}</p>
+            
+            <div class="flex items-center space-x-4 text-sm">
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                isCompleted 
+                  ? 'bg-green-900/30 text-green-400' 
+                  : isOverdue 
+                    ? 'bg-red-900/30 text-red-400'
+                    : 'bg-orange-900/30 text-orange-400'
+              }">
+                ${isCompleted ? '✅ Completada' : isOverdue ? '⚠️ Retrasada' : '⏳ Pendiente'}
+              </span>
+              
+              <span class="text-slate-400">
+                ${accion.tipo === 'secundaria' ? '📅 Diaria' : '📆 Semanal'}
+              </span>
+              
+              ${accion.proxima_revision ? `
+                <span class="text-slate-400">
+                  📅 ${Utils.formatDate(accion.proxima_revision)}
+                </span>
+              ` : ''}
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-2 ml-4">
+            ${!isCompleted ? `
+              <button 
+                onclick="event.stopPropagation(); Decretos.completarAccion('${accion.id}')"
+                class="text-green-400 hover:text-green-300 transition-colors p-2"
+                title="Completar acción"
+              >
+                <i class="fas fa-check"></i>
+              </button>
+            ` : ''}
+            
+            <button 
+              onclick="event.stopPropagation(); Decretos.openEditAccion('${accion.id}')"
+              class="text-blue-400 hover:text-blue-300 transition-colors p-2"
+              title="Editar acción"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            
+            <button 
+              onclick="event.stopPropagation(); Decretos.confirmarBorrarAccion('${accion.id}')"
+              class="text-red-400 hover:text-red-300 transition-colors p-2"
+              title="Eliminar acción"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `
   }
 }
