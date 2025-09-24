@@ -35,9 +35,8 @@ decretosRoutes.get('/', async (c) => {
   try {
     // Intentar obtener decretos reales de la BD
     const decretos = await c.env.DB.prepare(`
-      SELECT id, contenido, area, progreso, estado, created_at, updated_at
+      SELECT id, titulo, sueno_meta, descripcion, area, progreso, created_at, updated_at
       FROM decretos 
-      WHERE user_id = 1 
       ORDER BY created_at DESC
     `).all()
     
@@ -108,18 +107,20 @@ decretosRoutes.post('/', async (c) => {
     const body = await c.req.json()
     console.log('Datos recibidos:', body)
     
-    // Extraer contenido de cualquier campo posible
-    const contenido = body.contenido || body.titulo || body.texto || 'Mi decreto'
+    // Extraer campos correctos del esquema
+    const titulo = body.titulo || 'Mi decreto'
+    const sueno_meta = body.sueno_meta || 'Meta por definir'
+    const descripcion = body.descripcion || ''
     const area = body.area || 'humano'
     
-    console.log('Procesando:', { contenido, area })
+    console.log('Procesando:', { titulo, sueno_meta, descripcion, area })
     
     // GUARDAR EN BASE DE DATOS REAL
     try {
       const result = await c.env.DB.prepare(`
-        INSERT INTO decretos (contenido, area, user_id)
-        VALUES (?, ?, 1)
-      `).bind(contenido, area).run()
+        INSERT INTO decretos (titulo, sueno_meta, descripcion, area)
+        VALUES (?, ?, ?, ?)
+      `).bind(titulo, sueno_meta, descripcion, area).run()
       
       console.log('Resultado DB:', result)
       
@@ -127,10 +128,12 @@ decretosRoutes.post('/', async (c) => {
         success: true,
         data: {
           id: result.meta?.last_row_id || Math.floor(Math.random() * 1000),
-          contenido,
+          titulo,
+          sueno_meta,
+          descripcion,
           area,
           progreso: 0,
-          estado: 'activo'
+          created_at: new Date().toISOString()
         }
       })
     } catch (dbError) {
@@ -140,10 +143,12 @@ decretosRoutes.post('/', async (c) => {
         success: true,
         data: {
           id: Math.floor(Math.random() * 1000),
-          contenido,
+          titulo,
+          sueno_meta,
+          descripcion,
           area,
           progreso: 0,
-          estado: 'activo'
+          created_at: new Date().toISOString()
         }
       })
     }
