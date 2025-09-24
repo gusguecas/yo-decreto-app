@@ -2198,14 +2198,22 @@ Preparar presentación para próxima reunión"
   },
 
   openCreateAccionDetalleModal(decretoId) {
+    // Si no se proporciona decreto ID, usar el primero disponible por defecto
+    if (!decretoId) {
+      console.log('⚠️ No se proporcionó decreto ID, usando decreto por defecto')
+      decretoId = 'decreto_1' // Usar primer decreto como fallback
+    }
+    
+    console.log('📋 Abriendo modal crear acción para decreto:', decretoId)
+    
     // Configurar el formulario con el decreto ID
     setTimeout(() => {
       const form = document.getElementById('createAccionDetalleForm')
       if (form) {
         form.dataset.decretoId = decretoId
-        console.log('Decreto ID configurado:', decretoId) // Debug log
+        console.log('✅ Decreto ID configurado:', decretoId)
       } else {
-        console.error('No se encontró el formulario createAccionDetalleForm')
+        console.error('❌ No se encontró el formulario createAccionDetalleForm')
       }
     }, 100)
     
