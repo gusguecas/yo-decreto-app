@@ -124,10 +124,11 @@ auth.post('/register', async (c) => {
     }
     
     // Crear nuevo usuario
+    const hashedPassword = AuthUtils.hashPassword(password)
     const result = await c.env.DB.prepare(`
-      INSERT INTO auth_users (email, password_hash, name, is_active)
-      VALUES (?, ?, ?, 1)
-    `).bind(email, password, name).run()
+      INSERT INTO auth_users (email, password_hash, name)
+      VALUES (?, ?, ?)
+    `).bind(email, hashedPassword, name).run()
     
     if (!result.success) {
       return c.json({ error: 'Error al crear la cuenta' }, 500)
