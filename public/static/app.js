@@ -333,7 +333,16 @@ const Modal = {
   }
 }
 
-// Router simple
+// ROUTER ELIMINADO TEMPORALMENTE PARA EVITAR CONFLICTOS
+
+// Función temporal para navegación
+function navigateToSection(section) {
+  console.log('Navegando a:', section)
+  Utils.showToast(`Sección ${section} - Próximamente`, 'info')
+}
+
+// INICIO DEL CÓDIGO ORIGINAL (sin Router conflictivo)
+/*
 const Router = {
   navigate(section) {
     if (AppState.currentSection === section) return
@@ -549,6 +558,8 @@ const Router = {
     }
   }
 }
+*/ 
+// FIN DEL CÓDIGO COMENTADO
 
 // Objeto principal de la aplicación
 const App = {
