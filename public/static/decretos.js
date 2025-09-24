@@ -785,12 +785,23 @@ const Decretos = {
     const formData = new FormData(event.target)
     const data = Object.fromEntries(formData.entries())
     
+    console.log('Datos enviados al servidor:', data)
+    
+    // Asegurar formato correcto
+    const decreetoData = {
+      contenido: data.contenido || data.titulo || '',
+      area: data.area || 'humano'
+    }
+    
+    console.log('Datos finales:', decreetoData)
+    
     try {
-      await API.decretos.create(data)
+      await API.decretos.create(decreetoData)
       Modal.close('createDecretoModal')
       Utils.showToast('Decreto creado exitosamente', 'success')
       await this.render() // Recargar vista
     } catch (error) {
+      console.error('Error completo:', error)
       Utils.showToast('Error al crear decreto', 'error')
     }
   },
