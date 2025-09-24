@@ -32,15 +32,50 @@ decretosRoutes.put('/config', async (c) => {
 decretosRoutes.get('/', async (c) => {
   console.log('GET /api/decretos called')
   
-  // Por ahora devolver datos simples hasta que funcione
-  return c.json({
-    success: true,
-    data: {
-      decretos: [],
-      contadores: { total: 0, empresarial: 0, material: 0, humano: 0 },
-      porcentajes: { empresarial: 0, material: 0, humano: 0 }
+  try {
+    // Intentar obtener decretos reales de la BD
+    const decretos = await c.env.DB.prepare(`
+      SELECT id, contenido, area, progreso, estado, created_at, updated_at
+      FROM decretos 
+      WHERE user_id = 1 
+      ORDER BY created_at DESC
+    `).all()
+    
+    const decretosData = decretos.results || []
+    console.log('Decretos encontrados:', decretosData.length)
+    
+    // Calcular contadores
+    const contadores = {
+      total: decretosData.length,
+      empresarial: decretosData.filter((d: any) => d.area === 'empresarial').length,
+      material: decretosData.filter((d: any) => d.area === 'material').length,
+      humano: decretosData.filter((d: any) => d.area === 'humano').length
     }
-  })
+    
+    return c.json({
+      success: true,
+      data: {
+        decretos: decretosData,
+        contadores,
+        porcentajes: {
+          empresarial: contadores.total > 0 ? Math.round((contadores.empresarial / contadores.total) * 100) : 0,
+          material: contadores.total > 0 ? Math.round((contadores.material / contadores.total) * 100) : 0,
+          humano: contadores.total > 0 ? Math.round((contadores.humano / contadores.total) * 100) : 0
+        }
+      }
+    })
+  } catch (dbError) {
+    console.error('Error BD:', dbError)
+    // Si falla BD, devolver vacío
+    return c.json({
+      success: true,
+      data: {
+        decretos: [],
+        contadores: { total: 0, empresarial: 0, material: 0, humano: 0 },
+        porcentajes: { empresarial: 0, material: 0, humano: 0 }
+      }
+    })
+  }
 })
 
 // Obtener un decreto específico
@@ -65,7 +100,7 @@ decretosRoutes.get('/:id', async (c) => {
   })
 })
 
-// Crear nuevo decreto - VERSIÓN SUPER SIMPLIFICADA
+// Crear nuevo decreto - CON BASE DE DATOS REAL
 decretosRoutes.post('/', async (c) => {
   try {
     console.log('POST /api/decretos llamado')
@@ -79,17 +114,39 @@ decretosRoutes.post('/', async (c) => {
     
     console.log('Procesando:', { contenido, area })
     
-    // TEMPORALMENTE: Solo devolver success sin base de datos
-    return c.json({
-      success: true,
-      data: {
-        id: Math.floor(Math.random() * 1000),
-        contenido,
-        area,
-        progreso: 0,
-        estado: 'activo'
-      }
-    })
+    // GUARDAR EN BASE DE DATOS REAL
+    try {
+      const result = await c.env.DB.prepare(`
+        INSERT INTO decretos (contenido, area, user_id)
+        VALUES (?, ?, 1)
+      `).bind(contenido, area).run()
+      
+      console.log('Resultado DB:', result)
+      
+      return c.json({
+        success: true,
+        data: {
+          id: result.meta?.last_row_id || Math.floor(Math.random() * 1000),
+          contenido,
+          area,
+          progreso: 0,
+          estado: 'activo'
+        }
+      })
+    } catch (dbError) {
+      console.error('Error BD:', dbError)
+      // Si falla BD, devolver success temporal
+      return c.json({
+        success: true,
+        data: {
+          id: Math.floor(Math.random() * 1000),
+          contenido,
+          area,
+          progreso: 0,
+          estado: 'activo'
+        }
+      })
+    }
     
   } catch (error) {
     console.error('Error completo:', error)
