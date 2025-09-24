@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const config = await API.config.get()
     AppState.user = config.data
     
-    // Inicializar vista por defecto (sin router por ahora)
+    // Inicializar vista principal
     Decretos.render()
     
     Utils.showToast('¡Aplicación cargada exitosamente!', 'success')
@@ -640,7 +640,8 @@ document.addEventListener('click', (e) => {
   }
 })
 
-// ===== ROUTER SIMPLE =====
+// ===== ROUTER SIMPLE (TEMPORALMENTE DESHABILITADO) =====
+/*
 const Router = {
   init() {
     // Cargar sección por defecto
@@ -1049,3 +1050,5 @@ API.practica = {
     return API.request('/practica/rutinas')
   }
 }
+*/
+// FIN DE CÓDIGO TEMPORALMENTE DESHABILITADO
