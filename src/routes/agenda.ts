@@ -13,7 +13,13 @@ agendaRoutes.get('/metricas/:fecha', async (c) => {
     
     // Obtener tareas del día
     const tareas = await c.env.DB.prepare(`
-      SELECT ae.*, a.titulo as accion_titulo, d.area, d.titulo as decreto_titulo
+      SELECT 
+        ae.*, 
+        a.titulo as accion_titulo, 
+        a.fecha_creacion as accion_fecha_creacion,
+        a.fecha_cierre as accion_fecha_cierre,
+        d.area, 
+        d.titulo as decreto_titulo
       FROM agenda_eventos ae
       LEFT JOIN acciones a ON ae.accion_id = a.id
       LEFT JOIN decretos d ON a.decreto_id = d.id
@@ -107,6 +113,8 @@ agendaRoutes.get('/timeline/:fecha', async (c) => {
         a.titulo as accion_titulo,
         a.que_hacer,
         a.tipo,
+        a.fecha_creacion as accion_fecha_creacion,
+        a.fecha_cierre as accion_fecha_cierre,
         d.area,
         d.titulo as decreto_titulo,
         d.id as decreto_id
@@ -251,12 +259,19 @@ agendaRoutes.put('/tareas/:id/completar', async (c) => {
   try {
     const tareaId = c.req.param('id')
     
-    // Completar evento
-    await c.env.DB.prepare(
-      'UPDATE agenda_eventos SET estado = "completada", updated_at = CURRENT_TIMESTAMP WHERE id = ?'
-    ).bind(tareaId).run()
+    // 🕐 REGISTRAR CUÁNDO REALMENTE LA COMPLETASTE
+    const fechaCompletada = new Date().toISOString()
+    
+    // Completar evento EN AGENDA con fecha de finalización
+    await c.env.DB.prepare(`
+      UPDATE agenda_eventos SET 
+        estado = "completada", 
+        fecha_completada = ?,
+        updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `).bind(fechaCompletada, tareaId).run()
 
-    // Completar acción asociada
+    // Completar acción asociada con fecha de cierre
     await c.env.DB.prepare(`
       UPDATE acciones SET 
         estado = "completada", 
@@ -278,12 +293,16 @@ agendaRoutes.put('/tareas/:id/pendiente', async (c) => {
   try {
     const tareaId = c.req.param('id')
     
-    // Marcar evento como pendiente
-    await c.env.DB.prepare(
-      'UPDATE agenda_eventos SET estado = "pendiente", updated_at = CURRENT_TIMESTAMP WHERE id = ?'
-    ).bind(tareaId).run()
+    // 🔄 LIMPIAR fecha de completada cuando se marca como pendiente
+    await c.env.DB.prepare(`
+      UPDATE agenda_eventos SET 
+        estado = "pendiente", 
+        fecha_completada = NULL,
+        updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `).bind(tareaId).run()
 
-    // Marcar acción asociada como pendiente
+    // Limpiar fecha de cierre en acción asociada
     await c.env.DB.prepare(`
       UPDATE acciones SET 
         estado = "pendiente", 

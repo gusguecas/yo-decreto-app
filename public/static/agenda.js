@@ -2264,6 +2264,17 @@ const Agenda = {
             ${tarea.descripcion ? `
               <p class="text-xs text-slate-400 ${tarea.estado === 'completada' ? 'line-through' : ''}">${tarea.descripcion}</p>
             ` : ''}
+            
+            <!-- 📅 INFORMACIÓN DE FECHAS CLARIFICADA -->
+            <div class="text-xs text-slate-500 mt-2 space-y-1">
+              ${tarea.accion_fecha_creacion ? `
+                <div>📝 Creada: ${dayjs(tarea.accion_fecha_creacion).format('DD/MM/YYYY')}</div>
+              ` : ''}
+              <div>🎯 Compromiso: ${dayjs(tarea.fecha_evento + ' ' + tarea.hora_evento).format('DD/MM/YYYY HH:mm')}</div>
+              ${tarea.estado === 'completada' && tarea.fecha_completada ? `
+                <div class="text-green-400">✅ Realizada: ${dayjs(tarea.fecha_completada).format('DD/MM/YYYY HH:mm')}</div>
+              ` : ''}
+            </div>
           </div>
           
           <div class="flex items-center space-x-1 ml-2">

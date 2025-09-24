@@ -6,7 +6,7 @@ var __publicField = (obj, key, value) => {
   return value;
 };
 
-// ../.wrangler/tmp/bundle-8FNtRg/strip-cf-connecting-ip-header.js
+// ../.wrangler/tmp/bundle-34qlhi/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -897,7 +897,7 @@ var Ht = /* @__PURE__ */ __name((e) => {
   throw TypeError(e);
 }, "Ht");
 var Xr = /* @__PURE__ */ __name((e, t, r) => t in e ? Kr(e, t, { enumerable: true, configurable: true, writable: true, value: r }) : e[t] = r, "Xr");
-var _ = /* @__PURE__ */ __name((e, t, r) => Xr(e, typeof t != "symbol" ? t + "" : t, r), "_");
+var g = /* @__PURE__ */ __name((e, t, r) => Xr(e, typeof t != "symbol" ? t + "" : t, r), "g");
 var ut = /* @__PURE__ */ __name((e, t, r) => t.has(e) || Ht("Cannot " + r), "ut");
 var u = /* @__PURE__ */ __name((e, t, r) => (ut(e, t, "read from private field"), r ? r.call(e) : t.get(e)), "u");
 var R = /* @__PURE__ */ __name((e, t, r) => t.has(e) ? Ht("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(e) : t.set(e, r), "R");
@@ -1108,11 +1108,11 @@ var na = /* @__PURE__ */ __name(({ children: e, ...t }) => {
   const r = At();
   return r && je(r) === "head" ? Ve("meta", e, t) : Ye("meta", e, t, false);
 }, "na");
-var gr = /* @__PURE__ */ __name((e, { children: t, ...r }) => new $(e, r, ze(t ?? [])), "gr");
-var oa = /* @__PURE__ */ __name((e) => (typeof e.action == "function" && (e.action = nt in e.action ? e.action[nt] : void 0), gr("form", e)), "oa");
-var _r = /* @__PURE__ */ __name((e, t) => (typeof t.formAction == "function" && (t.formAction = nt in t.formAction ? t.formAction[nt] : void 0), gr(e, t)), "_r");
-var ia = /* @__PURE__ */ __name((e) => _r("input", e), "ia");
-var ca = /* @__PURE__ */ __name((e) => _r("button", e), "ca");
+var _r = /* @__PURE__ */ __name((e, { children: t, ...r }) => new $(e, r, ze(t ?? [])), "_r");
+var oa = /* @__PURE__ */ __name((e) => (typeof e.action == "function" && (e.action = nt in e.action ? e.action[nt] : void 0), _r("form", e)), "oa");
+var gr = /* @__PURE__ */ __name((e, t) => (typeof t.formAction == "function" && (t.formAction = nt in t.formAction ? t.formAction[nt] : void 0), _r(e, t)), "gr");
+var ia = /* @__PURE__ */ __name((e) => gr("input", e), "ia");
+var ca = /* @__PURE__ */ __name((e) => gr("button", e), "ca");
 var ft = Object.freeze(Object.defineProperty({ __proto__: null, button: ca, form: oa, input: ia, link: sa, meta: na, script: ra, style: aa, title: ta }, Symbol.toStringTag, { value: "Module" }));
 var la = /* @__PURE__ */ new Map([["className", "class"], ["htmlFor", "for"], ["crossOrigin", "crossorigin"], ["httpEquiv", "http-equiv"], ["itemProp", "itemprop"], ["fetchPriority", "fetchpriority"], ["noModule", "nomodule"], ["formAction", "formaction"]]);
 var ot = /* @__PURE__ */ __name((e) => la.get(e) || e, "ot");
@@ -1141,12 +1141,12 @@ var jt = /* @__PURE__ */ __name((e, t) => {
 }, "jt");
 var $ = /* @__PURE__ */ __name(class {
   constructor(e, t, r) {
-    _(this, "tag");
-    _(this, "props");
-    _(this, "key");
-    _(this, "children");
-    _(this, "isEscaped", true);
-    _(this, "localContexts");
+    g(this, "tag");
+    g(this, "props");
+    g(this, "key");
+    g(this, "children");
+    g(this, "isEscaped", true);
+    g(this, "localContexts");
     this.tag = e, this.props = t, this.children = r;
   }
   get type() {
@@ -1292,22 +1292,22 @@ __name(ma, "ma");
 function va(e, t) {
   const r = /* @__PURE__ */ Object.create(null);
   return e.forEach((a, s) => {
-    t.all || s.endsWith("[]") ? ga(r, s, a) : r[s] = a;
+    t.all || s.endsWith("[]") ? _a(r, s, a) : r[s] = a;
   }), t.dot && Object.entries(r).forEach(([a, s]) => {
-    a.includes(".") && (_a(r, a, s), delete r[a]);
+    a.includes(".") && (ga(r, a, s), delete r[a]);
   }), r;
 }
 __name(va, "va");
-var ga = /* @__PURE__ */ __name((e, t, r) => {
-  e[t] !== void 0 ? Array.isArray(e[t]) ? e[t].push(r) : e[t] = [e[t], r] : t.endsWith("[]") ? e[t] = [r] : e[t] = r;
-}, "ga");
 var _a = /* @__PURE__ */ __name((e, t, r) => {
+  e[t] !== void 0 ? Array.isArray(e[t]) ? e[t].push(r) : e[t] = [e[t], r] : t.endsWith("[]") ? e[t] = [r] : e[t] = r;
+}, "_a");
+var ga = /* @__PURE__ */ __name((e, t, r) => {
   let a = e;
   const s = t.split(".");
   s.forEach((n, o) => {
     o === s.length - 1 ? a[n] = r : ((!a[n] || typeof a[n] != "object" || Array.isArray(a[n]) || a[n] instanceof File) && (a[n] = /* @__PURE__ */ Object.create(null)), a = a[n]);
   });
-}, "_a");
+}, "ga");
 var Rr = /* @__PURE__ */ __name((e) => {
   const t = e.split("/");
   return t[0] === "" && t.shift(), t;
@@ -1441,12 +1441,12 @@ var rr;
 var Nr = (rr = /* @__PURE__ */ __name(class {
   constructor(e, t = "/", r = [[]]) {
     R(this, K);
-    _(this, "raw");
+    g(this, "raw");
     R(this, Se);
     R(this, P);
-    _(this, "routeIndex", 0);
-    _(this, "path");
-    _(this, "bodyCache", {});
+    g(this, "routeIndex", 0);
+    g(this, "path");
+    g(this, "bodyCache", {});
     R(this, Z, (e2) => {
       const { bodyCache: t2, raw: r2 } = this, a = t2[e2];
       if (a)
@@ -1548,10 +1548,10 @@ var Da = (ar = /* @__PURE__ */ __name(class {
     R(this, Q);
     R(this, Be);
     R(this, qe);
-    _(this, "env", {});
+    g(this, "env", {});
     R(this, V);
-    _(this, "finalized", false);
-    _(this, "error");
+    g(this, "finalized", false);
+    g(this, "error");
     R(this, we);
     R(this, Y);
     R(this, L);
@@ -1561,37 +1561,37 @@ var Da = (ar = /* @__PURE__ */ __name(class {
     R(this, de);
     R(this, $e);
     R(this, We);
-    _(this, "render", (...e2) => (u(this, Oe) ?? T(this, Oe, (t2) => this.html(t2)), u(this, Oe).call(this, ...e2)));
-    _(this, "setLayout", (e2) => T(this, Fe, e2));
-    _(this, "getLayout", () => u(this, Fe));
-    _(this, "setRenderer", (e2) => {
+    g(this, "render", (...e2) => (u(this, Oe) ?? T(this, Oe, (t2) => this.html(t2)), u(this, Oe).call(this, ...e2)));
+    g(this, "setLayout", (e2) => T(this, Fe, e2));
+    g(this, "getLayout", () => u(this, Fe));
+    g(this, "setRenderer", (e2) => {
       T(this, Oe, e2);
     });
-    _(this, "header", (e2, t2, r) => {
+    g(this, "header", (e2, t2, r) => {
       this.finalized && T(this, L, new Response(u(this, L).body, u(this, L)));
       const a = u(this, L) ? u(this, L).headers : u(this, de) ?? T(this, de, new Headers());
       t2 === void 0 ? a.delete(e2) : r != null && r.append ? a.append(e2, t2) : a.set(e2, t2);
     });
-    _(this, "status", (e2) => {
+    g(this, "status", (e2) => {
       T(this, we, e2);
     });
-    _(this, "set", (e2, t2) => {
+    g(this, "set", (e2, t2) => {
       u(this, V) ?? T(this, V, /* @__PURE__ */ new Map()), u(this, V).set(e2, t2);
     });
-    _(this, "get", (e2) => u(this, V) ? u(this, V).get(e2) : void 0);
-    _(this, "newResponse", (...e2) => N(this, Q, ye).call(this, ...e2));
-    _(this, "body", (e2, t2, r) => N(this, Q, ye).call(this, e2, t2, r));
-    _(this, "text", (e2, t2, r) => !u(this, de) && !u(this, we) && !t2 && !r && !this.finalized ? new Response(e2) : N(this, Q, ye).call(this, e2, t2, Et(Ca, r)));
-    _(this, "json", (e2, t2, r) => N(this, Q, ye).call(this, JSON.stringify(e2), t2, Et("application/json", r)));
-    _(this, "html", (e2, t2, r) => {
+    g(this, "get", (e2) => u(this, V) ? u(this, V).get(e2) : void 0);
+    g(this, "newResponse", (...e2) => N(this, Q, ye).call(this, ...e2));
+    g(this, "body", (e2, t2, r) => N(this, Q, ye).call(this, e2, t2, r));
+    g(this, "text", (e2, t2, r) => !u(this, de) && !u(this, we) && !t2 && !r && !this.finalized ? new Response(e2) : N(this, Q, ye).call(this, e2, t2, Et(Ca, r)));
+    g(this, "json", (e2, t2, r) => N(this, Q, ye).call(this, JSON.stringify(e2), t2, Et("application/json", r)));
+    g(this, "html", (e2, t2, r) => {
       const a = /* @__PURE__ */ __name((s) => N(this, Q, ye).call(this, s, t2, Et("text/html; charset=UTF-8", r)), "a");
       return typeof e2 == "object" ? hr(e2, ur.Stringify, false, {}).then(a) : a(e2);
     });
-    _(this, "redirect", (e2, t2) => {
+    g(this, "redirect", (e2, t2) => {
       const r = String(e2);
       return this.header("Location", /[^\x00-\xFF]/.test(r) ? encodeURI(r) : r), this.newResponse(null, t2 ?? 302);
     });
-    _(this, "notFound", () => (u(this, Ne) ?? T(this, Ne, () => new Response()), u(this, Ne).call(this, this)));
+    g(this, "notFound", () => (u(this, Ne) ?? T(this, Ne, () => new Response()), u(this, Ne).call(this, this)));
     T(this, Be, e), t && (T(this, Y, t.executionCtx), this.env = t.env, T(this, Ne, t.notFoundHandler), T(this, We, t.path), T(this, $e, t.matchResult));
   }
   get req() {
@@ -1673,27 +1673,27 @@ var sr;
 var jr = (sr = /* @__PURE__ */ __name(class {
   constructor(t = {}) {
     R(this, D);
-    _(this, "get");
-    _(this, "post");
-    _(this, "put");
-    _(this, "delete");
-    _(this, "options");
-    _(this, "patch");
-    _(this, "all");
-    _(this, "on");
-    _(this, "use");
-    _(this, "router");
-    _(this, "getPath");
-    _(this, "_basePath", "/");
+    g(this, "get");
+    g(this, "post");
+    g(this, "put");
+    g(this, "delete");
+    g(this, "options");
+    g(this, "patch");
+    g(this, "all");
+    g(this, "on");
+    g(this, "use");
+    g(this, "router");
+    g(this, "getPath");
+    g(this, "_basePath", "/");
     R(this, B, "/");
-    _(this, "routes", []);
+    g(this, "routes", []);
     R(this, q, Ma);
-    _(this, "errorHandler", zt);
-    _(this, "onError", (t2) => (this.errorHandler = t2, this));
-    _(this, "notFound", (t2) => (T(this, q, t2), this));
-    _(this, "fetch", (t2, ...r) => N(this, D, tt).call(this, t2, r[1], r[0], t2.method));
-    _(this, "request", (t2, r, a2, s2) => t2 instanceof Request ? this.fetch(r ? new Request(t2, r) : t2, a2, s2) : (t2 = t2.toString(), this.fetch(new Request(/^https?:\/\//.test(t2) ? t2 : `http://localhost${Te("/", t2)}`, r), a2, s2)));
-    _(this, "fire", () => {
+    g(this, "errorHandler", zt);
+    g(this, "onError", (t2) => (this.errorHandler = t2, this));
+    g(this, "notFound", (t2) => (T(this, q, t2), this));
+    g(this, "fetch", (t2, ...r) => N(this, D, tt).call(this, t2, r[1], r[0], t2.method));
+    g(this, "request", (t2, r, a2, s2) => t2 instanceof Request ? this.fetch(r ? new Request(t2, r) : t2, a2, s2) : (t2 = t2.toString(), this.fetch(new Request(/^https?:\/\//.test(t2) ? t2 : `http://localhost${Te("/", t2)}`, r), a2, s2)));
+    g(this, "fire", () => {
       addEventListener("fetch", (t2) => {
         t2.respondWith(N(this, D, tt).call(this, t2.request, t2, void 0, t2.request.method));
       });
@@ -1913,20 +1913,20 @@ function Ba(e) {
   const a = e.map((d) => [!/\*|\/:/.test(d[0]), ...d]).sort(([d, p], [f, E]) => d ? 1 : f ? -1 : p.length - E.length), s = /* @__PURE__ */ Object.create(null);
   for (let d = 0, p = -1, f = a.length; d < f; d++) {
     const [E, v, h] = a[d];
-    E ? s[v] = [h.map(([g]) => [g, /* @__PURE__ */ Object.create(null)]), Mr] : p++;
+    E ? s[v] = [h.map(([_]) => [_, /* @__PURE__ */ Object.create(null)]), Mr] : p++;
     let m;
     try {
       m = t.insert(v, p, E);
-    } catch (g) {
-      throw g === Re ? new Ar(v) : g;
+    } catch (_) {
+      throw _ === Re ? new Ar(v) : _;
     }
-    E || (r[p] = h.map(([g, y]) => {
+    E || (r[p] = h.map(([_, y]) => {
       const O = /* @__PURE__ */ Object.create(null);
       for (y -= 1; y >= 0; y--) {
         const [w, M] = m[y];
         O[w] = M;
       }
-      return [g, O];
+      return [_, O];
     }));
   }
   const [n, o, i] = t.buildRegExp();
@@ -1936,7 +1936,7 @@ function Ba(e) {
       if (!v)
         continue;
       const h = Object.keys(v);
-      for (let m = 0, g = h.length; m < g; m++)
+      for (let m = 0, _ = h.length; m < _; m++)
         v[h[m]] = i[v[h[m]]];
     }
   const c = [];
@@ -1945,14 +1945,14 @@ function Ba(e) {
   return [n, c, s];
 }
 __name(Ba, "Ba");
-function ge(e, t) {
+function _e(e, t) {
   if (e) {
     for (const r of Object.keys(e).sort((a, s) => s.length - a.length))
       if (xr(r).test(t))
         return [...e[r]];
   }
 }
-__name(ge, "ge");
+__name(_e, "_e");
 var ee;
 var te;
 var Ae;
@@ -1962,7 +1962,7 @@ var ir;
 var qa = (ir = /* @__PURE__ */ __name(class {
   constructor() {
     R(this, Ae);
-    _(this, "name", "RegExpRouter");
+    g(this, "name", "RegExpRouter");
     R(this, ee);
     R(this, te);
     T(this, ee, { [C]: /* @__PURE__ */ Object.create(null) }), T(this, te, { [C]: /* @__PURE__ */ Object.create(null) });
@@ -1982,8 +1982,8 @@ var qa = (ir = /* @__PURE__ */ __name(class {
       const c = xr(t);
       e === C ? Object.keys(a).forEach((l) => {
         var d;
-        (d = a[l])[t] || (d[t] = ge(a[l], t) || ge(a[C], t) || []);
-      }) : (i = a[e])[t] || (i[t] = ge(a[e], t) || ge(a[C], t) || []), Object.keys(a).forEach((l) => {
+        (d = a[l])[t] || (d[t] = _e(a[l], t) || _e(a[C], t) || []);
+      }) : (i = a[e])[t] || (i[t] = _e(a[e], t) || _e(a[C], t) || []), Object.keys(a).forEach((l) => {
         (e === C || e === l) && Object.keys(a[l]).forEach((d) => {
           c.test(d) && a[l][d].push([r, n]);
         });
@@ -1997,7 +1997,7 @@ var qa = (ir = /* @__PURE__ */ __name(class {
       const d = o[c];
       Object.keys(s).forEach((p) => {
         var f;
-        (e === C || e === p) && ((f = s[p])[d] || (f[d] = [...ge(a[p], d) || ge(a[C], d) || []]), s[p][d].push([r, n - l + c + 1]));
+        (e === C || e === p) && ((f = s[p])[d] || (f[d] = [..._e(a[p], d) || _e(a[C], d) || []]), s[p][d].push([r, n - l + c + 1]));
       });
     }
   }
@@ -2033,7 +2033,7 @@ var J;
 var cr;
 var Fa = (cr = /* @__PURE__ */ __name(class {
   constructor(e) {
-    _(this, "name", "SmartRouter");
+    g(this, "name", "SmartRouter");
     R(this, re, []);
     R(this, J, []);
     T(this, re, e.routers);
@@ -2120,8 +2120,8 @@ var Pr = (lr = /* @__PURE__ */ __name(class {
       for (let E = 0, v = s.length; E < v; E++) {
         const h = s[E], m = u(h, x)[d];
         m && (T(m, j, u(h, j)), p ? (u(m, x)["*"] && r.push(...N(this, G, ce).call(this, u(m, x)["*"], e, u(h, j))), r.push(...N(this, G, ce).call(this, m, e, u(h, j)))) : f.push(m));
-        for (let g = 0, y = u(h, pe).length; g < y; g++) {
-          const O = u(h, pe)[g], w = u(h, j) === Ie ? {} : { ...u(h, j) };
+        for (let _ = 0, y = u(h, pe).length; _ < y; _++) {
+          const O = u(h, pe)[_], w = u(h, j) === Ie ? {} : { ...u(h, j) };
           if (O === "*") {
             const X = u(h, x)["*"];
             X && (r.push(...N(this, G, ce).call(this, X, e, u(h, j))), T(X, j, w), f.push(X));
@@ -2165,7 +2165,7 @@ var he;
 var dr;
 var $a = (dr = /* @__PURE__ */ __name(class {
   constructor() {
-    _(this, "name", "TrieRouter");
+    g(this, "name", "TrieRouter");
     R(this, he);
     T(this, he, new Pr());
   }
@@ -2264,9 +2264,9 @@ var Ka = /* @__PURE__ */ __name((e) => {
         for (const m of Ja) {
           if (!h.has(m))
             continue;
-          const g = await c(i + Ur[m], s);
-          if (g) {
-            l = g, s.header("Content-Encoding", m), s.header("Vary", "Accept-Encoding", { append: true });
+          const _ = await c(i + Ur[m], s);
+          if (_) {
+            l = _, s.header("Content-Encoding", m), s.header("Vary", "Accept-Encoding", { append: true });
             break;
           }
         }
@@ -2465,30 +2465,30 @@ var bt = /* @__PURE__ */ __name((e, t, r) => {
       Array.isArray(r[v]) && r.splice(v, 1, ...r[v].flat());
       let h = is(r[v]);
       if (h) {
-        typeof h.tag == "function" && !h.tag[Er] && (Ce.length > 0 && (h[b][2] = Ce.map((g) => [g, g.values.at(-1)])), (o = e[5]) != null && o.length && (h[b][3] = e[5].at(-1)));
+        typeof h.tag == "function" && !h.tag[Er] && (Ce.length > 0 && (h[b][2] = Ce.map((_) => [_, _.values.at(-1)])), (o = e[5]) != null && o.length && (h[b][3] = e[5].at(-1)));
         let m;
         if (p && p.length) {
-          const g = p.findIndex(z(h) ? (y) => z(y) : h.key !== void 0 ? (y) => y.key === h.key && y.tag === h.tag : (y) => y.tag === h.tag);
-          g !== -1 && (m = p[g], p.splice(g, 1));
+          const _ = p.findIndex(z(h) ? (y) => z(y) : h.key !== void 0 ? (y) => y.key === h.key && y.tag === h.tag : (y) => y.tag === h.tag);
+          _ !== -1 && (m = p[_], p.splice(_, 1));
         }
         if (m)
           if (z(h))
             m.t !== h.t && (m.t = h.t, m.d = true), h = m;
           else {
-            const g = m.pP = m.props;
+            const _ = m.pP = m.props;
             if (m.props = h.props, m.f || (m.f = h.f || t.f), typeof h.tag == "function") {
               const y = m[b][2];
-              m[b][2] = h[b][2] || [], m[b][3] = h[b][3], !m.f && ((m.o || m) === h.o || (c = (i = m.tag)[ea]) != null && c.call(i, g, m.props)) && os(y, m[b][2]) && (m.s = true);
+              m[b][2] = h[b][2] || [], m[b][3] = h[b][3], !m.f && ((m.o || m) === h.o || (c = (i = m.tag)[ea]) != null && c.call(i, _, m.props)) && os(y, m[b][2]) && (m.s = true);
             }
             h = m;
           }
         else if (!z(h) && De) {
-          const g = je(De);
-          g && (h.n = g);
+          const _ = je(De);
+          _ && (h.n = _);
         }
         if (!z(h) && !h.s && (bt(e, h), delete h.f), f.push(h), E && !E.s && !h.s)
-          for (let g = E; g && !z(g); g = (l = g.vC) == null ? void 0 : l.at(-1))
-            g.nN = h;
+          for (let _ = E; _ && !z(_); _ = (l = _.vC) == null ? void 0 : l.at(-1))
+            _.nN = h;
         E = h;
       }
     }
@@ -2503,7 +2503,7 @@ var bt = /* @__PURE__ */ __name((e, t, r) => {
     if (E) {
       const h = /* @__PURE__ */ __name(() => st([0, false, e[2]], v), "h"), m = at.get(v) || [];
       m.push(h), at.set(v, m);
-      const g = E(p, () => {
+      const _ = E(p, () => {
         const y = at.get(v);
         if (y) {
           const O = y.indexOf(h);
@@ -2511,10 +2511,10 @@ var bt = /* @__PURE__ */ __name((e, t, r) => {
             return y.splice(O, 1), h();
         }
       });
-      if (g) {
+      if (_) {
         if (e[0] === 1)
           e[1] = true;
-        else if (bt(e, v, [g]), (E.length === 1 || e !== f) && v.c) {
+        else if (bt(e, v, [_]), (E.length === 1 || e !== f) && v.c) {
           Fr(v, v.c, false);
           return;
         }
@@ -2581,8 +2581,8 @@ var st = /* @__PURE__ */ __name(async (e, t) => {
 var cs = /* @__PURE__ */ __name((e, t, r) => ({ tag: Pe, props: { children: e }, key: r, e: t, p: 1 }), "cs");
 var vt = 0;
 var Wr = 1;
-var gt = 2;
-var _t = 3;
+var _t = 2;
+var gt = 3;
 var Tt = /* @__PURE__ */ new WeakMap();
 var kr = /* @__PURE__ */ __name((e, t) => !e || !t || e.length !== t.length || t.some((r, a) => r !== e[a]), "kr");
 var ls = void 0;
@@ -2618,7 +2618,7 @@ var Mt = /* @__PURE__ */ __name((e, t) => {
   const r = Ue.at(-1);
   if (!r)
     return e;
-  const [, a] = r, s = (i = a[b][1])[gt] || (i[gt] = []), n = a[b][0]++, o = s[n];
+  const [, a] = r, s = (i = a[b][1])[_t] || (i[_t] = []), n = a[b][0]++, o = s[n];
   return kr(o == null ? void 0 : o[1], t) ? s[n] = [e, t] : e = s[n][0], e;
 }, "Mt");
 var us = /* @__PURE__ */ __name((e) => {
@@ -2635,7 +2635,7 @@ var fs = /* @__PURE__ */ __name((e, t) => {
   const r = Ue.at(-1);
   if (!r)
     return e();
-  const [, a] = r, s = (i = a[b][1])[_t] || (i[_t] = []), n = a[b][0]++, o = s[n];
+  const [, a] = r, s = (i = a[b][1])[gt] || (i[gt] = []), n = a[b][0]++, o = s[n];
   return kr(o == null ? void 0 : o[1], t) && (s[n] = [e(), t]), s[n][0];
 }, "fs");
 var ps = vr({ pending: false, data: null, method: null, action: null });
@@ -2655,7 +2655,7 @@ var xt = /* @__PURE__ */ __name((e, t) => fs(() => (r) => {
     s == null || s(), a == null || a();
   };
 }, [e]), "xt");
-var _e = /* @__PURE__ */ Object.create(null);
+var ge = /* @__PURE__ */ Object.create(null);
 var Ke = /* @__PURE__ */ Object.create(null);
 var Je = /* @__PURE__ */ __name((e, t, r, a, s) => {
   if (t != null && t.itemProp)
@@ -2710,7 +2710,7 @@ var Je = /* @__PURE__ */ __name((e, t, r, a, s) => {
     const O = E[0];
     if (r === 2 && (y.innerHTML = ""), (f || v) && h(y), !i && !o)
       return;
-    let w = _e[M = y.getAttribute(O)] || (_e[M] = new Promise((ve, oe) => {
+    let w = ge[M = y.getAttribute(O)] || (ge[M] = new Promise((ve, oe) => {
       y.addEventListener("load", ve), y.addEventListener("error", oe);
     }));
     o && (w = w.then(o)), i && (w = w.catch(i)), w.catch(() => {
@@ -2719,14 +2719,14 @@ var Je = /* @__PURE__ */ __name((e, t, r, a, s) => {
   if (s && l === "render") {
     const y = Xe[e][0];
     if (t[y]) {
-      const O = t[y], w = _e[O] || (_e[O] = new Promise((M, ve) => {
+      const O = t[y], w = ge[O] || (ge[O] = new Promise((M, ve) => {
         h(p), p.addEventListener("load", M), p.addEventListener("error", ve);
       }));
       us(w);
     }
   }
-  const g = { tag: e, type: e, props: { ...d, ref: m }, ref: m };
-  return g.p = r, p && (g.e = p), cs(g, n);
+  const _ = { tag: e, type: e, props: { ...d, ref: m }, ref: m };
+  return _.p = r, p && (_.e = p), cs(_, n);
 }, "Je");
 var Es = /* @__PURE__ */ __name((e) => {
   const t = rs(), r = t && je(t);
@@ -2734,8 +2734,8 @@ var Es = /* @__PURE__ */ __name((e) => {
 }, "Es");
 var ms = /* @__PURE__ */ __name((e) => !e || ["src", "async"].some((t) => !e[t]) ? { tag: "script", props: e, type: "script", ref: e.ref } : Je("script", e, 1, false, true), "ms");
 var vs = /* @__PURE__ */ __name((e) => !e || !["href", "precedence"].every((t) => t in e) ? { tag: "style", props: e, type: "style", ref: e.ref } : (e["data-href"] = e.href, delete e.href, Je("style", e, 2, true, true)), "vs");
-var gs = /* @__PURE__ */ __name((e) => !e || ["onLoad", "onError"].some((t) => t in e) || e.rel === "stylesheet" && (!("precedence" in e) || "disabled" in e) ? { tag: "link", props: e, type: "link", ref: e.ref } : Je("link", e, 1, "precedence" in e, true), "gs");
-var _s = /* @__PURE__ */ __name((e) => Je("meta", e, void 0, false, false), "_s");
+var _s = /* @__PURE__ */ __name((e) => !e || ["onLoad", "onError"].some((t) => t in e) || e.rel === "stylesheet" && (!("precedence" in e) || "disabled" in e) ? { tag: "link", props: e, type: "link", ref: e.ref } : Je("link", e, 1, "precedence" in e, true), "_s");
+var gs = /* @__PURE__ */ __name((e) => Je("meta", e, void 0, false, false), "gs");
 var zr = Symbol();
 var Ts = /* @__PURE__ */ __name((e) => {
   const { action: t, ...r } = e;
@@ -2767,7 +2767,7 @@ var Vr = /* @__PURE__ */ __name((e, { formAction: t, ...r }) => {
 }, "Vr");
 var ys = /* @__PURE__ */ __name((e) => Vr("input", e), "ys");
 var Rs = /* @__PURE__ */ __name((e) => Vr("button", e), "Rs");
-Object.assign(St, { title: Es, script: ms, style: vs, link: gs, meta: _s, form: Ts, input: ys, button: Rs });
+Object.assign(St, { title: Es, script: ms, style: vs, link: _s, meta: gs, form: Ts, input: ys, button: Rs });
 Dt(null);
 new TextEncoder();
 var Ss = Dt(null);
@@ -2911,15 +2911,15 @@ I.post("/:id/acciones", async (e) => {
       console.log("\u{1F525} FORZANDO creaci\xF3n en agenda para:", { accionId: E, titulo: s, proxima_revision: d });
       const h = d.split("T")[0], m = d.split("T")[1] || "09:00";
       try {
-        const g = await e.env.DB.prepare(`
+        const _ = await e.env.DB.prepare(`
           INSERT INTO agenda_eventos (
             accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad, estado,
             created_at, updated_at
           ) VALUES (?, ?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         `).bind(E, `[Decreto] ${s}`, `${n}${o ? " - " + o : ""}`, h, m, "media").run();
-        console.log("\u{1F680} AGENDA EVENTO CREADO EXITOSAMENTE:", g.meta.last_row_id);
-      } catch (g) {
-        console.error("\u{1F4A5} ERROR CREANDO AGENDA EVENTO:", g);
+        console.log("\u{1F680} AGENDA EVENTO CREADO EXITOSAMENTE:", _.meta.last_row_id);
+      } catch (_) {
+        console.error("\u{1F4A5} ERROR CREANDO AGENDA EVENTO:", _);
       }
     } else
       console.log("\u26A0\uFE0F NO HAY FECHA DE REVISI\xD3N - NO SE CREA EVENTO AGENDA");
@@ -2929,16 +2929,16 @@ I.post("/:id/acciones", async (e) => {
       for (let h = 0; h < f.length; h++) {
         const m = f[h];
         if (console.log(`Sub-tarea ${h + 1}:`, m), m.titulo) {
-          const g = crypto.randomUUID().replace(/-/g, "").substring(0, 32);
+          const _ = crypto.randomUUID().replace(/-/g, "").substring(0, 32);
           let y = m.fecha_programada;
-          !y && d && (y = d), console.log(`Creando sub-tarea ${h + 1} con ID: ${g}`, { titulo: m.titulo, queHacer: m.que_hacer, fecha: y, padreId: E });
+          !y && d && (y = d), console.log(`Creando sub-tarea ${h + 1} con ID: ${_}`, { titulo: m.titulo, queHacer: m.que_hacer, fecha: y, padreId: E });
           const O = await e.env.DB.prepare(`
             INSERT INTO acciones (
               id, decreto_id, titulo, que_hacer, como_hacerlo, resultados, 
               tipo, proxima_revision, origen, tarea_padre_id, nivel_jerarquia
             ) VALUES (?, ?, ?, ?, ?, '', 'secundaria', ?, 'subtarea', ?, 1)
-          `).bind(g, r, m.titulo, m.que_hacer, m.como_hacerlo || "", y, E).run();
-          console.log(`\u2705 Sub-tarea ${h + 1} creada en BD:`, { success: O.success, changes: O.changes }), y && (await bs(e.env.DB, g, `[Sub] ${m.titulo}`, m.que_hacer, m.como_hacerlo, "secundaria", y), console.log(`\u2705 Sub-tarea ${h + 1} sincronizada con agenda`)), v++;
+          `).bind(_, r, m.titulo, m.que_hacer, m.como_hacerlo || "", y, E).run();
+          console.log(`\u2705 Sub-tarea ${h + 1} creada en BD:`, { success: O.success, changes: O.changes }), y && (await bs(e.env.DB, _, `[Sub] ${m.titulo}`, m.que_hacer, m.como_hacerlo, "secundaria", y), console.log(`\u2705 Sub-tarea ${h + 1} sincronizada con agenda`)), v++;
         } else
           console.log(`\u23ED\uFE0F Sub-tarea ${h + 1} sin t\xEDtulo, saltando`);
       }
@@ -3068,11 +3068,11 @@ I.post("/:decretoId/acciones/:accionId/seguimientos", async (e) => {
             `).bind(v.decreto_id, d, "Tarea generada desde seguimiento", `Completar: ${d}`, p, f, `seguimiento:${t}`).run();
             let m = null;
             if (p === "secundaria") {
-              const g = f ? f.split("T")[0] : (/* @__PURE__ */ new Date()).toISOString().split("T")[0], y = f ? f.split("T")[1] : "09:00";
+              const _ = f ? f.split("T")[0] : (/* @__PURE__ */ new Date()).toISOString().split("T")[0], y = f ? f.split("T")[1] : "09:00";
               m = (await e.env.DB.prepare(`
                 INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
                 VALUES (?, ?, ?, ?, ?, ?)
-              `).bind(h.meta.last_row_id, d, `[Auto-generada] ${d}`, g, y, "media").run()).meta.last_row_id;
+              `).bind(h.meta.last_row_id, d, `[Auto-generada] ${d}`, _, y, "media").run()).meta.last_row_id;
             } else
               p === "primaria" && f && (m = (await e.env.DB.prepare(`
                 INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
@@ -3150,7 +3150,13 @@ var H = new Ee();
 H.get("/metricas/:fecha", async (e) => {
   try {
     const t = e.req.param("fecha"), r = await e.env.DB.prepare(`
-      SELECT ae.*, a.titulo as accion_titulo, d.area, d.titulo as decreto_titulo
+      SELECT 
+        ae.*, 
+        a.titulo as accion_titulo, 
+        a.fecha_creacion as accion_fecha_creacion,
+        a.fecha_cierre as accion_fecha_cierre,
+        d.area, 
+        d.titulo as decreto_titulo
       FROM agenda_eventos ae
       LEFT JOIN acciones a ON ae.accion_id = a.id
       LEFT JOIN decretos d ON a.decreto_id = d.id
@@ -3198,6 +3204,8 @@ H.get("/timeline/:fecha", async (e) => {
         a.titulo as accion_titulo,
         a.que_hacer,
         a.tipo,
+        a.fecha_creacion as accion_fecha_creacion,
+        a.fecha_cierre as accion_fecha_cierre,
         d.area,
         d.titulo as decreto_titulo,
         d.id as decreto_id
@@ -3271,8 +3279,14 @@ H.post("/tareas", async (e) => {
 });
 H.put("/tareas/:id/completar", async (e) => {
   try {
-    const t = e.req.param("id");
-    return await e.env.DB.prepare('UPDATE agenda_eventos SET estado = "completada", updated_at = CURRENT_TIMESTAMP WHERE id = ?').bind(t).run(), await e.env.DB.prepare(`
+    const t = e.req.param("id"), r = (/* @__PURE__ */ new Date()).toISOString();
+    return await e.env.DB.prepare(`
+      UPDATE agenda_eventos SET 
+        estado = "completada", 
+        fecha_completada = ?,
+        updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `).bind(r, t).run(), await e.env.DB.prepare(`
       UPDATE acciones SET 
         estado = "completada", 
         fecha_cierre = date("now"),
@@ -3288,7 +3302,13 @@ H.put("/tareas/:id/completar", async (e) => {
 H.put("/tareas/:id/pendiente", async (e) => {
   try {
     const t = e.req.param("id");
-    return await e.env.DB.prepare('UPDATE agenda_eventos SET estado = "pendiente", updated_at = CURRENT_TIMESTAMP WHERE id = ?').bind(t).run(), await e.env.DB.prepare(`
+    return await e.env.DB.prepare(`
+      UPDATE agenda_eventos SET 
+        estado = "pendiente", 
+        fecha_completada = NULL,
+        updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `).bind(t).run(), await e.env.DB.prepare(`
       UPDATE acciones SET 
         estado = "pendiente", 
         fecha_cierre = NULL,
@@ -4235,7 +4255,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env2, _ctx, middlewareCtx
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-8FNtRg/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-34qlhi/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -4267,7 +4287,7 @@ function __facade_invoke__(request, env2, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-8FNtRg/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-34qlhi/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
@@ -4365,4 +4385,4 @@ export {
   __INTERNAL_WRANGLER_MIDDLEWARE__,
   middleware_loader_entry_default as default
 };
-//# sourceMappingURL=bundledWorker-0.8130774431723637.mjs.map
+//# sourceMappingURL=bundledWorker-0.20898080045761902.mjs.map
