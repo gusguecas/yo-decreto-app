@@ -787,9 +787,11 @@ const Decretos = {
     
     console.log('Datos enviados al servidor:', data)
     
-    // Asegurar formato correcto
+    // Asegurar formato correcto para el backend
     const decreetoData = {
-      contenido: data.contenido || data.titulo || '',
+      titulo: data.titulo || '',
+      sueno_meta: data.sueno_meta || '',
+      descripcion: data.descripcion || '',
       area: data.area || 'humano'
     }
     
