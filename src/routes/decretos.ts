@@ -8,21 +8,14 @@ export const decretosRoutes = new Hono<{ Bindings: Bindings }>()
 
 // Obtener configuración del usuario
 decretosRoutes.get('/config', async (c) => {
-  try {
-    const config = await c.env.DB.prepare(
-      'SELECT * FROM configuracion WHERE id = ?'
-    ).bind('main').first()
-
-    return c.json({
-      success: true,
-      data: config || {
-        nombre_usuario: 'Gustavo Adolfo Guerrero Castaños',
-        frase_vida: '(Agregar frase de vida)'
-      }
-    })
-  } catch (error) {
-    return c.json({ success: false, error: 'Error al obtener configuración' }, 500)
-  }
+  // Respuesta simple sin base de datos por ahora
+  return c.json({
+    success: true,
+    data: {
+      nombre_usuario: 'Gustavo Adolfo Guerrero Castaños',
+      frase_vida: '✨ Creo en la abundancia y manifiesto mis sueños ✨'
+    }
+  })
 })
 
 // Actualizar configuración del usuario
