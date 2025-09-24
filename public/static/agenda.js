@@ -2445,5 +2445,108 @@ const Agenda = {
         </div>
       </div>
     `
+  },
+
+  // 🔥 FUNCIONES PARA BOTONES DE ACCIÓN EN TIMELINE
+  async completarTarea(tareaId) {
+    try {
+      console.log('🎯 Completando tarea:', tareaId)
+      
+      const response = await fetch(`/api/agenda/tareas/${tareaId}/completar`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        showNotification('✅ Tarea completada', 'success')
+        // Recargar la agenda para reflejar cambios
+        await this.cargarEventos()
+        this.render()
+      } else {
+        throw new Error('Error al completar tarea')
+      }
+    } catch (error) {
+      console.error('❌ Error completando tarea:', error)
+      showNotification('❌ Error al completar tarea', 'error')
+    }
+  },
+
+  async marcarPendiente(tareaId) {
+    try {
+      console.log('🔄 Marcando tarea como pendiente:', tareaId)
+      
+      const response = await fetch(`/api/agenda/tareas/${tareaId}/pendiente`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        showNotification('🔄 Tarea marcada como pendiente', 'success')
+        // Recargar la agenda para reflejar cambios
+        await this.cargarEventos()
+        this.render()
+      } else {
+        throw new Error('Error al marcar tarea como pendiente')
+      }
+    } catch (error) {
+      console.error('❌ Error marcando tarea como pendiente:', error)
+      showNotification('❌ Error al marcar tarea como pendiente', 'error')
+    }
+  },
+
+  async confirmarEliminarTarea(tareaId) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+      await this.eliminarTarea(tareaId)
+    }
+  },
+
+  async eliminarTarea(tareaId) {
+    try {
+      console.log('🗑️ Eliminando tarea:', tareaId)
+      
+      const response = await fetch(`/api/agenda/tareas/${tareaId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        showNotification('🗑️ Tarea eliminada', 'success')
+        // Recargar la agenda para reflejar cambios
+        await this.cargarEventos()
+        this.render()
+      } else {
+        throw new Error('Error al eliminar tarea')
+      }
+    } catch (error) {
+      console.error('❌ Error eliminando tarea:', error)
+      showNotification('❌ Error al eliminar tarea', 'error')
+    }
+  },
+
+  openSeguimientoModal(tareaId) {
+    try {
+      console.log('📊 Abriendo modal de seguimiento para tarea:', tareaId)
+      
+      // Buscar la tarea en los datos actuales
+      const tarea = this.data.timeline?.find(t => t.id === tareaId)
+      
+      if (tarea && tarea.accion_id) {
+        // Si tiene accion_id, abrir el modal de seguimiento de decretos
+        if (typeof openSeguimiento === 'function') {
+          openSeguimiento(tarea.accion_id)
+        } else {
+          console.warn('Función openSeguimiento no disponible')
+          showNotification('⚠️ Función de seguimiento no disponible', 'warning')
+        }
+      } else {
+        showNotification('ℹ️ Esta tarea no tiene seguimiento disponible', 'info')
+      }
+    } catch (error) {
+      console.error('❌ Error abriendo seguimiento:', error)
+      showNotification('❌ Error abriendo seguimiento', 'error')
+    }
   }
 }
