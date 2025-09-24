@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 DESCARGAR - Yo Decreto App</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid #334155;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #3b82f6, #10b981);
+            color: white;
+            padding: 20px 40px;
+            font-size: 1.4em;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 15px;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+        }
+        .info {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #10b981;
+        }
+        .steps {
+            text-align: left;
+            margin: 20px 0;
+        }
+        .steps li {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 5px;
+        }
+        .file-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .file-detail {
+            background: rgba(16, 185, 129, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎯</div>
+        
+        <h1>YO DECRETO APP</h1>
+        <p style="font-size: 1.2em; margin-bottom: 30px;">Código Completo - Listo para GitHub y yo-decreto.com</p>
+        
+        <div class="file-info">
+            <div class="file-detail">
+                <strong>📁 Formato</strong><br>
+                ZIP Comprimido
+            </div>
+            <div class="file-detail">
+                <strong>📏 Tamaño</strong><br>
+                25 MB
+            </div>
+            <div class="file-detail">
+                <strong>🚀 Versión</strong><br>
+                v1.0 Production
+            </div>
+        </div>
+
+        <a href="/static/yo-decreto-clean.zip" download="yo-decreto-clean.zip" class="download-btn">
+            📦 DESCARGAR CÓDIGO COMPLETO
+        </a>
+
+        <div class="info">
+            <h3>📋 Qué incluye:</h3>
+            <ul style="text-align: left; margin: 0; padding-left: 20px;">
+                <li>🔐 Sistema de autenticación completo (login/registro)</li>
+                <li>🎨 Logo gigante con efectos espectaculares</li>
+                <li>📱 Layout horizontal rediseñado</li>
+                <li>🗄️ Base de datos D1 configurada</li>
+                <li>🔧 GitHub Actions para deploy automático</li>
+                <li>🌐 Configuración para yo-decreto.com</li>
+                <li>📖 Documentación completa</li>
+            </ul>
+        </div>
+
+        <div class="info">
+            <h3>🎯 Próximos pasos después de descargar:</h3>
+            <ol class="steps">
+                <li><strong>Extrae el archivo ZIP</strong> que acabas de descargar</li>
+                <li><strong>Sube todo a GitHub:</strong> github.com/gusguecas/yo-decreto-app</li>
+                <li><strong>Conecta con Cloudflare Pages</strong> usando tu repositorio</li>
+                <li><strong>Configura yo-decreto.com</strong> como dominio personalizado</li>
+                <li><strong>¡Tu app estará en línea!</strong> 🎉</li>
+            </ol>
+        </div>
+
+        <div style="margin-top: 30px; font-size: 0.9em; opacity: 0.7;">
+            <p>© 2024 <strong>www.yo-decreto.com</strong> - Tu manifestación, tu poder</p>
+            <p>Desarrollado por Gustavo Adolfo Guerrero Castaños</p>
+        </div>
+    </div>
+
+    <script>
+        // Confirmar descarga
+        document.querySelector('.download-btn').addEventListener('click', function() {
+            setTimeout(function() {
+                alert('🎉 ¡DESCARGA INICIADA!\n\n✅ Archivo: yo-decreto-clean.zip\n📂 Tamaño: 25 MB\n\n📋 Próximo paso:\n1. Extrae el ZIP\n2. Sube a GitHub\n3. Conecta con Cloudflare Pages\n4. ¡yo-decreto.com en línea!');
+            }, 1000);
+        });
+        
+        // Verificar si el archivo existe
+        fetch('/static/yo-decreto-clean.zip', {method: 'HEAD'})
+        .then(response => {
+            if (!response.ok) {
+                document.querySelector('.download-btn').style.background = '#ef4444';
+                document.querySelector('.download-btn').innerHTML = '❌ ARCHIVO NO ENCONTRADO';
+            }
+        })
+        .catch(() => {
+            document.querySelector('.download-btn').style.background = '#ef4444';
+            document.querySelector('.download-btn').innerHTML = '❌ ERROR DE CONEXIÓN';
+        });
+    </script>
+</body>
+</html>
