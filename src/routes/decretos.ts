@@ -37,7 +37,7 @@ decretosRoutes.get('/', async (c) => {
     const decretos = await c.env.DB.prepare(`
       SELECT id, contenido, area, progreso, estado, user_id, created_at, updated_at
       FROM decretos 
-      WHERE user_id = 1
+      WHERE user_id = 2
       ORDER BY created_at DESC
     `).all()
     
@@ -123,7 +123,7 @@ decretosRoutes.post('/', async (c) => {
       
       const result = await c.env.DB.prepare(`
         INSERT INTO decretos (contenido, area, user_id)
-        VALUES (?, ?, 1)
+        VALUES (?, ?, 2)
       `).bind(contenido, area).run()
       
       console.log('Resultado DB:', result)
@@ -136,7 +136,7 @@ decretosRoutes.post('/', async (c) => {
           area,
           progreso: 0,
           estado: 'activo',
-          user_id: 1,
+          user_id: 2,
           created_at: new Date().toISOString()
         }
       })
