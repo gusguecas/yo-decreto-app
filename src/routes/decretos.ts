@@ -6,6 +6,12 @@ type Bindings = {
 
 export const decretosRoutes = new Hono<{ Bindings: Bindings }>()
 
+// Middleware para log
+decretosRoutes.use('*', async (c, next) => {
+  console.log(`${c.req.method} ${c.req.url}`)
+  await next()
+})
+
 // Obtener configuración del usuario
 decretosRoutes.get('/config', async (c) => {
   return c.json({
@@ -24,58 +30,17 @@ decretosRoutes.put('/config', async (c) => {
 
 // Obtener todos los decretos con contadores
 decretosRoutes.get('/', async (c) => {
-  try {
-    // Intentar obtener decretos del usuario
-    let decretosData = []
-    
-    try {
-      const decretos = await c.env.DB.prepare(`
-        SELECT id, contenido, area, progreso, estado, created_at, updated_at
-        FROM decretos 
-        WHERE user_id = 1 
-        ORDER BY created_at DESC
-      `).all()
-      decretosData = decretos.results || []
-    } catch (dbError) {
-      console.log('Tabla decretos no existe aún, devolviendo vacío')
-      // Si la tabla no existe, devolver datos vacíos
+  console.log('GET /api/decretos called')
+  
+  // Por ahora devolver datos simples hasta que funcione
+  return c.json({
+    success: true,
+    data: {
+      decretos: [],
+      contadores: { total: 0, empresarial: 0, material: 0, humano: 0 },
+      porcentajes: { empresarial: 0, material: 0, humano: 0 }
     }
-    
-    // Calcular contadores
-    const contadores = {
-      total: decretosData.length,
-      empresarial: decretosData.filter((d: any) => d.area === 'empresarial').length,
-      material: decretosData.filter((d: any) => d.area === 'material').length,
-      humano: decretosData.filter((d: any) => d.area === 'humano').length
-    }
-    
-    // Calcular porcentajes
-    const porcentajes = {
-      empresarial: contadores.total > 0 ? Math.round((contadores.empresarial / contadores.total) * 100) : 0,
-      material: contadores.total > 0 ? Math.round((contadores.material / contadores.total) * 100) : 0,
-      humano: contadores.total > 0 ? Math.round((contadores.humano / contadores.total) * 100) : 0
-    }
-    
-    return c.json({
-      success: true,
-      data: {
-        decretos: decretosData,
-        contadores,
-        porcentajes
-      }
-    })
-  } catch (error) {
-    console.error('Error obteniendo decretos:', error)
-    // En caso de error, devolver estructura vacía
-    return c.json({
-      success: true,
-      data: {
-        decretos: [],
-        contadores: { total: 0, empresarial: 0, material: 0, humano: 0 },
-        porcentajes: { empresarial: 0, material: 0, humano: 0 }
-      }
-    })
-  }
+  })
 })
 
 // Obtener un decreto específico
