@@ -6,11 +6,11 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "DB", 
-  //     "database_name": "webapp-production",
-  //     "database_id": "placeholder-for-production"
-  //   }
-  // ]
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "yo-decreto-production",
+      "database_id": "2054fd63-656d-47cf-94c6-00d01a5cb441"
+    }
+  ]
 }
