@@ -796,10 +796,21 @@ const Decretos = {
     console.log('Datos finales:', decreetoData)
     
     try {
-      await API.decretos.create(decreetoData)
+      const response = await API.decretos.create(decreetoData)
+      console.log('Respuesta del servidor:', response)
+      
       Modal.close('createDecretoModal')
       Utils.showToast('Decreto creado exitosamente', 'success')
-      await this.render() // Recargar vista
+      
+      // FORZAR RECARGA COMPLETA
+      console.log('Recargando datos...')
+      await this.loadDecretos()
+      
+      // Renderizar la vista actualizada
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderDecretosView()
+      this.renderModals()
+      
     } catch (error) {
       console.error('Error completo:', error)
       Utils.showToast('Error al crear decreto', 'error')
