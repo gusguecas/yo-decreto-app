@@ -31,14 +31,14 @@ const AuthUtils = {
 
   // Verificar contraseña (simple para desarrollo)
   verifyPassword(password: string, storedPassword: string): boolean {
-    // Para desarrollo, verificamos con el prefijo
-    return `simple_${password}` === storedPassword
+    // Para desarrollo, comparación directa
+    return password === storedPassword
   },
 
   // Hash de contraseña (simplificado para desarrollo)
   hashPassword(password: string): string {
-    // Para desarrollo, usamos la contraseña directamente con un prefijo
-    return `simple_${password}`
+    // Para desarrollo, guardamos la contraseña tal como está
+    return password
   },
 
   // Validar formato de email
