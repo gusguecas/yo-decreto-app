@@ -778,6 +778,16 @@ const Agenda = {
               </select>
             </div>
           </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-2">🎯 Prioridad *</label>
+            <select name="prioridad" required class="form-select w-full px-4 py-2">
+              <option value="baja">🟢 Baja - Puede esperar</option>
+              <option value="media" selected>🟡 Media - Importante</option>
+              <option value="alta">🔴 Alta - Urgente</option>
+            </select>
+            <p class="text-xs text-slate-400 mt-1">Ayuda a organizar tu agenda por importancia</p>
+          </div>
         </div>
         
         <div class="flex justify-end space-x-4 mt-8">
@@ -2222,6 +2232,16 @@ const Agenda = {
               <span class="text-accent-green font-medium text-xs">
                 ${tarea.hora_evento || '09:00'}
               </span>
+              
+              <!-- Indicador de prioridad -->
+              <span class="px-1.5 py-0.5 text-xs rounded font-medium ${
+                tarea.prioridad === 'alta' ? 'bg-red-500/20 text-red-400' :
+                tarea.prioridad === 'baja' ? 'bg-green-500/20 text-green-400' :
+                'bg-yellow-500/20 text-yellow-400'
+              }" title="Prioridad: ${tarea.prioridad}">
+                ${tarea.prioridad === 'alta' ? '🔴' : tarea.prioridad === 'baja' ? '🟢' : '🟡'}
+              </span>
+              
               ${tarea.es_enfoque_dia ? `
                 <span class="px-1.5 py-0.5 bg-accent-purple/20 text-accent-purple text-xs rounded">
                   🎯

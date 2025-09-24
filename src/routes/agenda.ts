@@ -18,7 +18,14 @@ agendaRoutes.get('/metricas/:fecha', async (c) => {
       LEFT JOIN acciones a ON ae.accion_id = a.id
       LEFT JOIN decretos d ON a.decreto_id = d.id
       WHERE ae.fecha_evento = ?
-      ORDER BY ae.hora_evento ASC
+      ORDER BY 
+        CASE ae.prioridad 
+          WHEN 'alta' THEN 1 
+          WHEN 'media' THEN 2 
+          WHEN 'baja' THEN 3 
+          ELSE 2 
+        END ASC, 
+        ae.hora_evento ASC
     `).bind(fecha).all()
 
     const total = tareas.results.length
@@ -107,7 +114,15 @@ agendaRoutes.get('/timeline/:fecha', async (c) => {
       LEFT JOIN acciones a ON ae.accion_id = a.id
       LEFT JOIN decretos d ON a.decreto_id = d.id
       WHERE ae.fecha_evento = ?
-      ORDER BY ae.hora_evento ASC, ae.created_at ASC
+      ORDER BY 
+        CASE ae.prioridad 
+          WHEN 'alta' THEN 1 
+          WHEN 'media' THEN 2 
+          WHEN 'baja' THEN 3 
+          ELSE 2 
+        END ASC, 
+        ae.hora_evento ASC, 
+        ae.created_at ASC
     `).bind(fecha).all()
 
     return c.json({
@@ -178,10 +193,11 @@ agendaRoutes.post('/tareas', async (c) => {
       nombre, 
       descripcion, 
       fecha_hora, 
-      tipo 
+      tipo,
+      prioridad
     } = await c.req.json()
     
-    console.log('📝 Creando tarea agenda:', { decreto_id, nombre, fecha_hora, tipo })
+    console.log('📝 Creando tarea agenda:', { decreto_id, nombre, fecha_hora, tipo, prioridad })
     
     if (!nombre || !fecha_hora) {
       return c.json({ 
@@ -200,15 +216,17 @@ agendaRoutes.post('/tareas', async (c) => {
         descripcion, 
         fecha_evento, 
         hora_evento,
+        prioridad,
         estado,
         created_at,
         updated_at
-      ) VALUES (?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       nombre,
       descripcion || '',
       fechaParte,
-      horaParte
+      horaParte,
+      prioridad || 'media'
     ).run()
 
     console.log('✅ Tarea agenda creada:', result.meta.last_row_id)
@@ -402,7 +420,8 @@ agendaRoutes.put('/tareas/:id', async (c) => {
       como_hacerlo,
       resultados,
       tipo,
-      calificacion
+      calificacion,
+      prioridad
     } = await c.req.json()
     
     if (!titulo || !fecha_hora) {
@@ -423,9 +442,10 @@ agendaRoutes.put('/tareas/:id', async (c) => {
         descripcion = ?,
         fecha_evento = ?,
         hora_evento = ?,
+        prioridad = ?,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).bind(titulo, descripcion || '', fechaParte, horaParte, tareaId).run()
+    `).bind(titulo, descripcion || '', fechaParte, horaParte, prioridad || 'media', tareaId).run()
 
     // Obtener accion_id para actualizar la acción asociada
     const evento = await c.env.DB.prepare(

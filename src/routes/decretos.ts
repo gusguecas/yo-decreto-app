@@ -27,15 +27,16 @@ async function sincronizarAccionConAgenda(
       // Crear evento en agenda_eventos con campos CORRECTOS
       const result = await db.prepare(`
         INSERT INTO agenda_eventos (
-          accion_id, titulo, descripcion, fecha_evento, hora_evento, estado,
+          accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad, estado,
           created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ) VALUES (?, ?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `).bind(
         accionId,
         `[Decreto] ${titulo}`,
         `${queHacer}${comoHacerlo ? ' - ' + comoHacerlo : ''}`,
         fechaParte,
-        horaParte
+        horaParte,
+        'media' // Prioridad por defecto para decretos
       ).run()
       
       console.log('✅ Evento agenda creado:', result.meta.last_row_id)
@@ -278,15 +279,16 @@ decretosRoutes.post('/:id/acciones', async (c) => {
       try {
         const agendaResult = await c.env.DB.prepare(`
           INSERT INTO agenda_eventos (
-            accion_id, titulo, descripcion, fecha_evento, hora_evento, estado,
+            accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad, estado,
             created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          ) VALUES (?, ?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         `).bind(
           accionId,
           `[Decreto] ${titulo}`,
           `${que_hacer}${como_hacerlo ? ' - ' + como_hacerlo : ''}`,
           fechaParte,
-          horaParte
+          horaParte,
+          'media' // Prioridad por defecto para decretos
         ).run()
         
         console.log('🚀 AGENDA EVENTO CREADO EXITOSAMENTE:', agendaResult.meta.last_row_id)
@@ -658,14 +660,15 @@ decretosRoutes.post('/:decretoId/acciones/:accionId/seguimientos', async (c) => 
               const horaEvento = fechaRevision ? fechaRevision.split('T')[1] : '09:00'
               
               const agendaResult = await c.env.DB.prepare(`
-                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
+                VALUES (?, ?, ?, ?, ?, ?)
               `).bind(
                 resultNuevaAccion.meta.last_row_id,
                 textoTarea,
                 `[Auto-generada] ${textoTarea}`,
                 fechaEvento,
-                horaEvento
+                horaEvento,
+                'media' // Prioridad por defecto
               ).run()
               
               agendaEventId = agendaResult.meta.last_row_id
@@ -673,14 +676,15 @@ decretosRoutes.post('/:decretoId/acciones/:accionId/seguimientos', async (c) => 
             // Para tareas primarias solo si hay fecha específica
             else if (tipo === 'primaria' && fechaRevision) {
               const agendaResult = await c.env.DB.prepare(`
-                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento)
-                VALUES (?, ?, ?, date(?), time(?))
+                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
+                VALUES (?, ?, ?, date(?), time(?), ?)
               `).bind(
                 resultNuevaAccion.meta.last_row_id,
                 `[Semanal] ${textoTarea}`,
                 `Tarea generada desde seguimiento`,
                 fechaRevision.split('T')[0],
-                fechaRevision.split('T')[1]
+                fechaRevision.split('T')[1],
+                'media' // Prioridad por defecto
               ).run()
               
               agendaEventId = agendaResult.meta.last_row_id

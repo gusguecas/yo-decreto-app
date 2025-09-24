@@ -6,7 +6,7 @@ var __publicField = (obj, key, value) => {
   return value;
 };
 
-// .wrangler/tmp/bundle-90Yu6R/strip-cf-connecting-ip-header.js
+// .wrangler/tmp/bundle-CoJ9vt/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -891,7 +891,7 @@ var process_default = _process;
 // node_modules/wrangler/_virtual_unenv_global_polyfill-@cloudflare-unenv-preset-node-process
 globalThis.process = process_default;
 
-// .wrangler/tmp/pages-l3ZvBX/bundledWorker-0.4055715698702038.mjs
+// .wrangler/tmp/pages-ZW5Mzg/bundledWorker-0.8130774431723637.mjs
 import { Writable as Writable2 } from "node:stream";
 import { EventEmitter as EventEmitter2 } from "node:events";
 import { Socket as Socket3 } from "node:net";
@@ -1757,21 +1757,21 @@ var _process2 = {
 var process_default2 = _process2;
 globalThis.process = process_default2;
 var Kr = Object.defineProperty;
-var Pt = /* @__PURE__ */ __name2((e) => {
+var Ht = /* @__PURE__ */ __name2((e) => {
   throw TypeError(e);
-}, "Pt");
+}, "Ht");
 var Xr = /* @__PURE__ */ __name2((e, t, r) => t in e ? Kr(e, t, { enumerable: true, configurable: true, writable: true, value: r }) : e[t] = r, "Xr");
 var _ = /* @__PURE__ */ __name2((e, t, r) => Xr(e, typeof t != "symbol" ? t + "" : t, r), "_");
-var ut = /* @__PURE__ */ __name2((e, t, r) => t.has(e) || Pt("Cannot " + r), "ut");
+var ut = /* @__PURE__ */ __name2((e, t, r) => t.has(e) || Ht("Cannot " + r), "ut");
 var u = /* @__PURE__ */ __name2((e, t, r) => (ut(e, t, "read from private field"), r ? r.call(e) : t.get(e)), "u");
-var R = /* @__PURE__ */ __name2((e, t, r) => t.has(e) ? Pt("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(e) : t.set(e, r), "R");
+var R = /* @__PURE__ */ __name2((e, t, r) => t.has(e) ? Ht("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(e) : t.set(e, r), "R");
 var T = /* @__PURE__ */ __name2((e, t, r, a) => (ut(e, t, "write to private field"), a ? a.call(e, r) : t.set(e, r), r), "T");
 var N = /* @__PURE__ */ __name2((e, t, r) => (ut(e, t, "access private method"), r), "N");
-var Ht = /* @__PURE__ */ __name2((e, t, r, a) => ({ set _(s) {
+var Pt = /* @__PURE__ */ __name2((e, t, r, a) => ({ set _(s) {
   T(e, t, s, r);
 }, get _() {
   return u(e, t, a);
-} }), "Ht");
+} }), "Pt");
 var ur = { Stringify: 1 };
 var U = /* @__PURE__ */ __name2((e, t) => {
   const r = new String(e);
@@ -1856,8 +1856,8 @@ var Qr = /* @__PURE__ */ __name2((e, ...t) => {
           if (c.callbacks)
             r.unshift("", c);
           else {
-            const d = c.toString();
-            d instanceof Promise ? r.unshift("", d) : r[0] += d;
+            const l = c.toString();
+            l instanceof Promise ? r.unshift("", l) : r[0] += l;
           }
         else
           c instanceof Promise ? r.unshift("", c) : se(c.toString(), r);
@@ -1918,30 +1918,30 @@ var qt = /* @__PURE__ */ __name2((e, t, r, a) => ({ buffer: s, context: n }) => 
   Bt.set(n, o);
   const i = o[e] || (o[e] = []);
   let c = false;
-  const d = Xe[e];
-  if (d.length > 0) {
+  const l = Xe[e];
+  if (l.length > 0) {
     e:
-      for (const [, l] of i)
-        for (const p of d)
-          if (((l == null ? void 0 : l[p]) ?? null) === (r == null ? void 0 : r[p])) {
+      for (const [, d] of i)
+        for (const p of l)
+          if (((d == null ? void 0 : d[p]) ?? null) === (r == null ? void 0 : r[p])) {
             c = true;
             break e;
           }
   }
-  if (c ? s[0] = s[0].replaceAll(t, "") : d.length > 0 ? i.push([t, r, a]) : i.unshift([t, r, a]), s[0].indexOf("</head>") !== -1) {
-    let l;
+  if (c ? s[0] = s[0].replaceAll(t, "") : l.length > 0 ? i.push([t, r, a]) : i.unshift([t, r, a]), s[0].indexOf("</head>") !== -1) {
+    let d;
     if (a === void 0)
-      l = i.map(([p]) => p);
+      d = i.map(([p]) => p);
     else {
       const p = [];
-      l = i.map(([f, , m]) => {
-        let v = p.indexOf(m);
-        return v === -1 && (p.push(m), v = p.length - 1), [f, v];
-      }).sort((f, m) => f[1] - m[1]).map(([f]) => f);
+      d = i.map(([f, , E]) => {
+        let v = p.indexOf(E);
+        return v === -1 && (p.push(E), v = p.length - 1), [f, v];
+      }).sort((f, E) => f[1] - E[1]).map(([f]) => f);
     }
-    l.forEach((p) => {
+    d.forEach((p) => {
       s[0] = s[0].replaceAll(p, "");
-    }), s[0] = s[0].replace(/(?=<\/head>)/, l.join(""));
+    }), s[0] = s[0].replace(/(?=<\/head>)/, d.join(""));
   }
 }, "qt");
 var Ve = /* @__PURE__ */ __name2((e, t, r) => U(new $(e, r, ze(t ?? [])).toString()), "Ve");
@@ -1986,8 +1986,8 @@ var Tr = /* @__PURE__ */ __name2((e, t) => {
     t(s, a == null ? null : typeof a == "number" ? s.match(/^(?:a|border-im|column(?:-c|s)|flex(?:$|-[^b])|grid-(?:ar|[^a])|font-w|li|or|sca|st|ta|wido|z)|ty$/) ? `${a}` : `${a}px` : a);
   }
 }, "Tr");
-var Pe = void 0;
-var At = /* @__PURE__ */ __name2(() => Pe, "At");
+var He = void 0;
+var At = /* @__PURE__ */ __name2(() => He, "At");
 var da = /* @__PURE__ */ __name2((e) => /[A-Z]/.test(e) && e.match(/^(?:al|basel|clip(?:Path|Rule)$|co|do|fill|fl|fo|gl|let|lig|i|marker[EMS]|o|pai|pointe|sh|st[or]|text[^L]|tr|u|ve|w)/) ? e.replace(/([A-Z])/g, "-$1").toLowerCase() : e, "da");
 var ua = ["area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"];
 var fa = ["allowfullscreen", "async", "autofocus", "autoplay", "checked", "controls", "default", "defer", "disabled", "download", "formnovalidate", "hidden", "inert", "ismap", "itemscope", "loop", "multiple", "muted", "nomodule", "novalidate", "open", "playsinline", "readonly", "required", "reversed", "selected"];
@@ -2038,13 +2038,13 @@ var $ = /* @__PURE__ */ __name2(class {
     const t = this.tag, r = this.props;
     let { children: a } = this;
     e[0] += `<${t}`;
-    const s = Pe && je(Pe) === "svg" ? (n) => da(ot(n)) : (n) => ot(n);
+    const s = He && je(He) === "svg" ? (n) => da(ot(n)) : (n) => ot(n);
     for (let [n, o] of Object.entries(r))
       if (n = s(n), n !== "children") {
         if (n === "style" && typeof o == "object") {
           let i = "";
-          Tr(o, (c, d) => {
-            d != null && (i += `${i ? ";" : ""}${c}:${d}`);
+          Tr(o, (c, l) => {
+            l != null && (i += `${i ? ";" : ""}${c}:${l}`);
           }), e[0] += ' style="', se(i, e), e[0] += '"';
         } else if (typeof o == "string")
           e[0] += ` ${n}="`, se(o, e), e[0] += '"';
@@ -2106,7 +2106,7 @@ var Qe = /* @__PURE__ */ __name2((e, t, r) => {
       ft[a][Ct] = St[a];
     $t = true;
   }
-  return typeof e == "function" ? new pt(e, t, r) : ft[e] ? new pt(ft[e], t, r) : e === "svg" || e === "head" ? (Pe || (Pe = Dt("")), new $(e, t, [new pt(Pe, { value: e }, r)])) : new $(e, t, r);
+  return typeof e == "function" ? new pt(e, t, r) : ft[e] ? new pt(ft[e], t, r) : e === "svg" || e === "head" ? (He || (He = Dt("")), new $(e, t, [new pt(He, { value: e }, r)])) : new $(e, t, r);
 }, "Qe");
 var pa = /* @__PURE__ */ __name2(({ children: e }) => new yr("", { children: e }, Array.isArray(e) ? e : e ? [e] : []), "pa");
 function S(e, t, r) {
@@ -2121,30 +2121,30 @@ function S(e, t, r) {
 }
 __name(S, "S");
 __name2(S, "S");
-var kt = /* @__PURE__ */ __name2((e, t, r) => (a, s) => {
+var Wt = /* @__PURE__ */ __name2((e, t, r) => (a, s) => {
   let n = -1;
   return o(0);
   async function o(i) {
     if (i <= n)
       throw new Error("next() called multiple times");
     n = i;
-    let c, d = false, l;
-    if (e[i] ? (l = e[i][0][0], a.req.routeIndex = i) : l = i === e.length && s || void 0, l)
+    let c, l = false, d;
+    if (e[i] ? (d = e[i][0][0], a.req.routeIndex = i) : d = i === e.length && s || void 0, d)
       try {
-        c = await l(a, () => o(i + 1));
+        c = await d(a, () => o(i + 1));
       } catch (p) {
         if (p instanceof Error && t)
-          a.error = p, c = await t(p, a), d = true;
+          a.error = p, c = await t(p, a), l = true;
         else
           throw p;
       }
     else
       a.finalized === false && r && (c = await r(a));
-    return c && (a.finalized === false || d) && (a.res = c), a;
+    return c && (a.finalized === false || l) && (a.res = c), a;
   }
   __name(o, "o");
   __name2(o, "o");
-}, "kt");
+}, "Wt");
 var ha = Symbol();
 var Ea = /* @__PURE__ */ __name2(async (e, t = /* @__PURE__ */ Object.create(null)) => {
   const { all: r = false, dot: a = false } = t, n = (e instanceof Nr ? e.raw.headers : e.headers).get("Content-Type");
@@ -2270,8 +2270,8 @@ var Or = /* @__PURE__ */ __name2((e, t, r) => {
     for (o === -1 && (o = e.indexOf(`&${t}`, 8)); o !== -1; ) {
       const i = e.charCodeAt(o + t.length + 1);
       if (i === 61) {
-        const c = o + t.length + 2, d = e.indexOf("&", c);
-        return ht(e.slice(c, d === -1 ? void 0 : d));
+        const c = o + t.length + 2, l = e.indexOf("&", c);
+        return ht(e.slice(c, l === -1 ? void 0 : l));
       } else if (i == 38 || isNaN(i))
         return "";
       o = e.indexOf(`&${t}`, o + 1);
@@ -2289,17 +2289,17 @@ var Or = /* @__PURE__ */ __name2((e, t, r) => {
     let c = e.slice(n + 1, i === -1 ? o === -1 ? void 0 : o : i);
     if (a && (c = ht(c)), n = o, c === "")
       continue;
-    let d;
-    i === -1 ? d = "" : (d = e.slice(i + 1, o === -1 ? void 0 : o), a && (d = ht(d))), r ? (s[c] && Array.isArray(s[c]) || (s[c] = []), s[c].push(d)) : s[c] ?? (s[c] = d);
+    let l;
+    i === -1 ? l = "" : (l = e.slice(i + 1, o === -1 ? void 0 : o), a && (l = ht(l))), r ? (s[c] && Array.isArray(s[c]) || (s[c] = []), s[c].push(l)) : s[c] ?? (s[c] = l);
   }
   return t ? s[t] : s;
 }, "Or");
 var Na = Or;
 var ba = /* @__PURE__ */ __name2((e, t) => Or(e, t, true), "ba");
 var It = decodeURIComponent;
-var Wt = /* @__PURE__ */ __name2((e) => lt(e, It), "Wt");
+var kt = /* @__PURE__ */ __name2((e) => lt(e, It), "kt");
 var Se;
-var H;
+var P;
 var K;
 var br;
 var Cr;
@@ -2311,7 +2311,7 @@ var Nr = (rr = /* @__PURE__ */ __name2(class {
     R(this, K);
     _(this, "raw");
     R(this, Se);
-    R(this, H);
+    R(this, P);
     _(this, "routeIndex", 0);
     _(this, "path");
     _(this, "bodyCache", {});
@@ -2322,7 +2322,7 @@ var Nr = (rr = /* @__PURE__ */ __name2(class {
       const s = Object.keys(t2)[0];
       return s ? t2[s].then((n) => (s === "json" && (n = JSON.stringify(n)), new Response(n)[e2]())) : t2[e2] = r2[e2]();
     });
-    this.raw = e, this.path = t, T(this, H, r), T(this, Se, {});
+    this.raw = e, this.path = t, T(this, P, r), T(this, Se, {});
   }
   param(e) {
     return e ? N(this, K, br).call(this, e) : N(this, K, Cr).call(this);
@@ -2373,26 +2373,26 @@ var Nr = (rr = /* @__PURE__ */ __name2(class {
     return this.raw.method;
   }
   get [ha]() {
-    return u(this, H);
+    return u(this, P);
   }
   get matchedRoutes() {
-    return u(this, H)[0].map(([[, e]]) => e);
+    return u(this, P)[0].map(([[, e]]) => e);
   }
   get routePath() {
-    return u(this, H)[0].map(([[, e]]) => e)[this.routeIndex].path;
+    return u(this, P)[0].map(([[, e]]) => e)[this.routeIndex].path;
   }
-}, "rr"), Se = /* @__PURE__ */ new WeakMap(), H = /* @__PURE__ */ new WeakMap(), K = /* @__PURE__ */ new WeakSet(), br = /* @__PURE__ */ __name2(function(e) {
-  const t = u(this, H)[0][this.routeIndex][1][e], r = N(this, K, wt).call(this, t);
-  return r && /\%/.test(r) ? Wt(r) : r;
+}, "rr"), Se = /* @__PURE__ */ new WeakMap(), P = /* @__PURE__ */ new WeakMap(), K = /* @__PURE__ */ new WeakSet(), br = /* @__PURE__ */ __name2(function(e) {
+  const t = u(this, P)[0][this.routeIndex][1][e], r = N(this, K, wt).call(this, t);
+  return r && /\%/.test(r) ? kt(r) : r;
 }, "br"), Cr = /* @__PURE__ */ __name2(function() {
-  const e = {}, t = Object.keys(u(this, H)[0][this.routeIndex][1]);
+  const e = {}, t = Object.keys(u(this, P)[0][this.routeIndex][1]);
   for (const r of t) {
-    const a = N(this, K, wt).call(this, u(this, H)[0][this.routeIndex][1][r]);
-    a !== void 0 && (e[r] = /\%/.test(a) ? Wt(a) : a);
+    const a = N(this, K, wt).call(this, u(this, P)[0][this.routeIndex][1][r]);
+    a !== void 0 && (e[r] = /\%/.test(a) ? kt(a) : a);
   }
   return e;
 }, "Cr"), wt = /* @__PURE__ */ __name2(function(e) {
-  return u(this, H)[1] ? u(this, H)[1][e] : e;
+  return u(this, P)[1] ? u(this, P)[1][e] : e;
 }, "wt"), Z = /* @__PURE__ */ new WeakMap(), rr);
 var Ca = "text/plain; charset=UTF-8";
 var Et = /* @__PURE__ */ __name2((e, t) => ({ "Content-Type": e, ...t }), "Et");
@@ -2407,7 +2407,7 @@ var Oe;
 var Ne;
 var de;
 var $e;
-var ke;
+var We;
 var Q;
 var ye;
 var ar;
@@ -2428,7 +2428,7 @@ var Da = (ar = /* @__PURE__ */ __name2(class {
     R(this, Ne);
     R(this, de);
     R(this, $e);
-    R(this, ke);
+    R(this, We);
     _(this, "render", (...e2) => (u(this, Oe) ?? T(this, Oe, (t2) => this.html(t2)), u(this, Oe).call(this, ...e2)));
     _(this, "setLayout", (e2) => T(this, Fe, e2));
     _(this, "getLayout", () => u(this, Fe));
@@ -2460,10 +2460,10 @@ var Da = (ar = /* @__PURE__ */ __name2(class {
       return this.header("Location", /[^\x00-\xFF]/.test(r) ? encodeURI(r) : r), this.newResponse(null, t2 ?? 302);
     });
     _(this, "notFound", () => (u(this, Ne) ?? T(this, Ne, () => new Response()), u(this, Ne).call(this, this)));
-    T(this, Be, e), t && (T(this, Y, t.executionCtx), this.env = t.env, T(this, Ne, t.notFoundHandler), T(this, ke, t.path), T(this, $e, t.matchResult));
+    T(this, Be, e), t && (T(this, Y, t.executionCtx), this.env = t.env, T(this, Ne, t.notFoundHandler), T(this, We, t.path), T(this, $e, t.matchResult));
   }
   get req() {
-    return u(this, qe) ?? T(this, qe, new Nr(u(this, Be), u(this, ke), u(this, $e))), u(this, qe);
+    return u(this, qe) ?? T(this, qe, new Nr(u(this, Be), u(this, We), u(this, $e))), u(this, qe);
   }
   get event() {
     if (u(this, Y) && "respondWith" in u(this, Y))
@@ -2496,7 +2496,7 @@ var Da = (ar = /* @__PURE__ */ __name2(class {
   get var() {
     return u(this, V) ? Object.fromEntries(u(this, V)) : {};
   }
-}, "ar"), Be = /* @__PURE__ */ new WeakMap(), qe = /* @__PURE__ */ new WeakMap(), V = /* @__PURE__ */ new WeakMap(), we = /* @__PURE__ */ new WeakMap(), Y = /* @__PURE__ */ new WeakMap(), L = /* @__PURE__ */ new WeakMap(), Fe = /* @__PURE__ */ new WeakMap(), Oe = /* @__PURE__ */ new WeakMap(), Ne = /* @__PURE__ */ new WeakMap(), de = /* @__PURE__ */ new WeakMap(), $e = /* @__PURE__ */ new WeakMap(), ke = /* @__PURE__ */ new WeakMap(), Q = /* @__PURE__ */ new WeakSet(), ye = /* @__PURE__ */ __name2(function(e, t, r) {
+}, "ar"), Be = /* @__PURE__ */ new WeakMap(), qe = /* @__PURE__ */ new WeakMap(), V = /* @__PURE__ */ new WeakMap(), we = /* @__PURE__ */ new WeakMap(), Y = /* @__PURE__ */ new WeakMap(), L = /* @__PURE__ */ new WeakMap(), Fe = /* @__PURE__ */ new WeakMap(), Oe = /* @__PURE__ */ new WeakMap(), Ne = /* @__PURE__ */ new WeakMap(), de = /* @__PURE__ */ new WeakMap(), $e = /* @__PURE__ */ new WeakMap(), We = /* @__PURE__ */ new WeakMap(), Q = /* @__PURE__ */ new WeakSet(), ye = /* @__PURE__ */ __name2(function(e, t, r) {
   const a = u(this, L) ? new Headers(u(this, L).headers) : u(this, de) ?? new Headers();
   if (typeof t == "object" && "headers" in t) {
     const n = t.headers instanceof Headers ? t.headers : new Headers(t.headers);
@@ -2573,9 +2573,9 @@ var jr = (sr = /* @__PURE__ */ __name2(class {
     }), this.on = (n, o, ...i) => {
       for (const c of [o].flat()) {
         T(this, B, c);
-        for (const d of [n].flat())
-          i.map((l) => {
-            N(this, D, ie).call(this, d.toUpperCase(), u(this, B), l);
+        for (const l of [n].flat())
+          i.map((d) => {
+            N(this, D, ie).call(this, l.toUpperCase(), u(this, B), d);
           });
       }
       return this;
@@ -2590,7 +2590,7 @@ var jr = (sr = /* @__PURE__ */ __name2(class {
     return r.routes.map((s) => {
       var o;
       let n;
-      r.errorHandler === zt ? n = s.handler : (n = /* @__PURE__ */ __name2(async (i, c) => (await kt([], r.errorHandler)(i, () => s.handler(i, c))).res, "n"), n[Ia] = s.handler), N(o = a, D, ie).call(o, s.method, s.path, n);
+      r.errorHandler === zt ? n = s.handler : (n = /* @__PURE__ */ __name2(async (i, c) => (await Wt([], r.errorHandler)(i, () => s.handler(i, c))).res, "n"), n[Ia] = s.handler), N(o = a, D, ie).call(o, s.method, s.path, n);
     }), this;
   }
   basePath(t) {
@@ -2601,28 +2601,28 @@ var jr = (sr = /* @__PURE__ */ __name2(class {
     let s, n;
     a && (typeof a == "function" ? n = a : (n = a.optionHandler, a.replaceRequest === false ? s = /* @__PURE__ */ __name2((c) => c, "s") : s = a.replaceRequest));
     const o = n ? (c) => {
-      const d = n(c);
-      return Array.isArray(d) ? d : [d];
+      const l = n(c);
+      return Array.isArray(l) ? l : [l];
     } : (c) => {
-      let d;
+      let l;
       try {
-        d = c.executionCtx;
+        l = c.executionCtx;
       } catch {
       }
-      return [c.env, d];
+      return [c.env, l];
     };
     s || (s = (() => {
-      const c = Te(this._basePath, t), d = c === "/" ? 0 : c.length;
-      return (l) => {
-        const p = new URL(l.url);
-        return p.pathname = p.pathname.slice(d) || "/", new Request(p, l);
+      const c = Te(this._basePath, t), l = c === "/" ? 0 : c.length;
+      return (d) => {
+        const p = new URL(d.url);
+        return p.pathname = p.pathname.slice(l) || "/", new Request(p, d);
       };
     })());
-    const i = /* @__PURE__ */ __name2(async (c, d) => {
-      const l = await r(s(c.req.raw), ...o(c));
-      if (l)
-        return l;
-      await d();
+    const i = /* @__PURE__ */ __name2(async (c, l) => {
+      const d = await r(s(c.req.raw), ...o(c));
+      if (d)
+        return d;
+      await l();
     }, "i");
     return N(this, D, ie).call(this, C, Te(t, "*"), i), this;
   }
@@ -2642,25 +2642,25 @@ var jr = (sr = /* @__PURE__ */ __name2(class {
     return (async () => new Response(null, await N(this, D, tt).call(this, t, r, a, "GET")))();
   const n = this.getPath(t, { env: a }), o = this.router.match(s, n), i = new Da(t, { path: n, matchResult: o, env: a, executionCtx: r, notFoundHandler: u(this, q) });
   if (o[0].length === 1) {
-    let d;
+    let l;
     try {
-      d = o[0][0][0][0](i, async () => {
+      l = o[0][0][0][0](i, async () => {
         i.res = await u(this, q).call(this, i);
       });
-    } catch (l) {
-      return N(this, D, et).call(this, l, i);
-    }
-    return d instanceof Promise ? d.then((l) => l || (i.finalized ? i.res : u(this, q).call(this, i))).catch((l) => N(this, D, et).call(this, l, i)) : d ?? u(this, q).call(this, i);
-  }
-  const c = kt(o[0], this.errorHandler, u(this, q));
-  return (async () => {
-    try {
-      const d = await c(i);
-      if (!d.finalized)
-        throw new Error("Context is not finalized. Did you forget to return a Response object or `await next()`?");
-      return d.res;
     } catch (d) {
       return N(this, D, et).call(this, d, i);
+    }
+    return l instanceof Promise ? l.then((d) => d || (i.finalized ? i.res : u(this, q).call(this, i))).catch((d) => N(this, D, et).call(this, d, i)) : l ?? u(this, q).call(this, i);
+  }
+  const c = Wt(o[0], this.errorHandler, u(this, q));
+  return (async () => {
+    try {
+      const l = await c(i);
+      if (!l.finalized)
+        throw new Error("Context is not finalized. Did you forget to return a Response object or `await next()`?");
+      return l.res;
+    } catch (l) {
+      return N(this, D, et).call(this, l, i);
     }
   })();
 }, "tt"), sr);
@@ -2694,28 +2694,28 @@ var Ot = (nr = /* @__PURE__ */ __name2(class {
       return;
     }
     const [o, ...i] = t, c = o === "*" ? i.length === 0 ? ["", "", xe] : ["", "", it] : o === "/*" ? ["", "", Le] : o.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);
-    let d;
+    let l;
     if (c) {
-      const l = c[1];
+      const d = c[1];
       let p = c[2] || it;
-      if (l && c[2] && (p === ".*" || (p = p.replace(/^\((?!\?:)(?=[^)]+\)$)/, "(?:"), /\((?!\?:)/.test(p))))
+      if (d && c[2] && (p === ".*" || (p = p.replace(/^\((?!\?:)(?=[^)]+\)$)/, "(?:"), /\((?!\?:)/.test(p))))
         throw Re;
-      if (d = u(this, F)[p], !d) {
+      if (l = u(this, F)[p], !l) {
         if (Object.keys(u(this, F)).some((f) => f !== xe && f !== Le))
           throw Re;
         if (n)
           return;
-        d = u(this, F)[p] = new Ot(), l !== "" && T(d, fe, s.varIndex++);
+        l = u(this, F)[p] = new Ot(), d !== "" && T(l, fe, s.varIndex++);
       }
-      !n && l !== "" && a.push([l, u(d, fe)]);
-    } else if (d = u(this, F)[o], !d) {
-      if (Object.keys(u(this, F)).some((l) => l.length > 1 && l !== xe && l !== Le))
+      !n && d !== "" && a.push([d, u(l, fe)]);
+    } else if (l = u(this, F)[o], !l) {
+      if (Object.keys(u(this, F)).some((d) => d.length > 1 && d !== xe && d !== Le))
         throw Re;
       if (n)
         return;
-      d = u(this, F)[o] = new Ot();
+      l = u(this, F)[o] = new Ot();
     }
-    d.insert(i, r, a, s, n);
+    l.insert(i, r, a, s, n);
   }
   buildRegExpStr() {
     const r = Object.keys(u(this, F)).sort(La).map((a) => {
@@ -2726,20 +2726,20 @@ var Ot = (nr = /* @__PURE__ */ __name2(class {
   }
 }, "nr"), ue = /* @__PURE__ */ new WeakMap(), fe = /* @__PURE__ */ new WeakMap(), F = /* @__PURE__ */ new WeakMap(), nr);
 var ct;
-var We;
+var ke;
 var or;
-var Pa = (or = /* @__PURE__ */ __name2(class {
+var Ha = (or = /* @__PURE__ */ __name2(class {
   constructor() {
     R(this, ct, { varIndex: 0 });
-    R(this, We, new Ot());
+    R(this, ke, new Ot());
   }
   insert(e, t, r) {
     const a = [], s = [];
     for (let o = 0; ; ) {
       let i = false;
       if (e = e.replace(/\{[^}]+\}/g, (c) => {
-        const d = `@\\${o}`;
-        return s[o] = [d, c], o++, i = true, d;
+        const l = `@\\${o}`;
+        return s[o] = [l, c], o++, i = true, l;
       }), !i)
         break;
     }
@@ -2752,19 +2752,19 @@ var Pa = (or = /* @__PURE__ */ __name2(class {
           break;
         }
     }
-    return u(this, We).insert(n, t, a, u(this, ct), r), a;
+    return u(this, ke).insert(n, t, a, u(this, ct), r), a;
   }
   buildRegExp() {
-    let e = u(this, We).buildRegExpStr();
+    let e = u(this, ke).buildRegExpStr();
     if (e === "")
       return [/^$/, [], []];
     let t = 0;
     const r = [], a = [];
     return e = e.replace(/#(\d+)|@(\d+)|\.\*\$/g, (s, n, o) => n !== void 0 ? (r[++t] = Number(n), "$()") : (o !== void 0 && (a[Number(o)] = ++t), "")), [new RegExp(`^${e}`), r, a];
   }
-}, "or"), ct = /* @__PURE__ */ new WeakMap(), We = /* @__PURE__ */ new WeakMap(), or);
+}, "or"), ct = /* @__PURE__ */ new WeakMap(), ke = /* @__PURE__ */ new WeakMap(), or);
 var Mr = [];
-var Ha = [/^$/, [], /* @__PURE__ */ Object.create(null)];
+var Pa = [/^$/, [], /* @__PURE__ */ Object.create(null)];
 var rt = /* @__PURE__ */ Object.create(null);
 function xr(e) {
   return rt[e] ?? (rt[e] = new RegExp(e === "*" ? "" : `^${e.replace(/\/\*$|([.\\+*[^\]$()])/g, (t, r) => r ? `\\${r}` : "(?:|/.*)")}$`));
@@ -2777,42 +2777,42 @@ function Ua() {
 __name(Ua, "Ua");
 __name2(Ua, "Ua");
 function Ba(e) {
-  var d;
-  const t = new Pa(), r = [];
+  var l;
+  const t = new Ha(), r = [];
   if (e.length === 0)
-    return Ha;
-  const a = e.map((l) => [!/\*|\/:/.test(l[0]), ...l]).sort(([l, p], [f, m]) => l ? 1 : f ? -1 : p.length - m.length), s = /* @__PURE__ */ Object.create(null);
-  for (let l = 0, p = -1, f = a.length; l < f; l++) {
-    const [m, v, h] = a[l];
-    m ? s[v] = [h.map(([g]) => [g, /* @__PURE__ */ Object.create(null)]), Mr] : p++;
-    let E;
+    return Pa;
+  const a = e.map((d) => [!/\*|\/:/.test(d[0]), ...d]).sort(([d, p], [f, E]) => d ? 1 : f ? -1 : p.length - E.length), s = /* @__PURE__ */ Object.create(null);
+  for (let d = 0, p = -1, f = a.length; d < f; d++) {
+    const [E, v, h] = a[d];
+    E ? s[v] = [h.map(([g]) => [g, /* @__PURE__ */ Object.create(null)]), Mr] : p++;
+    let m;
     try {
-      E = t.insert(v, p, m);
+      m = t.insert(v, p, E);
     } catch (g) {
       throw g === Re ? new Ar(v) : g;
     }
-    m || (r[p] = h.map(([g, y]) => {
+    E || (r[p] = h.map(([g, y]) => {
       const O = /* @__PURE__ */ Object.create(null);
       for (y -= 1; y >= 0; y--) {
-        const [w, M] = E[y];
+        const [w, M] = m[y];
         O[w] = M;
       }
       return [g, O];
     }));
   }
   const [n, o, i] = t.buildRegExp();
-  for (let l = 0, p = r.length; l < p; l++)
-    for (let f = 0, m = r[l].length; f < m; f++) {
-      const v = (d = r[l][f]) == null ? void 0 : d[1];
+  for (let d = 0, p = r.length; d < p; d++)
+    for (let f = 0, E = r[d].length; f < E; f++) {
+      const v = (l = r[d][f]) == null ? void 0 : l[1];
       if (!v)
         continue;
       const h = Object.keys(v);
-      for (let E = 0, g = h.length; E < g; E++)
-        v[h[E]] = i[v[h[E]]];
+      for (let m = 0, g = h.length; m < g; m++)
+        v[h[m]] = i[v[h[m]]];
     }
   const c = [];
-  for (const l in o)
-    c[l] = r[o[l]];
+  for (const d in o)
+    c[d] = r[o[d]];
   return [n, c, s];
 }
 __name(Ba, "Ba");
@@ -2830,7 +2830,7 @@ var ee;
 var te;
 var Ae;
 var Lr;
-var Pr;
+var Hr;
 var ir;
 var qa = (ir = /* @__PURE__ */ __name2(class {
   constructor() {
@@ -2846,31 +2846,31 @@ var qa = (ir = /* @__PURE__ */ __name2(class {
     if (!a || !s)
       throw new Error(Dr);
     a[e] || [a, s].forEach((c) => {
-      c[e] = /* @__PURE__ */ Object.create(null), Object.keys(c[C]).forEach((d) => {
-        c[e][d] = [...c[C][d]];
+      c[e] = /* @__PURE__ */ Object.create(null), Object.keys(c[C]).forEach((l) => {
+        c[e][l] = [...c[C][l]];
       });
     }), t === "/*" && (t = "*");
     const n = (t.match(/\/:/g) || []).length;
     if (/\*$/.test(t)) {
       const c = xr(t);
-      e === C ? Object.keys(a).forEach((d) => {
-        var l;
-        (l = a[d])[t] || (l[t] = ge(a[d], t) || ge(a[C], t) || []);
-      }) : (i = a[e])[t] || (i[t] = ge(a[e], t) || ge(a[C], t) || []), Object.keys(a).forEach((d) => {
-        (e === C || e === d) && Object.keys(a[d]).forEach((l) => {
-          c.test(l) && a[d][l].push([r, n]);
+      e === C ? Object.keys(a).forEach((l) => {
+        var d;
+        (d = a[l])[t] || (d[t] = ge(a[l], t) || ge(a[C], t) || []);
+      }) : (i = a[e])[t] || (i[t] = ge(a[e], t) || ge(a[C], t) || []), Object.keys(a).forEach((l) => {
+        (e === C || e === l) && Object.keys(a[l]).forEach((d) => {
+          c.test(d) && a[l][d].push([r, n]);
         });
-      }), Object.keys(s).forEach((d) => {
-        (e === C || e === d) && Object.keys(s[d]).forEach((l) => c.test(l) && s[d][l].push([r, n]));
+      }), Object.keys(s).forEach((l) => {
+        (e === C || e === l) && Object.keys(s[l]).forEach((d) => c.test(d) && s[l][d].push([r, n]));
       });
       return;
     }
     const o = wr(t) || [t];
-    for (let c = 0, d = o.length; c < d; c++) {
-      const l = o[c];
+    for (let c = 0, l = o.length; c < l; c++) {
+      const d = o[c];
       Object.keys(s).forEach((p) => {
         var f;
-        (e === C || e === p) && ((f = s[p])[l] || (f[l] = [...ge(a[p], l) || ge(a[C], l) || []]), s[p][l].push([r, n - d + c + 1]));
+        (e === C || e === p) && ((f = s[p])[d] || (f[d] = [...ge(a[p], d) || ge(a[C], d) || []]), s[p][d].push([r, n - l + c + 1]));
       });
     }
   }
@@ -2891,16 +2891,16 @@ var qa = (ir = /* @__PURE__ */ __name2(class {
 }, "ir"), ee = /* @__PURE__ */ new WeakMap(), te = /* @__PURE__ */ new WeakMap(), Ae = /* @__PURE__ */ new WeakSet(), Lr = /* @__PURE__ */ __name2(function() {
   const e = /* @__PURE__ */ Object.create(null);
   return Object.keys(u(this, te)).concat(Object.keys(u(this, ee))).forEach((t) => {
-    e[t] || (e[t] = N(this, Ae, Pr).call(this, t));
+    e[t] || (e[t] = N(this, Ae, Hr).call(this, t));
   }), T(this, ee, T(this, te, void 0)), e;
-}, "Lr"), Pr = /* @__PURE__ */ __name2(function(e) {
+}, "Lr"), Hr = /* @__PURE__ */ __name2(function(e) {
   const t = [];
   let r = e === C;
   return [u(this, ee), u(this, te)].forEach((a) => {
     const s = a[e] ? Object.keys(a[e]).map((n) => [n, a[e][n]]) : [];
     s.length !== 0 ? (r || (r = true), t.push(...s)) : e !== C && t.push(...Object.keys(a[C]).map((n) => [n, a[C][n]]));
   }), r ? Ba(t) : null;
-}, "Pr"), ir);
+}, "Hr"), ir);
 var re;
 var J;
 var cr;
@@ -2924,7 +2924,7 @@ var Fa = (cr = /* @__PURE__ */ __name2(class {
     for (; n < s; n++) {
       const i = r[n];
       try {
-        for (let c = 0, d = a.length; c < d; c++)
+        for (let c = 0, l = a.length; c < l; c++)
           i.add(...a[c]);
         o = i.match(e, t);
       } catch (c) {
@@ -2954,7 +2954,7 @@ var j;
 var G;
 var ce;
 var lr;
-var Hr = (lr = /* @__PURE__ */ __name2(class {
+var Pr = (lr = /* @__PURE__ */ __name2(class {
   constructor(e, t, r) {
     R(this, G);
     R(this, ae);
@@ -2969,16 +2969,16 @@ var Hr = (lr = /* @__PURE__ */ __name2(class {
     T(this, pe, []);
   }
   insert(e, t, r) {
-    T(this, be, ++Ht(this, be)._);
+    T(this, be, ++Pt(this, be)._);
     let a = this;
     const s = Ta(t), n = [];
     for (let o = 0, i = s.length; o < i; o++) {
-      const c = s[o], d = s[o + 1], l = Sa(c, d), p = Array.isArray(l) ? l[0] : c;
+      const c = s[o], l = s[o + 1], d = Sa(c, l), p = Array.isArray(d) ? d[0] : c;
       if (p in u(a, x)) {
-        a = u(a, x)[p], l && n.push(l[1]);
+        a = u(a, x)[p], d && n.push(d[1]);
         continue;
       }
-      u(a, x)[p] = new Hr(), l && (u(a, pe).push(l), n.push(l[1])), a = u(a, x)[p];
+      u(a, x)[p] = new Pr(), d && (u(a, pe).push(d), n.push(d[1])), a = u(a, x)[p];
     }
     return u(a, ae).push({ [e]: { handler: r, possibleKeys: n.filter((o, i, c) => c.indexOf(o) === i), score: u(this, be) } }), a;
   }
@@ -2988,11 +2988,11 @@ var Hr = (lr = /* @__PURE__ */ __name2(class {
     T(this, j, Ie);
     let s = [this];
     const n = Rr(t), o = [];
-    for (let c = 0, d = n.length; c < d; c++) {
-      const l = n[c], p = c === d - 1, f = [];
-      for (let m = 0, v = s.length; m < v; m++) {
-        const h = s[m], E = u(h, x)[l];
-        E && (T(E, j, u(h, j)), p ? (u(E, x)["*"] && r.push(...N(this, G, ce).call(this, u(E, x)["*"], e, u(h, j))), r.push(...N(this, G, ce).call(this, E, e, u(h, j)))) : f.push(E));
+    for (let c = 0, l = n.length; c < l; c++) {
+      const d = n[c], p = c === l - 1, f = [];
+      for (let E = 0, v = s.length; E < v; E++) {
+        const h = s[E], m = u(h, x)[d];
+        m && (T(m, j, u(h, j)), p ? (u(m, x)["*"] && r.push(...N(this, G, ce).call(this, u(m, x)["*"], e, u(h, j))), r.push(...N(this, G, ce).call(this, m, e, u(h, j)))) : f.push(m));
         for (let g = 0, y = u(h, pe).length; g < y; g++) {
           const O = u(h, pe)[g], w = u(h, j) === Ie ? {} : { ...u(h, j) };
           if (O === "*") {
@@ -3001,35 +3001,35 @@ var Hr = (lr = /* @__PURE__ */ __name2(class {
             continue;
           }
           const [M, ve, oe] = O;
-          if (!l && !(oe instanceof RegExp))
+          if (!d && !(oe instanceof RegExp))
             continue;
-          const W = u(h, x)[M], Gr = n.slice(c).join("/");
+          const k = u(h, x)[M], Gr = n.slice(c).join("/");
           if (oe instanceof RegExp) {
             const X = oe.exec(Gr);
             if (X) {
-              if (w[ve] = X[0], r.push(...N(this, G, ce).call(this, W, e, u(h, j), w)), Object.keys(u(W, x)).length) {
-                T(W, j, w);
+              if (w[ve] = X[0], r.push(...N(this, G, ce).call(this, k, e, u(h, j), w)), Object.keys(u(k, x)).length) {
+                T(k, j, w);
                 const dt = ((i = X[0].match(/\//)) == null ? void 0 : i.length) ?? 0;
-                (o[dt] || (o[dt] = [])).push(W);
+                (o[dt] || (o[dt] = [])).push(k);
               }
               continue;
             }
           }
-          (oe === true || oe.test(l)) && (w[ve] = l, p ? (r.push(...N(this, G, ce).call(this, W, e, w, u(h, j))), u(W, x)["*"] && r.push(...N(this, G, ce).call(this, u(W, x)["*"], e, w, u(h, j)))) : (T(W, j, w), f.push(W)));
+          (oe === true || oe.test(d)) && (w[ve] = d, p ? (r.push(...N(this, G, ce).call(this, k, e, w, u(h, j))), u(k, x)["*"] && r.push(...N(this, G, ce).call(this, u(k, x)["*"], e, w, u(h, j)))) : (T(k, j, w), f.push(k)));
         }
       }
       s = f.concat(o.shift() ?? []);
     }
-    return r.length > 1 && r.sort((c, d) => c.score - d.score), [r.map(({ handler: c, params: d }) => [c, d])];
+    return r.length > 1 && r.sort((c, l) => c.score - l.score), [r.map(({ handler: c, params: l }) => [c, l])];
   }
 }, "lr"), ae = /* @__PURE__ */ new WeakMap(), x = /* @__PURE__ */ new WeakMap(), pe = /* @__PURE__ */ new WeakMap(), be = /* @__PURE__ */ new WeakMap(), j = /* @__PURE__ */ new WeakMap(), G = /* @__PURE__ */ new WeakSet(), ce = /* @__PURE__ */ __name2(function(e, t, r, a) {
   const s = [];
   for (let n = 0, o = u(e, ae).length; n < o; n++) {
-    const i = u(e, ae)[n], c = i[t] || i[C], d = {};
+    const i = u(e, ae)[n], c = i[t] || i[C], l = {};
     if (c !== void 0 && (c.params = /* @__PURE__ */ Object.create(null), s.push(c), r !== Ie || a && a !== Ie))
-      for (let l = 0, p = c.possibleKeys.length; l < p; l++) {
-        const f = c.possibleKeys[l], m = d[c.score];
-        c.params[f] = a != null && a[f] && !m ? a[f] : r[f] ?? (a == null ? void 0 : a[f]), d[c.score] = true;
+      for (let d = 0, p = c.possibleKeys.length; d < p; d++) {
+        const f = c.possibleKeys[d], E = l[c.score];
+        c.params[f] = a != null && a[f] && !E ? a[f] : r[f] ?? (a == null ? void 0 : a[f]), l[c.score] = true;
       }
   }
   return s;
@@ -3040,7 +3040,7 @@ var $a = (dr = /* @__PURE__ */ __name2(class {
   constructor() {
     _(this, "name", "TrieRouter");
     R(this, he);
-    T(this, he, new Hr());
+    T(this, he, new Pr());
   }
   add(e, t, r) {
     const a = wr(t);
@@ -3060,35 +3060,35 @@ var Ee = /* @__PURE__ */ __name2(class extends jr {
     super(e), this.router = e.router ?? new Fa({ routers: [new qa(), new $a()] });
   }
 }, "Ee");
-var ka = /* @__PURE__ */ __name2((e) => {
+var Wa = /* @__PURE__ */ __name2((e) => {
   const r = { ...{ origin: "*", allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "PATCH"], allowHeaders: [], exposeHeaders: [] }, ...e }, a = ((n) => typeof n == "string" ? n === "*" ? () => n : (o) => n === o ? o : null : typeof n == "function" ? n : (o) => n.includes(o) ? o : null)(r.origin), s = ((n) => typeof n == "function" ? n : Array.isArray(n) ? () => n : () => [])(r.allowMethods);
   return async function(o, i) {
-    var l;
+    var d;
     function c(p, f) {
       o.res.headers.set(p, f);
     }
     __name(c, "c");
     __name2(c, "c");
-    const d = await a(o.req.header("origin") || "", o);
-    if (d && c("Access-Control-Allow-Origin", d), r.origin !== "*") {
+    const l = await a(o.req.header("origin") || "", o);
+    if (l && c("Access-Control-Allow-Origin", l), r.origin !== "*") {
       const p = o.req.header("Vary");
       p ? c("Vary", p) : c("Vary", "Origin");
     }
-    if (r.credentials && c("Access-Control-Allow-Credentials", "true"), (l = r.exposeHeaders) != null && l.length && c("Access-Control-Expose-Headers", r.exposeHeaders.join(",")), o.req.method === "OPTIONS") {
+    if (r.credentials && c("Access-Control-Allow-Credentials", "true"), (d = r.exposeHeaders) != null && d.length && c("Access-Control-Expose-Headers", r.exposeHeaders.join(",")), o.req.method === "OPTIONS") {
       r.maxAge != null && c("Access-Control-Max-Age", r.maxAge.toString());
       const p = await s(o.req.header("origin") || "", o);
       p.length && c("Access-Control-Allow-Methods", p.join(","));
       let f = r.allowHeaders;
       if (!(f != null && f.length)) {
-        const m = o.req.header("Access-Control-Request-Headers");
-        m && (f = m.split(/\s*,\s*/));
+        const E = o.req.header("Access-Control-Request-Headers");
+        E && (f = E.split(/\s*,\s*/));
       }
       return f != null && f.length && (c("Access-Control-Allow-Headers", f.join(",")), o.res.headers.append("Vary", "Access-Control-Request-Headers")), o.res.headers.delete("Content-Length"), o.res.headers.delete("Content-Type"), new Response(null, { headers: o.res.headers, status: 204, statusText: "No Content" });
     }
     await i();
   };
-}, "ka");
-var Wa = /^\s*(?:text\/(?!event-stream(?:[;\s]|$))[^;\s]+|application\/(?:javascript|json|xml|xml-dtd|ecmascript|dart|postscript|rtf|tar|toml|vnd\.dart|vnd\.ms-fontobject|vnd\.ms-opentype|wasm|x-httpd-php|x-javascript|x-ns-proxy-autoconfig|x-sh|x-tar|x-virtualbox-hdd|x-virtualbox-ova|x-virtualbox-ovf|x-virtualbox-vbox|x-virtualbox-vdi|x-virtualbox-vhd|x-virtualbox-vmdk|x-www-form-urlencoded)|font\/(?:otf|ttf)|image\/(?:bmp|vnd\.adobe\.photoshop|vnd\.microsoft\.icon|vnd\.ms-dds|x-icon|x-ms-bmp)|message\/rfc822|model\/gltf-binary|x-shader\/x-fragment|x-shader\/x-vertex|[^;\s]+?\+(?:json|text|xml|yaml))(?:[;\s]|$)/i;
+}, "Wa");
+var ka = /^\s*(?:text\/(?!event-stream(?:[;\s]|$))[^;\s]+|application\/(?:javascript|json|xml|xml-dtd|ecmascript|dart|postscript|rtf|tar|toml|vnd\.dart|vnd\.ms-fontobject|vnd\.ms-opentype|wasm|x-httpd-php|x-javascript|x-ns-proxy-autoconfig|x-sh|x-tar|x-virtualbox-hdd|x-virtualbox-ova|x-virtualbox-ovf|x-virtualbox-vbox|x-virtualbox-vdi|x-virtualbox-vhd|x-virtualbox-vmdk|x-www-form-urlencoded)|font\/(?:otf|ttf)|image\/(?:bmp|vnd\.adobe\.photoshop|vnd\.microsoft\.icon|vnd\.ms-dds|x-icon|x-ms-bmp)|message\/rfc822|model\/gltf-binary|x-shader\/x-fragment|x-shader\/x-vertex|[^;\s]+?\+(?:json|text|xml|yaml))(?:[;\s]|$)/i;
 var Vt = /* @__PURE__ */ __name2((e, t = Va) => {
   const r = /\.([a-zA-Z0-9]+?)$/, a = e.match(r);
   if (!a)
@@ -3112,7 +3112,7 @@ var Ga = "index.html";
 var Ka = /* @__PURE__ */ __name2((e) => {
   const t = e.root ?? "./", r = e.path, a = e.join ?? Ya;
   return async (s, n) => {
-    var l, p, f, m;
+    var d, p, f, E;
     if (s.finalized)
       return n();
     let o;
@@ -3123,31 +3123,31 @@ var Ka = /* @__PURE__ */ __name2((e) => {
         if (o = decodeURIComponent(s.req.path), /(?:^|[\/\\])\.\.(?:$|[\/\\])/.test(o))
           throw new Error();
       } catch {
-        return await ((l = e.onNotFound) == null ? void 0 : l.call(e, s.req.path, s)), n();
+        return await ((d = e.onNotFound) == null ? void 0 : d.call(e, s.req.path, s)), n();
       }
     let i = a(t, !r && e.rewriteRequestPath ? e.rewriteRequestPath(o) : o);
     e.isDir && await e.isDir(i) && (i = a(i, Ga));
     const c = e.getContent;
-    let d = await c(i, s);
-    if (d instanceof Response)
-      return s.newResponse(d.body, d);
-    if (d) {
+    let l = await c(i, s);
+    if (l instanceof Response)
+      return s.newResponse(l.body, l);
+    if (l) {
       const v = e.mimes && Vt(i, e.mimes) || Vt(i);
-      if (s.header("Content-Type", v || "application/octet-stream"), e.precompressed && (!v || Wa.test(v))) {
-        const h = new Set((p = s.req.header("Accept-Encoding")) == null ? void 0 : p.split(",").map((E) => E.trim()));
-        for (const E of Ja) {
-          if (!h.has(E))
+      if (s.header("Content-Type", v || "application/octet-stream"), e.precompressed && (!v || ka.test(v))) {
+        const h = new Set((p = s.req.header("Accept-Encoding")) == null ? void 0 : p.split(",").map((m) => m.trim()));
+        for (const m of Ja) {
+          if (!h.has(m))
             continue;
-          const g = await c(i + Ur[E], s);
+          const g = await c(i + Ur[m], s);
           if (g) {
-            d = g, s.header("Content-Encoding", E), s.header("Vary", "Accept-Encoding", { append: true });
+            l = g, s.header("Content-Encoding", m), s.header("Vary", "Accept-Encoding", { append: true });
             break;
           }
         }
       }
-      return await ((f = e.onFound) == null ? void 0 : f.call(e, i, s)), s.body(d);
+      return await ((f = e.onFound) == null ? void 0 : f.call(e, i, s)), s.body(l);
     }
-    await ((m = e.onNotFound) == null ? void 0 : m.call(e, i, s)), await n();
+    await ((E = e.onNotFound) == null ? void 0 : E.call(e, i, s)), await n();
   };
 }, "Ka");
 var Xa = /* @__PURE__ */ __name2(async (e, t) => {
@@ -3165,7 +3165,7 @@ var Za = /* @__PURE__ */ __name2((e) => async function(r, a) {
   return Ka({ ...e, getContent: async (n) => Xa(n, { manifest: e.manifest, namespace: e.namespace ? e.namespace : r.env ? r.env.__STATIC_CONTENT : void 0 }) })(r, a);
 }, "Za");
 var Qa = /* @__PURE__ */ __name2((e) => Za(e), "Qa");
-var He = "_hp";
+var Pe = "_hp";
 var es = { Change: "Input", DoubleClick: "DblClick" };
 var ts = { svg: "2000/svg", math: "1998/Math/MathML" };
 var Ue = [];
@@ -3248,16 +3248,16 @@ var ss = /* @__PURE__ */ __name2((e, t) => {
 }, "ss");
 var Br = /* @__PURE__ */ __name2((e, t, r, a, s) => {
   var n, o;
-  (n = e.vR) != null && n.length && (a.push(...e.vR), delete e.vR), typeof e.tag == "function" && ((o = e[b][1][kr]) == null || o.forEach((i) => s.push(i))), e.vC.forEach((i) => {
+  (n = e.vR) != null && n.length && (a.push(...e.vR), delete e.vR), typeof e.tag == "function" && ((o = e[b][1][Wr]) == null || o.forEach((i) => s.push(i))), e.vC.forEach((i) => {
     var c;
     if (z(i))
       r.push(i);
     else if (typeof i.tag == "function" || i.tag === "") {
       i.c = t;
-      const d = r.length;
+      const l = r.length;
       if (Br(i, t, r, a, s), i.s) {
-        for (let l = d; l < r.length; l++)
-          r[l].s = true;
+        for (let d = l; d < r.length; d++)
+          r[d].s = true;
         i.s = false;
       }
     } else
@@ -3265,16 +3265,16 @@ var Br = /* @__PURE__ */ __name2((e, t, r, a, s) => {
   });
 }, "Br");
 var ns = /* @__PURE__ */ __name2((e) => {
-  for (; ; e = e.tag === He || !e.vC || !e.pP ? e.nN : e.vC[0]) {
+  for (; ; e = e.tag === Pe || !e.vC || !e.pP ? e.nN : e.vC[0]) {
     if (!e)
       return null;
-    if (e.tag !== He && e.e)
+    if (e.tag !== Pe && e.e)
       return e.e;
   }
 }, "ns");
 var qr = /* @__PURE__ */ __name2((e) => {
   var t, r, a, s, n, o;
-  z(e) || ((r = (t = e[b]) == null ? void 0 : t[1][kr]) == null || r.forEach((i) => {
+  z(e) || ((r = (t = e[b]) == null ? void 0 : t[1][Wr]) == null || r.forEach((i) => {
     var c;
     return (c = i[2]) == null ? void 0 : c.call(i);
   }), (a = Nt.get(e.e)) == null || a(), e.p === 2 && ((s = e.vC) == null || s.forEach((i) => i.p = 2)), (n = e.vC) == null || n.forEach(qr)), e.p || ((o = e.e) == null || o.remove(), delete e.e), typeof e.tag == "function" && (Me.delete(e), at.delete(e), delete e[b][3], e.a = true);
@@ -3291,7 +3291,7 @@ var Gt = /* @__PURE__ */ __name2((e, t) => {
 }, "Gt");
 var Kt = Symbol();
 var $r = /* @__PURE__ */ __name2((e, t, r) => {
-  var d;
+  var l;
   const a = [], s = [], n = [];
   Br(e, t, a, s, n), s.forEach(qr);
   const o = r ? void 0 : t.childNodes;
@@ -3301,25 +3301,25 @@ var $r = /* @__PURE__ */ __name2((e, t, r) => {
   else if (!o.length)
     i = 0;
   else {
-    const l = Gt(o, ns(e.nN));
-    l !== void 0 ? (c = o[l], i = l) : i = Gt(o, (d = a.find((p) => p.tag !== He && p.e)) == null ? void 0 : d.e) ?? -1, i === -1 && (r = true);
+    const d = Gt(o, ns(e.nN));
+    d !== void 0 ? (c = o[d], i = d) : i = Gt(o, (l = a.find((p) => p.tag !== Pe && p.e)) == null ? void 0 : l.e) ?? -1, i === -1 && (r = true);
   }
-  for (let l = 0, p = a.length; l < p; l++, i++) {
-    const f = a[l];
-    let m;
+  for (let d = 0, p = a.length; d < p; d++, i++) {
+    const f = a[d];
+    let E;
     if (f.s && f.e)
-      m = f.e, f.s = false;
+      E = f.e, f.s = false;
     else {
       const v = r || !f.e;
-      z(f) ? (f.e && f.d && (f.e.textContent = f.t), f.d = false, m = f.e || (f.e = document.createTextNode(f.t))) : (m = f.e || (f.e = f.n ? document.createElementNS(f.n, f.tag) : document.createElement(f.tag)), as(m, f.props, f.pP), $r(f, m, v));
+      z(f) ? (f.e && f.d && (f.e.textContent = f.t), f.d = false, E = f.e || (f.e = document.createTextNode(f.t))) : (E = f.e || (f.e = f.n ? document.createElementNS(f.n, f.tag) : document.createElement(f.tag)), as(E, f.props, f.pP), $r(f, E, v));
     }
-    f.tag === He ? i-- : r ? m.parentNode || t.appendChild(m) : o[i] !== m && o[i - 1] !== m && (o[i + 1] === m ? t.appendChild(o[i]) : t.insertBefore(m, c || o[i] || null));
+    f.tag === Pe ? i-- : r ? E.parentNode || t.appendChild(E) : o[i] !== E && o[i - 1] !== E && (o[i + 1] === E ? t.appendChild(o[i]) : t.insertBefore(E, c || o[i] || null));
   }
   if (e.pP && delete e.pP, n.length) {
-    const l = [], p = [];
-    n.forEach(([, f, , m, v]) => {
-      f && l.push(f), m && p.push(m), v == null || v();
-    }), l.forEach((f) => f()), p.length && requestAnimationFrame(() => {
+    const d = [], p = [];
+    n.forEach(([, f, , E, v]) => {
+      f && d.push(f), E && p.push(E), v == null || v();
+    }), d.forEach((f) => f()), p.length && requestAnimationFrame(() => {
       p.forEach((f) => f());
     });
   }
@@ -3327,43 +3327,43 @@ var $r = /* @__PURE__ */ __name2((e, t, r) => {
 var os = /* @__PURE__ */ __name2((e, t) => !!(e && e.length === t.length && e.every((r, a) => r[1] === t[a][1])), "os");
 var at = /* @__PURE__ */ new WeakMap();
 var bt = /* @__PURE__ */ __name2((e, t, r) => {
-  var n, o, i, c, d, l;
+  var n, o, i, c, l, d;
   const a = !r && t.pC;
   r && (t.pC || (t.pC = t.vC));
   let s;
   try {
     r || (r = typeof t.tag == "function" ? ss(e, t) : ze(t.props.children)), ((n = r[0]) == null ? void 0 : n.tag) === "" && r[0][Rt] && (s = r[0][Rt], e[5].push([e, s, t]));
     const p = a ? [...t.pC] : t.vC ? [...t.vC] : void 0, f = [];
-    let m;
+    let E;
     for (let v = 0; v < r.length; v++) {
       Array.isArray(r[v]) && r.splice(v, 1, ...r[v].flat());
       let h = is(r[v]);
       if (h) {
         typeof h.tag == "function" && !h.tag[Er] && (Ce.length > 0 && (h[b][2] = Ce.map((g) => [g, g.values.at(-1)])), (o = e[5]) != null && o.length && (h[b][3] = e[5].at(-1)));
-        let E;
+        let m;
         if (p && p.length) {
           const g = p.findIndex(z(h) ? (y) => z(y) : h.key !== void 0 ? (y) => y.key === h.key && y.tag === h.tag : (y) => y.tag === h.tag);
-          g !== -1 && (E = p[g], p.splice(g, 1));
+          g !== -1 && (m = p[g], p.splice(g, 1));
         }
-        if (E)
+        if (m)
           if (z(h))
-            E.t !== h.t && (E.t = h.t, E.d = true), h = E;
+            m.t !== h.t && (m.t = h.t, m.d = true), h = m;
           else {
-            const g = E.pP = E.props;
-            if (E.props = h.props, E.f || (E.f = h.f || t.f), typeof h.tag == "function") {
-              const y = E[b][2];
-              E[b][2] = h[b][2] || [], E[b][3] = h[b][3], !E.f && ((E.o || E) === h.o || (c = (i = E.tag)[ea]) != null && c.call(i, g, E.props)) && os(y, E[b][2]) && (E.s = true);
+            const g = m.pP = m.props;
+            if (m.props = h.props, m.f || (m.f = h.f || t.f), typeof h.tag == "function") {
+              const y = m[b][2];
+              m[b][2] = h[b][2] || [], m[b][3] = h[b][3], !m.f && ((m.o || m) === h.o || (c = (i = m.tag)[ea]) != null && c.call(i, g, m.props)) && os(y, m[b][2]) && (m.s = true);
             }
-            h = E;
+            h = m;
           }
         else if (!z(h) && De) {
           const g = je(De);
           g && (h.n = g);
         }
-        if (!z(h) && !h.s && (bt(e, h), delete h.f), f.push(h), m && !m.s && !h.s)
-          for (let g = m; g && !z(g); g = (d = g.vC) == null ? void 0 : d.at(-1))
+        if (!z(h) && !h.s && (bt(e, h), delete h.f), f.push(h), E && !E.s && !h.s)
+          for (let g = E; g && !z(g); g = (l = g.vC) == null ? void 0 : l.at(-1))
             g.nN = h;
-        m = h;
+        E = h;
       }
     }
     t.vR = a ? [...t.vC, ...p || []] : p || [], t.vC = f, a && delete t.pC;
@@ -3373,11 +3373,11 @@ var bt = /* @__PURE__ */ __name2((e, t, r) => {
         return;
       throw p;
     }
-    const [f, m, v] = ((l = t[b]) == null ? void 0 : l[3]) || [];
-    if (m) {
-      const h = /* @__PURE__ */ __name2(() => st([0, false, e[2]], v), "h"), E = at.get(v) || [];
-      E.push(h), at.set(v, E);
-      const g = m(p, () => {
+    const [f, E, v] = ((d = t[b]) == null ? void 0 : d[3]) || [];
+    if (E) {
+      const h = /* @__PURE__ */ __name2(() => st([0, false, e[2]], v), "h"), m = at.get(v) || [];
+      m.push(h), at.set(v, m);
+      const g = E(p, () => {
         const y = at.get(v);
         if (y) {
           const O = y.indexOf(h);
@@ -3388,7 +3388,7 @@ var bt = /* @__PURE__ */ __name2((e, t, r) => {
       if (g) {
         if (e[0] === 1)
           e[1] = true;
-        else if (bt(e, v, [g]), (m.length === 1 || e !== f) && v.c) {
+        else if (bt(e, v, [g]), (E.length === 1 || e !== f) && v.c) {
           Fr(v, v.c, false);
           return;
         }
@@ -3452,13 +3452,13 @@ var st = /* @__PURE__ */ __name2(async (e, t) => {
   }
   return s;
 }, "st");
-var cs = /* @__PURE__ */ __name2((e, t, r) => ({ tag: He, props: { children: e }, key: r, e: t, p: 1 }), "cs");
+var cs = /* @__PURE__ */ __name2((e, t, r) => ({ tag: Pe, props: { children: e }, key: r, e: t, p: 1 }), "cs");
 var vt = 0;
-var kr = 1;
+var Wr = 1;
 var gt = 2;
 var _t = 3;
 var Tt = /* @__PURE__ */ new WeakMap();
-var Wr = /* @__PURE__ */ __name2((e, t) => !e || !t || e.length !== t.length || t.some((r, a) => r !== e[a]), "Wr");
+var kr = /* @__PURE__ */ __name2((e, t) => !e || !t || e.length !== t.length || t.some((r, a) => r !== e[a]), "kr");
 var ls = void 0;
 var Qt = [];
 var ds = /* @__PURE__ */ __name2((e) => {
@@ -3469,17 +3469,17 @@ var ds = /* @__PURE__ */ __name2((e) => {
     }];
   const [, a] = r, s = (o = a[b][1])[vt] || (o[vt] = []), n = a[b][0]++;
   return s[n] || (s[n] = [t(), (i) => {
-    const c = ls, d = s[n];
-    if (typeof i == "function" && (i = i(d[0])), !Object.is(i, d[0]))
-      if (d[0] = i, Qt.length) {
-        const [l, p] = Qt.at(-1);
-        Promise.all([l === 3 ? a : st([l, false, c], a), p]).then(([f]) => {
-          if (!f || !(l === 2 || l === 3))
+    const c = ls, l = s[n];
+    if (typeof i == "function" && (i = i(l[0])), !Object.is(i, l[0]))
+      if (l[0] = i, Qt.length) {
+        const [d, p] = Qt.at(-1);
+        Promise.all([d === 3 ? a : st([d, false, c], a), p]).then(([f]) => {
+          if (!f || !(d === 2 || d === 3))
             return;
-          const m = f.vC;
+          const E = f.vC;
           requestAnimationFrame(() => {
             setTimeout(() => {
-              m === f.vC && st([l === 3 ? 1 : 0, false, c], f);
+              E === f.vC && st([d === 3 ? 1 : 0, false, c], f);
             });
           });
         });
@@ -3493,7 +3493,7 @@ var Mt = /* @__PURE__ */ __name2((e, t) => {
   if (!r)
     return e;
   const [, a] = r, s = (i = a[b][1])[gt] || (i[gt] = []), n = a[b][0]++, o = s[n];
-  return Wr(o == null ? void 0 : o[1], t) ? s[n] = [e, t] : e = s[n][0], e;
+  return kr(o == null ? void 0 : o[1], t) ? s[n] = [e, t] : e = s[n][0], e;
 }, "Mt");
 var us = /* @__PURE__ */ __name2((e) => {
   const t = Tt.get(e);
@@ -3510,7 +3510,7 @@ var fs = /* @__PURE__ */ __name2((e, t) => {
   if (!r)
     return e();
   const [, a] = r, s = (i = a[b][1])[_t] || (i[_t] = []), n = a[b][0]++, o = s[n];
-  return Wr(o == null ? void 0 : o[1], t) && (s[n] = [e(), t]), s[n][0];
+  return kr(o == null ? void 0 : o[1], t) && (s[n] = [e(), t]), s[n][0];
 }, "fs");
 var ps = vr({ pending: false, data: null, method: null, action: null });
 var er = /* @__PURE__ */ new Set();
@@ -3535,10 +3535,10 @@ var Je = /* @__PURE__ */ __name2((e, t, r, a, s) => {
   if (t != null && t.itemProp)
     return { tag: e, props: t, type: e, ref: t.ref };
   const n = document.head;
-  let { onLoad: o, onError: i, precedence: c, blocking: d, ...l } = t, p = null, f = false;
-  const m = Xe[e];
+  let { onLoad: o, onError: i, precedence: c, blocking: l, ...d } = t, p = null, f = false;
+  const E = Xe[e];
   let v;
-  if (m.length > 0) {
+  if (E.length > 0) {
     const y = n.querySelectorAll(e);
     e:
       for (const O of y)
@@ -3548,19 +3548,19 @@ var Je = /* @__PURE__ */ __name2((e, t, r, a, s) => {
             break e;
           }
     if (!p) {
-      const O = m.reduce((w, M) => t[M] === void 0 ? w : `${w}-${M}-${t[M]}`, e);
+      const O = E.reduce((w, M) => t[M] === void 0 ? w : `${w}-${M}-${t[M]}`, e);
       f = !Ke[O], p = Ke[O] || (Ke[O] = (() => {
         const w = document.createElement(e);
-        for (const M of m)
+        for (const M of E)
           t[M] !== void 0 && w.setAttribute(M, t[M]), t.rel && w.setAttribute("rel", t.rel);
         return w;
       })());
     }
   } else
     v = n.querySelectorAll(e);
-  c = a ? c ?? "" : void 0, a && (l[Ze] = c);
+  c = a ? c ?? "" : void 0, a && (d[Ze] = c);
   const h = Mt((y) => {
-    if (m.length > 0) {
+    if (E.length > 0) {
       let O = false;
       for (const w of n.querySelectorAll(e)) {
         if (O && w.getAttribute(Ze) !== c) {
@@ -3579,9 +3579,9 @@ var Je = /* @__PURE__ */ __name2((e, t, r, a, s) => {
         }
       O || n.insertBefore(y, n.contains(v[0]) ? v[0] : n.querySelector(e)), v = void 0;
     }
-  }, [c]), E = xt(t.ref, (y) => {
+  }, [c]), m = xt(t.ref, (y) => {
     var M;
-    const O = m[0];
+    const O = E[0];
     if (r === 2 && (y.innerHTML = ""), (f || v) && h(y), !i && !o)
       return;
     let w = _e[M = y.getAttribute(O)] || (_e[M] = new Promise((ve, oe) => {
@@ -3590,7 +3590,7 @@ var Je = /* @__PURE__ */ __name2((e, t, r, a, s) => {
     o && (w = w.then(o)), i && (w = w.catch(i)), w.catch(() => {
     });
   });
-  if (s && d === "render") {
+  if (s && l === "render") {
     const y = Xe[e][0];
     if (t[y]) {
       const O = t[y], w = _e[O] || (_e[O] = new Promise((M, ve) => {
@@ -3599,7 +3599,7 @@ var Je = /* @__PURE__ */ __name2((e, t, r, a, s) => {
       us(w);
     }
   }
-  const g = { tag: e, type: e, props: { ...l, ref: E }, ref: E };
+  const g = { tag: e, type: e, props: { ...d, ref: m }, ref: m };
   return g.p = r, p && (g.e = p), cs(g, n);
 }, "Je");
 var Es = /* @__PURE__ */ __name2((e) => {
@@ -3614,17 +3614,17 @@ var zr = Symbol();
 var Ts = /* @__PURE__ */ __name2((e) => {
   const { action: t, ...r } = e;
   typeof t != "function" && (r.action = t);
-  const [a, s] = ds([null, false]), n = Mt(async (d) => {
-    const l = d.isTrusted ? t : d.detail[zr];
-    if (typeof l != "function")
+  const [a, s] = ds([null, false]), n = Mt(async (l) => {
+    const d = l.isTrusted ? t : l.detail[zr];
+    if (typeof d != "function")
       return;
-    d.preventDefault();
-    const p = new FormData(d.target);
+    l.preventDefault();
+    const p = new FormData(l.target);
     s([p, true]);
-    const f = l(p);
+    const f = d(p);
     f instanceof Promise && (hs(f), await f), s([null, true]);
-  }, []), o = xt(e.ref, (d) => (d.addEventListener("submit", n), () => {
-    d.removeEventListener("submit", n);
+  }, []), o = xt(e.ref, (l) => (l.addEventListener("submit", n), () => {
+    l.removeEventListener("submit", n);
   })), [i, c] = a;
   return a[1] = false, { tag: ps, props: { value: { pending: i !== null, data: i, method: i ? "post" : null, action: i ? t : null }, children: { tag: "form", props: { ...r, ref: o }, type: "form", ref: o } }, f: c };
 }, "Ts");
@@ -3646,7 +3646,7 @@ Dt(null);
 new TextEncoder();
 var Ss = Dt(null);
 var ws = /* @__PURE__ */ __name2((e, t, r, a) => (s, n) => {
-  const o = "<!DOCTYPE html>", i = r ? Ft((d) => r(d, e), { Layout: t, ...n }, s) : s, c = Qr`${U(o)}${Ft(Ss.Provider, { value: e }, i)}`;
+  const o = "<!DOCTYPE html>", i = r ? Ft((l) => r(l, e), { Layout: t, ...n }, s) : s, c = Qr`${U(o)}${Ft(Ss.Provider, { value: e }, i)}`;
   return e.html(c);
 }, "ws");
 var Os = /* @__PURE__ */ __name2((e, t) => function(a, s) {
@@ -3690,13 +3690,13 @@ async function bs(e, t, r, a, s, n, o) {
     if (console.log("\u{1F4C5} Sincronizando con agenda:", { accionId: t, titulo: r, proximaRevision: o }), o) {
       const i = o.split("T")[0], c = o.split("T")[1] || "09:00";
       console.log("\u{1F4C5} Creando evento agenda:", { fechaParte: i, horaParte: c });
-      const d = await e.prepare(`
+      const l = await e.prepare(`
         INSERT INTO agenda_eventos (
-          accion_id, titulo, descripcion, fecha_evento, hora_evento, estado,
+          accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad, estado,
           created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `).bind(t, `[Decreto] ${r}`, `${a}${s ? " - " + s : ""}`, i, c).run();
-      console.log("\u2705 Evento agenda creado:", d.meta.last_row_id);
+        ) VALUES (?, ?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `).bind(t, `[Decreto] ${r}`, `${a}${s ? " - " + s : ""}`, i, c, "media").run();
+      console.log("\u2705 Evento agenda creado:", l.meta.last_row_id);
     } else
       console.log("\u23ED\uFE0F Sin fecha programada, no se crea evento agenda");
   } catch (i) {
@@ -3773,25 +3773,25 @@ I.post("/:id/acciones", async (e) => {
   try {
     const r = e.req.param("id"), a = await e.req.json();
     console.log("=== BACKEND: RECIBIENDO DATOS ===", { decretoId: r, requestDataKeys: Object.keys(a), hasSubtareas: "subtareas" in a, subtareasLength: ((t = a.subtareas) == null ? void 0 : t.length) || 0, subtareasData: a.subtareas });
-    const { titulo: s, que_hacer: n, como_hacerlo: o, resultados: i, tareas_pendientes: c, tipo: d, proxima_revision: l, calificacion: p, subtareas: f = [] } = a;
+    const { titulo: s, que_hacer: n, como_hacerlo: o, resultados: i, tareas_pendientes: c, tipo: l, proxima_revision: d, calificacion: p, subtareas: f = [] } = a;
     if (!s || !n)
       return e.json({ success: false, error: "Campos requeridos: titulo, que_hacer" }, 400);
-    const m = crypto.randomUUID().replace(/-/g, "").substring(0, 32);
+    const E = crypto.randomUUID().replace(/-/g, "").substring(0, 32);
     if (await e.env.DB.prepare(`
       INSERT INTO acciones (
         id, decreto_id, titulo, que_hacer, como_hacerlo, resultados, 
         tareas_pendientes, tipo, proxima_revision, calificacion, origen
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'manual')
-    `).bind(m, r, s, n, o || "", i || "", JSON.stringify(c || []), d || "secundaria", l || null, p || null).run(), console.log("\u2705 Acci\xF3n creada:", m), l) {
-      console.log("\u{1F525} FORZANDO creaci\xF3n en agenda para:", { accionId: m, titulo: s, proxima_revision: l });
-      const h = l.split("T")[0], E = l.split("T")[1] || "09:00";
+    `).bind(E, r, s, n, o || "", i || "", JSON.stringify(c || []), l || "secundaria", d || null, p || null).run(), console.log("\u2705 Acci\xF3n creada:", E), d) {
+      console.log("\u{1F525} FORZANDO creaci\xF3n en agenda para:", { accionId: E, titulo: s, proxima_revision: d });
+      const h = d.split("T")[0], m = d.split("T")[1] || "09:00";
       try {
         const g = await e.env.DB.prepare(`
           INSERT INTO agenda_eventos (
-            accion_id, titulo, descripcion, fecha_evento, hora_evento, estado,
+            accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad, estado,
             created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        `).bind(m, `[Decreto] ${s}`, `${n}${o ? " - " + o : ""}`, h, E).run();
+          ) VALUES (?, ?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `).bind(E, `[Decreto] ${s}`, `${n}${o ? " - " + o : ""}`, h, m, "media").run();
         console.log("\u{1F680} AGENDA EVENTO CREADO EXITOSAMENTE:", g.meta.last_row_id);
       } catch (g) {
         console.error("\u{1F4A5} ERROR CREANDO AGENDA EVENTO:", g);
@@ -3802,24 +3802,24 @@ I.post("/:id/acciones", async (e) => {
     if (console.log("=== PROCESANDO SUB-TAREAS ===", { hasSubtareas: !!f, subtareasLength: (f == null ? void 0 : f.length) || 0, subtareasData: f }), f && f.length > 0) {
       console.log(`Procesando ${f.length} sub-tareas...`);
       for (let h = 0; h < f.length; h++) {
-        const E = f[h];
-        if (console.log(`Sub-tarea ${h + 1}:`, E), E.titulo) {
+        const m = f[h];
+        if (console.log(`Sub-tarea ${h + 1}:`, m), m.titulo) {
           const g = crypto.randomUUID().replace(/-/g, "").substring(0, 32);
-          let y = E.fecha_programada;
-          !y && l && (y = l), console.log(`Creando sub-tarea ${h + 1} con ID: ${g}`, { titulo: E.titulo, queHacer: E.que_hacer, fecha: y, padreId: m });
+          let y = m.fecha_programada;
+          !y && d && (y = d), console.log(`Creando sub-tarea ${h + 1} con ID: ${g}`, { titulo: m.titulo, queHacer: m.que_hacer, fecha: y, padreId: E });
           const O = await e.env.DB.prepare(`
             INSERT INTO acciones (
               id, decreto_id, titulo, que_hacer, como_hacerlo, resultados, 
               tipo, proxima_revision, origen, tarea_padre_id, nivel_jerarquia
             ) VALUES (?, ?, ?, ?, ?, '', 'secundaria', ?, 'subtarea', ?, 1)
-          `).bind(g, r, E.titulo, E.que_hacer, E.como_hacerlo || "", y, m).run();
-          console.log(`\u2705 Sub-tarea ${h + 1} creada en BD:`, { success: O.success, changes: O.changes }), y && (await bs(e.env.DB, g, `[Sub] ${E.titulo}`, E.que_hacer, E.como_hacerlo, "secundaria", y), console.log(`\u2705 Sub-tarea ${h + 1} sincronizada con agenda`)), v++;
+          `).bind(g, r, m.titulo, m.que_hacer, m.como_hacerlo || "", y, E).run();
+          console.log(`\u2705 Sub-tarea ${h + 1} creada en BD:`, { success: O.success, changes: O.changes }), y && (await bs(e.env.DB, g, `[Sub] ${m.titulo}`, m.que_hacer, m.como_hacerlo, "secundaria", y), console.log(`\u2705 Sub-tarea ${h + 1} sincronizada con agenda`)), v++;
         } else
           console.log(`\u23ED\uFE0F Sub-tarea ${h + 1} sin t\xEDtulo, saltando`);
       }
     } else
       console.log("No hay sub-tareas para procesar");
-    return console.log(`=== SUB-TAREAS COMPLETADAS: ${v} ===`), console.log("=== RESPUESTA FINAL ===", { success: true, accionId: m, subtareasCreadas: v }), e.json({ success: true, id: m, data: { subtareas_creadas: v } });
+    return console.log(`=== SUB-TAREAS COMPLETADAS: ${v} ===`), console.log("=== RESPUESTA FINAL ===", { success: true, accionId: E, subtareasCreadas: v }), e.json({ success: true, id: E, data: { subtareas_creadas: v } });
   } catch (r) {
     return console.error("Error creating action:", r), e.json({ success: false, error: `Error al crear acci\xF3n: ${r.message}` }, 500);
   }
@@ -3852,7 +3852,7 @@ I.get("/:decretoId/acciones/:accionId", async (e) => {
 });
 I.put("/:decretoId/acciones/:accionId", async (e) => {
   try {
-    const t = e.req.param("decretoId"), r = e.req.param("accionId"), { titulo: a, que_hacer: s, como_hacerlo: n, resultados: o, tipo: i, proxima_revision: c, calificacion: d } = await e.req.json();
+    const t = e.req.param("decretoId"), r = e.req.param("accionId"), { titulo: a, que_hacer: s, como_hacerlo: n, resultados: o, tipo: i, proxima_revision: c, calificacion: l } = await e.req.json();
     if (!a || !s)
       return e.json({ success: false, error: "Campos requeridos: titulo, que_hacer" }, 400);
     if (await e.env.DB.prepare(`
@@ -3866,7 +3866,7 @@ I.put("/:decretoId/acciones/:accionId", async (e) => {
         calificacion = ?,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND decreto_id = ?
-    `).bind(a, s, n || "", o || "", i || "secundaria", c || null, d || null, r, t).run(), await e.env.DB.prepare("SELECT id FROM agenda_eventos WHERE accion_id = ?").bind(r).first() && c) {
+    `).bind(a, s, n || "", o || "", i || "secundaria", c || null, l || null, r, t).run(), await e.env.DB.prepare("SELECT id FROM agenda_eventos WHERE accion_id = ?").bind(r).first() && c) {
       const p = c.split("T")[0], f = c.split("T")[1] || "09:00";
       await e.env.DB.prepare(`
         UPDATE agenda_eventos SET 
@@ -3927,12 +3927,12 @@ I.post("/:decretoId/acciones/:accionId/seguimientos", async (e) => {
     `).bind(s, JSON.stringify(n || []), o || null, i || null, t).run();
     let c = 0;
     if (n && Array.isArray(n)) {
-      for (const d of n)
-        if (typeof d == "string" && d.trim()) {
-          let l = d.trim(), p = "secundaria", f = null;
-          (l.startsWith("[P]") || l.includes("#primaria")) && (p = "primaria", l = l.replace(/\[P\]|#primaria/g, "").trim()), l.includes("#diaria") && (p = "secundaria", l = l.replace(/#diaria/g, "").trim());
-          const m = l.match(/@(\d{4}-\d{2}-\d{2})/);
-          m && (f = m[1] + "T09:00", l = l.replace(/@\d{4}-\d{2}-\d{2}/g, "").trim());
+      for (const l of n)
+        if (typeof l == "string" && l.trim()) {
+          let d = l.trim(), p = "secundaria", f = null;
+          (d.startsWith("[P]") || d.includes("#primaria")) && (p = "primaria", d = d.replace(/\[P\]|#primaria/g, "").trim()), d.includes("#diaria") && (p = "secundaria", d = d.replace(/#diaria/g, "").trim());
+          const E = d.match(/@(\d{4}-\d{2}-\d{2})/);
+          E && (f = E[1] + "T09:00", d = d.replace(/@\d{4}-\d{2}-\d{2}/g, "").trim());
           const v = await e.env.DB.prepare("SELECT decreto_id FROM acciones WHERE id = ?").bind(t).first();
           if (v) {
             const h = await e.env.DB.prepare(`
@@ -3940,22 +3940,22 @@ I.post("/:decretoId/acciones/:accionId/seguimientos", async (e) => {
                 decreto_id, titulo, que_hacer, como_hacerlo, tipo, 
                 proxima_revision, origen
               ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            `).bind(v.decreto_id, l, "Tarea generada desde seguimiento", `Completar: ${l}`, p, f, `seguimiento:${t}`).run();
-            let E = null;
+            `).bind(v.decreto_id, d, "Tarea generada desde seguimiento", `Completar: ${d}`, p, f, `seguimiento:${t}`).run();
+            let m = null;
             if (p === "secundaria") {
               const g = f ? f.split("T")[0] : (/* @__PURE__ */ new Date()).toISOString().split("T")[0], y = f ? f.split("T")[1] : "09:00";
-              E = (await e.env.DB.prepare(`
-                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento)
-                VALUES (?, ?, ?, ?, ?)
-              `).bind(h.meta.last_row_id, l, `[Auto-generada] ${l}`, g, y).run()).meta.last_row_id;
+              m = (await e.env.DB.prepare(`
+                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
+                VALUES (?, ?, ?, ?, ?, ?)
+              `).bind(h.meta.last_row_id, d, `[Auto-generada] ${d}`, g, y, "media").run()).meta.last_row_id;
             } else
-              p === "primaria" && f && (E = (await e.env.DB.prepare(`
-                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento)
-                VALUES (?, ?, ?, date(?), time(?))
-              `).bind(h.meta.last_row_id, `[Semanal] ${l}`, "Tarea generada desde seguimiento", f.split("T")[0], f.split("T")[1]).run()).meta.last_row_id);
-            E && await e.env.DB.prepare(`
+              p === "primaria" && f && (m = (await e.env.DB.prepare(`
+                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
+                VALUES (?, ?, ?, date(?), time(?), ?)
+              `).bind(h.meta.last_row_id, `[Semanal] ${d}`, "Tarea generada desde seguimiento", f.split("T")[0], f.split("T")[1], "media").run()).meta.last_row_id);
+            m && await e.env.DB.prepare(`
                 UPDATE acciones SET agenda_event_id = ? WHERE id = ?
-              `).bind(E, h.meta.last_row_id).run(), c++;
+              `).bind(m, h.meta.last_row_id).run(), c++;
           }
         }
     }
@@ -4021,8 +4021,8 @@ I.get("/:decretoId/acciones/:accionId/arbol", async (e) => {
     return e.json({ success: false, error: "Error al obtener \xE1rbol de tareas" }, 500);
   }
 });
-var P = new Ee();
-P.get("/metricas/:fecha", async (e) => {
+var H = new Ee();
+H.get("/metricas/:fecha", async (e) => {
   try {
     const t = e.req.param("fecha"), r = await e.env.DB.prepare(`
       SELECT ae.*, a.titulo as accion_titulo, d.area, d.titulo as decreto_titulo
@@ -4030,14 +4030,21 @@ P.get("/metricas/:fecha", async (e) => {
       LEFT JOIN acciones a ON ae.accion_id = a.id
       LEFT JOIN decretos d ON a.decreto_id = d.id
       WHERE ae.fecha_evento = ?
-      ORDER BY ae.hora_evento ASC
+      ORDER BY 
+        CASE ae.prioridad 
+          WHEN 'alta' THEN 1 
+          WHEN 'media' THEN 2 
+          WHEN 'baja' THEN 3 
+          ELSE 2 
+        END ASC, 
+        ae.hora_evento ASC
     `).bind(t).all(), a = r.results.length, s = r.results.filter((i) => i.estado === "completada").length, n = a - s, o = a > 0 ? Math.round(s / a * 100) : 0;
     return e.json({ success: true, data: { total: a, completadas: s, pendientes: n, progreso: o, tareas: r.results } });
   } catch {
     return e.json({ success: false, error: "Error al obtener m\xE9tricas del d\xEDa" }, 500);
   }
 });
-P.get("/calendario/:year/:month", async (e) => {
+H.get("/calendario/:year/:month", async (e) => {
   try {
     const t = e.req.param("year"), r = e.req.param("month"), a = `${t}-${r.padStart(2, "0")}-01`, s = `${t}-${r.padStart(2, "0")}-31`, n = await e.env.DB.prepare(`
       SELECT 
@@ -4050,15 +4057,15 @@ P.get("/calendario/:year/:month", async (e) => {
       GROUP BY fecha_evento
     `).bind(a, s).all(), o = {};
     for (const i of n.results) {
-      const { fecha_evento: c, total: d, completadas: l, vencidas: p } = i;
-      l === d ? o[c] = "completado" : p > 0 ? o[c] = "vencido" : d > l && (o[c] = "pendiente");
+      const { fecha_evento: c, total: l, completadas: d, vencidas: p } = i;
+      d === l ? o[c] = "completado" : p > 0 ? o[c] = "vencido" : l > d && (o[c] = "pendiente");
     }
     return e.json({ success: true, data: { eventos: n.results, estados: o } });
   } catch {
     return e.json({ success: false, error: "Error al obtener calendario" }, 500);
   }
 });
-P.get("/timeline/:fecha", async (e) => {
+H.get("/timeline/:fecha", async (e) => {
   try {
     const t = e.req.param("fecha"), r = await e.env.DB.prepare(`
       SELECT 
@@ -4073,14 +4080,22 @@ P.get("/timeline/:fecha", async (e) => {
       LEFT JOIN acciones a ON ae.accion_id = a.id
       LEFT JOIN decretos d ON a.decreto_id = d.id
       WHERE ae.fecha_evento = ?
-      ORDER BY ae.hora_evento ASC, ae.created_at ASC
+      ORDER BY 
+        CASE ae.prioridad 
+          WHEN 'alta' THEN 1 
+          WHEN 'media' THEN 2 
+          WHEN 'baja' THEN 3 
+          ELSE 2 
+        END ASC, 
+        ae.hora_evento ASC, 
+        ae.created_at ASC
     `).bind(t).all();
     return e.json({ success: true, data: r.results });
   } catch {
     return e.json({ success: false, error: "Error al obtener timeline" }, 500);
   }
 });
-P.get("/enfoque/:fecha", async (e) => {
+H.get("/enfoque/:fecha", async (e) => {
   try {
     const t = e.req.param("fecha"), r = await e.env.DB.prepare(`
       SELECT 
@@ -4099,7 +4114,7 @@ P.get("/enfoque/:fecha", async (e) => {
     return e.json({ success: false, error: "Error al obtener enfoque del d\xEDa" }, 500);
   }
 });
-P.put("/enfoque/:fecha", async (e) => {
+H.put("/enfoque/:fecha", async (e) => {
   try {
     const t = e.req.param("fecha"), { tarea_id: r } = await e.req.json();
     return await e.env.DB.prepare("UPDATE agenda_eventos SET es_enfoque_dia = 0 WHERE fecha_evento = ?").bind(t).run(), r && await e.env.DB.prepare("UPDATE agenda_eventos SET es_enfoque_dia = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(r).run(), e.json({ success: true });
@@ -4107,28 +4122,29 @@ P.put("/enfoque/:fecha", async (e) => {
     return e.json({ success: false, error: "Error al establecer enfoque" }, 500);
   }
 });
-P.post("/tareas", async (e) => {
+H.post("/tareas", async (e) => {
   try {
-    const { decreto_id: t, nombre: r, descripcion: a, fecha_hora: s, tipo: n } = await e.req.json();
-    if (console.log("\u{1F4DD} Creando tarea agenda:", { decreto_id: t, nombre: r, fecha_hora: s, tipo: n }), !r || !s)
+    const { decreto_id: t, nombre: r, descripcion: a, fecha_hora: s, tipo: n, prioridad: o } = await e.req.json();
+    if (console.log("\u{1F4DD} Creando tarea agenda:", { decreto_id: t, nombre: r, fecha_hora: s, tipo: n, prioridad: o }), !r || !s)
       return e.json({ success: false, error: "Campos requeridos: nombre, fecha_hora" }, 400);
-    const o = s.split("T")[0], i = s.split("T")[1] || "09:00", c = await e.env.DB.prepare(`
+    const i = s.split("T")[0], c = s.split("T")[1] || "09:00", l = await e.env.DB.prepare(`
       INSERT INTO agenda_eventos (
         titulo, 
         descripcion, 
         fecha_evento, 
         hora_evento,
+        prioridad,
         estado,
         created_at,
         updated_at
-      ) VALUES (?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `).bind(r, a || "", o, i).run();
-    return console.log("\u2705 Tarea agenda creada:", c.meta.last_row_id), e.json({ success: true, id: c.meta.last_row_id, message: "Tarea creada correctamente" });
+      ) VALUES (?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).bind(r, a || "", i, c, o || "media").run();
+    return console.log("\u2705 Tarea agenda creada:", l.meta.last_row_id), e.json({ success: true, id: l.meta.last_row_id, message: "Tarea creada correctamente" });
   } catch (t) {
     return console.error("\u274C Error crear tarea:", t), e.json({ success: false, error: `Error al crear tarea: ${t.message}` }, 500);
   }
 });
-P.put("/tareas/:id/completar", async (e) => {
+H.put("/tareas/:id/completar", async (e) => {
   try {
     const t = e.req.param("id");
     return await e.env.DB.prepare('UPDATE agenda_eventos SET estado = "completada", updated_at = CURRENT_TIMESTAMP WHERE id = ?').bind(t).run(), await e.env.DB.prepare(`
@@ -4144,7 +4160,7 @@ P.put("/tareas/:id/completar", async (e) => {
     return e.json({ success: false, error: "Error al completar tarea" }, 500);
   }
 });
-P.put("/tareas/:id/pendiente", async (e) => {
+H.put("/tareas/:id/pendiente", async (e) => {
   try {
     const t = e.req.param("id");
     return await e.env.DB.prepare('UPDATE agenda_eventos SET estado = "pendiente", updated_at = CURRENT_TIMESTAMP WHERE id = ?').bind(t).run(), await e.env.DB.prepare(`
@@ -4160,7 +4176,7 @@ P.put("/tareas/:id/pendiente", async (e) => {
     return e.json({ success: false, error: "Error al marcar tarea como pendiente" }, 500);
   }
 });
-P.delete("/tareas/:id", async (e) => {
+H.delete("/tareas/:id", async (e) => {
   try {
     const t = e.req.param("id"), r = await e.env.DB.prepare("SELECT accion_id FROM agenda_eventos WHERE id = ?").bind(t).first();
     if (await e.env.DB.prepare("DELETE FROM agenda_eventos WHERE id = ?").bind(t).run(), r != null && r.accion_id) {
@@ -4172,7 +4188,7 @@ P.delete("/tareas/:id", async (e) => {
     return e.json({ success: false, error: "Error al eliminar tarea" }, 500);
   }
 });
-P.get("/pendientes/:fecha", async (e) => {
+H.get("/pendientes/:fecha", async (e) => {
   try {
     const t = e.req.param("fecha"), r = await e.env.DB.prepare(`
       SELECT 
@@ -4193,7 +4209,7 @@ P.get("/pendientes/:fecha", async (e) => {
     return e.json({ success: false, error: "Error al obtener tareas pendientes" }, 500);
   }
 });
-P.get("/tareas/:id", async (e) => {
+H.get("/tareas/:id", async (e) => {
   try {
     const t = e.req.param("id"), r = await e.env.DB.prepare(`
       SELECT 
@@ -4229,23 +4245,24 @@ P.get("/tareas/:id", async (e) => {
     return e.json({ success: false, error: "Error al obtener detalles de la tarea" }, 500);
   }
 });
-P.put("/tareas/:id", async (e) => {
+H.put("/tareas/:id", async (e) => {
   try {
-    const t = e.req.param("id"), { titulo: r, descripcion: a, fecha_hora: s, que_hacer: n, como_hacerlo: o, resultados: i, tipo: c, calificacion: d } = await e.req.json();
+    const t = e.req.param("id"), { titulo: r, descripcion: a, fecha_hora: s, que_hacer: n, como_hacerlo: o, resultados: i, tipo: c, calificacion: l, prioridad: d } = await e.req.json();
     if (!r || !s)
       return e.json({ success: false, error: "Campos requeridos: titulo, fecha_hora" }, 400);
-    const l = s.split("T")[0], p = s.split("T")[1] || "09:00";
+    const p = s.split("T")[0], f = s.split("T")[1] || "09:00";
     await e.env.DB.prepare(`
       UPDATE agenda_eventos SET 
         titulo = ?,
         descripcion = ?,
         fecha_evento = ?,
         hora_evento = ?,
+        prioridad = ?,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).bind(r, a || "", l, p, t).run();
-    const f = await e.env.DB.prepare("SELECT accion_id FROM agenda_eventos WHERE id = ?").bind(t).first();
-    return f != null && f.accion_id && await e.env.DB.prepare(`
+    `).bind(r, a || "", p, f, d || "media", t).run();
+    const E = await e.env.DB.prepare("SELECT accion_id FROM agenda_eventos WHERE id = ?").bind(t).first();
+    return E != null && E.accion_id && await e.env.DB.prepare(`
         UPDATE acciones SET 
           titulo = ?,
           que_hacer = ?,
@@ -4256,15 +4273,15 @@ P.put("/tareas/:id", async (e) => {
           calificacion = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
-      `).bind(r, n || "", o || "", i || "", c || "secundaria", s, d || null, f.accion_id).run(), e.json({ success: true });
+      `).bind(r, n || "", o || "", i || "", c || "secundaria", s, l || null, E.accion_id).run(), e.json({ success: true });
   } catch {
     return e.json({ success: false, error: "Error al editar tarea" }, 500);
   }
 });
-P.get("/filtros", async (e) => {
+H.get("/filtros", async (e) => {
   try {
     const { fecha_desde: t, fecha_hasta: r, incluir_hoy: a, incluir_futuras: s, incluir_completadas: n, incluir_pendientes: o, decreto_id: i, area: c } = e.req.query();
-    let d = `
+    let l = `
       SELECT 
         ae.*,
         a.titulo as accion_titulo,
@@ -4277,28 +4294,28 @@ P.get("/filtros", async (e) => {
       LEFT JOIN decretos d ON a.decreto_id = d.id
       WHERE 1=1
     `;
-    const l = [];
-    a === "true" && (d += " AND ae.fecha_evento = date('now')"), s === "true" && (d += " AND ae.fecha_evento > date('now')"), t && r && (d += " AND ae.fecha_evento BETWEEN ? AND ?", l.push(t, r));
+    const d = [];
+    a === "true" && (l += " AND ae.fecha_evento = date('now')"), s === "true" && (l += " AND ae.fecha_evento > date('now')"), t && r && (l += " AND ae.fecha_evento BETWEEN ? AND ?", d.push(t, r));
     const p = [];
-    n === "true" && p.push("completada"), o === "true" && p.push("pendiente"), p.length > 0 && (d += ` AND ae.estado IN (${p.map(() => "?").join(",")})`, l.push(...p)), i && i !== "todos" && (d += " AND d.id = ?", l.push(i)), c && c !== "todos" && (d += " AND d.area = ?", l.push(c)), d += " ORDER BY ae.fecha_evento DESC, ae.hora_evento ASC";
-    const f = await e.env.DB.prepare(d).bind(...l).all();
+    n === "true" && p.push("completada"), o === "true" && p.push("pendiente"), p.length > 0 && (l += ` AND ae.estado IN (${p.map(() => "?").join(",")})`, d.push(...p)), i && i !== "todos" && (l += " AND d.id = ?", d.push(i)), c && c !== "todos" && (l += " AND d.area = ?", d.push(c)), l += " ORDER BY ae.fecha_evento DESC, ae.hora_evento ASC";
+    const f = await e.env.DB.prepare(l).bind(...d).all();
     return e.json({ success: true, data: f.results });
   } catch {
     return e.json({ success: false, error: "Error al filtrar tareas" }, 500);
   }
 });
-P.post("/tareas/:id/seguimiento", async (e) => {
+H.post("/tareas/:id/seguimiento", async (e) => {
   try {
     const t = e.req.param("id"), r = await e.req.json(), a = await e.env.DB.prepare("SELECT accion_id FROM agenda_eventos WHERE id = ?").bind(t).first();
     if (!(a != null && a.accion_id))
       return e.json({ success: false, error: "No se encontr\xF3 acci\xF3n asociada" }, 404);
-    const { que_se_hizo: s, como_se_hizo: n, resultados_obtenidos: o, tareas_pendientes: i, proxima_revision: c, calificacion: d } = r;
+    const { que_se_hizo: s, como_se_hizo: n, resultados_obtenidos: o, tareas_pendientes: i, proxima_revision: c, calificacion: l } = r;
     return await e.env.DB.prepare(`
       INSERT INTO seguimientos (
         accion_id, que_se_hizo, como_se_hizo, resultados_obtenidos, 
         tareas_pendientes, proxima_revision, calificacion
       ) VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).bind(a.accion_id, s, n, o, JSON.stringify(i || []), c || null, d || null).run(), await e.env.DB.prepare(`
+    `).bind(a.accion_id, s, n, o, JSON.stringify(i || []), c || null, l || null).run(), await e.env.DB.prepare(`
       UPDATE acciones SET 
         resultados = ?, 
         tareas_pendientes = ?, 
@@ -4306,7 +4323,7 @@ P.post("/tareas/:id/seguimiento", async (e) => {
         calificacion = ?,
         updated_at = CURRENT_TIMESTAMP 
       WHERE id = ?
-    `).bind(o, JSON.stringify(i || []), c || null, d || null, a.accion_id).run(), e.json({ success: true, message: "Seguimiento guardado desde agenda" });
+    `).bind(o, JSON.stringify(i || []), c || null, l || null, a.accion_id).run(), e.json({ success: true, message: "Seguimiento guardado desde agenda" });
   } catch {
     return e.json({ success: false, error: "Error al crear seguimiento" }, 500);
   }
@@ -4692,14 +4709,14 @@ A.get("/rutinas/:id/preguntas", async (e) => {
 });
 A.post("/rutinas/:id/completar-detallado", async (e) => {
   try {
-    const t = e.req.param("id"), { tiempo_invertido: r, notas: a, respuestas: s, estado_animo_antes: n, estado_animo_despues: o, calidad_percibida: i, ubicacion: c } = await e.req.json(), d = (/* @__PURE__ */ new Date()).toISOString().split("T")[0], l = (/* @__PURE__ */ new Date()).toISOString();
+    const t = e.req.param("id"), { tiempo_invertido: r, notas: a, respuestas: s, estado_animo_antes: n, estado_animo_despues: o, calidad_percibida: i, ubicacion: c } = await e.req.json(), l = (/* @__PURE__ */ new Date()).toISOString().split("T")[0], d = (/* @__PURE__ */ new Date()).toISOString();
     return await e.env.DB.prepare(`
       INSERT OR REPLACE INTO rutinas_completadas 
       (rutina_id, fecha_completada, tiempo_invertido, notas, respuestas_json, 
        estado_animo_antes, estado_animo_despues, calidad_percibida, ubicacion, 
        tiempo_inicio, tiempo_fin)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(t, d, r || null, a || "", JSON.stringify(s || {}), n || null, o || null, i || null, c || null, l, (/* @__PURE__ */ new Date()).toISOString()).run(), await e.env.DB.prepare(`
+    `).bind(t, l, r || null, a || "", JSON.stringify(s || {}), n || null, o || null, i || null, c || null, d, (/* @__PURE__ */ new Date()).toISOString()).run(), await e.env.DB.prepare(`
       INSERT OR REPLACE INTO rutinas_estadisticas_diarias 
       (fecha, rutinas_completadas, rutinas_totales, porcentaje_completado, tiempo_total_minutos)
       SELECT 
@@ -4711,7 +4728,7 @@ A.post("/rutinas/:id/completar-detallado", async (e) => {
         COALESCE(SUM(rc.tiempo_invertido), 0) as tiempo_total
       FROM rutinas_completadas rc
       WHERE rc.fecha_completada = ?
-    `).bind(d, d).run(), e.json({ success: true });
+    `).bind(l, l).run(), e.json({ success: true });
   } catch (t) {
     return console.error("Error al completar rutina detallada:", t), e.json({ success: false, error: "Error al completar rutina" }, 500);
   }
@@ -5033,19 +5050,19 @@ me.get("/stats", async (e) => {
     return console.error("Error obteniendo estad\xEDsticas:", t), e.json({ error: "Error interno del servidor" }, 500);
   }
 });
-var k = new Ee();
-k.use(Ns);
-k.use("/api/*", ka());
-k.use("/static/*", Qa());
-k.route("/api/auth", me);
-k.route("/api/decretos", I);
-k.route("/api/agenda", P);
-k.route("/api/progreso", ne);
-k.route("/api/practica", A);
-k.get("/", (e) => e.render(S("div", { children: S("div", { id: "app", children: S("div", { className: "loading-screen", children: [S("img", { src: "/static/logo-yo-decreto.png", alt: "Yo Decreto", className: "logo-yo-decreto logo-lg w-auto mx-auto mb-4" }), S("div", { className: "loader" }), S("h2", { children: "Cargando..." })] }) }) })));
-k.get("*", (e) => e.render(S("div", { children: S("div", { id: "app", children: S("div", { className: "loading-screen", children: [S("img", { src: "/static/logo-yo-decreto.png", alt: "Yo Decreto", className: "logo-yo-decreto logo-lg w-auto mx-auto mb-4" }), S("div", { className: "loader" }), S("h2", { children: "Cargando..." })] }) }) })));
+var W = new Ee();
+W.use(Ns);
+W.use("/api/*", Wa());
+W.use("/static/*", Qa());
+W.route("/api/auth", me);
+W.route("/api/decretos", I);
+W.route("/api/agenda", H);
+W.route("/api/progreso", ne);
+W.route("/api/practica", A);
+W.get("/", (e) => e.render(S("div", { children: S("div", { id: "app", children: S("div", { className: "loading-screen", children: [S("img", { src: "/static/logo-yo-decreto.png", alt: "Yo Decreto", className: "logo-yo-decreto logo-lg w-auto mx-auto mb-4" }), S("div", { className: "loader" }), S("h2", { children: "Cargando..." })] }) }) })));
+W.get("*", (e) => e.render(S("div", { children: S("div", { id: "app", children: S("div", { className: "loading-screen", children: [S("img", { src: "/static/logo-yo-decreto.png", alt: "Yo Decreto", className: "logo-yo-decreto logo-lg w-auto mx-auto mb-4" }), S("div", { className: "loader" }), S("h2", { children: "Cargando..." })] }) }) })));
 var tr = new Ee();
-var Ms = Object.assign({ "/src/index.tsx": k });
+var Ms = Object.assign({ "/src/index.tsx": W });
 var Jr = false;
 for (const [, e] of Object.entries(Ms))
   e && (tr.route("/", e), tr.notFound(e.notFoundHandler), Jr = true);
@@ -5246,7 +5263,7 @@ function transformRoutingRuleToRegExp(rule) {
 }
 __name(transformRoutingRuleToRegExp, "transformRoutingRuleToRegExp");
 
-// .wrangler/tmp/pages-l3ZvBX/bzh5bu31zui.js
+// .wrangler/tmp/pages-ZW5Mzg/skykmp4ly9k.js
 var define_ROUTES_default = { version: 1, include: ["/*"], exclude: ["/download.html", "/static/*"] };
 var routes = define_ROUTES_default;
 var pages_dev_pipeline_default = {
@@ -5311,7 +5328,7 @@ var jsonError2 = /* @__PURE__ */ __name(async (request, env3, _ctx, middlewareCt
 }, "jsonError");
 var middleware_miniflare3_json_error_default2 = jsonError2;
 
-// .wrangler/tmp/bundle-90Yu6R/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-CoJ9vt/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__2 = [
   middleware_ensure_req_body_drained_default2,
   middleware_miniflare3_json_error_default2
@@ -5343,7 +5360,7 @@ function __facade_invoke__2(request, env3, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__2, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-90Yu6R/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-CoJ9vt/middleware-loader.entry.ts
 var __Facade_ScheduledController__2 = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
@@ -5441,4 +5458,4 @@ export {
   __INTERNAL_WRANGLER_MIDDLEWARE__2 as __INTERNAL_WRANGLER_MIDDLEWARE__,
   middleware_loader_entry_default2 as default
 };
-//# sourceMappingURL=bzh5bu31zui.js.map
+//# sourceMappingURL=skykmp4ly9k.js.map
