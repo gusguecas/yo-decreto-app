@@ -31,15 +31,14 @@ const AuthUtils = {
 
   // Verificar contraseña (simple para desarrollo)
   verifyPassword(password: string, storedPassword: string): boolean {
-    // Comparación directa para desarrollo
-    // En producción usar bcrypt o Web Crypto API
-    return password === storedPassword
+    // Para desarrollo, verificamos con el prefijo
+    return `simple_${password}` === storedPassword
   },
 
-  // Hash de contraseña (simulado)
+  // Hash de contraseña (simplificado para desarrollo)
   hashPassword(password: string): string {
-    // En producción usar bcrypt
-    return '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+    // Para desarrollo, usamos la contraseña directamente con un prefijo
+    return `simple_${password}`
   },
 
   // Validar formato de email
