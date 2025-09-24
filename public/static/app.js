@@ -212,9 +212,19 @@ const UI = {
             <div class="flex items-center space-x-4">
               <img src="/static/logo-yo-decreto.png" alt="Yo Decreto" class="logo-yo-decreto logo-header w-auto" />
             </div>
-            <nav class="flex space-x-2">
-              ${this.renderNavTabs()}
-            </nav>
+            <div class="flex items-center space-x-4">
+              <nav class="flex space-x-2">
+                ${this.renderNavTabs()}
+              </nav>
+              <button 
+                class="logout-btn px-3 py-2 text-sm font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-slate-500 rounded-lg transition-all duration-200 flex items-center space-x-2"
+                onclick="App.logout()"
+                title="Cerrar sesión"
+              >
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="hidden sm:inline">Salir</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -537,6 +547,31 @@ const Router = {
       default:
         mainContent.innerHTML = '<div class="p-8 text-center">Sección no encontrada</div>'
     }
+  }
+}
+
+// Objeto principal de la aplicación
+const App = {
+  // Cerrar sesión
+  async logout() {
+    try {
+      // Llamar API de logout
+      await API.request('/auth/logout', { method: 'POST' })
+    } catch (error) {
+      console.log('Error al hacer logout:', error)
+      // Continuar con logout local aunque falle el servidor
+    }
+    
+    // Limpiar datos locales
+    localStorage.removeItem('yo-decreto-session')
+    
+    // Mostrar mensaje
+    Utils.showToast('Sesión cerrada exitosamente', 'success')
+    
+    // Recargar página para mostrar login
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
   }
 }
 
