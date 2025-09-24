@@ -167,7 +167,7 @@ const Practica = {
                     <div class="text-center mb-4">
                       <div class="relative inline-block">
                         <div class="w-20 h-20 ${this.getIconBg(rutina.icono)} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300">
-                          <i class="${rutina.icono} text-3xl ${this.getIconColor(rutina.icono)}"></i>
+                          <span class="text-4xl">${rutina.icono}</span>
                         </div>
                         <div class="absolute inset-0 ${this.getIconBg(rutina.icono)} rounded-full animate-ping opacity-20"></div>
                       </div>
@@ -433,7 +433,7 @@ const Practica = {
               ${analytics.data.tendencias_por_rutina.slice(0, 5).map(rutina => `
                 <div class="flex items-center justify-between">
                   <div class="flex items-center space-x-3">
-                    <i class="${rutina.icono} text-blue-400"></i>
+                    <span class="text-blue-400">${rutina.icono}</span>
                     <span class="text-sm">${rutina.nombre}</span>
                   </div>
                   <div class="text-right">
@@ -1035,7 +1035,7 @@ Esto simulará que hemos pasado al día siguiente:
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center space-x-3">
             <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <i class="${rutina.icono} text-white text-xl"></i>
+              <span class="text-white text-xl">${rutina.icono}</span>
             </div>
             <div>
               <h3 class="text-xl font-semibold text-white">${rutina.nombre}</h3>
