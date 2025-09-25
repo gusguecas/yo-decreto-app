@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mi Práctica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <style>
+        body { background: #0f172a; color: white; }
+        .error { color: #ef4444; }
+        .success { color: #10b981; }
+        .info { color: #3b82f6; }
+    </style>
+</head>
+<body class="p-6">
+    <h1 class="text-3xl font-bold mb-6">🧪 Test Directo - Mi Práctica</h1>
+    <div id="log" class="space-y-2 mb-6"></div>
+    <div id="content" class="bg-slate-800 p-4 rounded"></div>
+
+    <script>
+        const log = document.getElementById('log');
+        const content = document.getElementById('content');
+        
+        function addLog(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = message;
+            log.appendChild(div);
+            console.log(message);
+        }
+
+        async function testPractica() {
+            try {
+                addLog('🚀 Iniciando test de Mi Práctica...', 'info');
+                
+                // Test 1: Rutinas
+                addLog('📡 Probando /api/practica/rutinas...', 'info');
+                const rutinasResp = await axios.get('/api/practica/rutinas');
+                addLog(`✅ Rutinas: ${rutinasResp.status} - ${rutinasResp.data.data.length} rutinas`, 'success');
+                
+                // Test 2: Afirmaciones
+                addLog('📡 Probando /api/practica/afirmaciones...', 'info');
+                const afirmacionesResp = await axios.get('/api/practica/afirmaciones');
+                addLog(`✅ Afirmaciones: ${afirmacionesResp.status} - ${afirmacionesResp.data.data.length} afirmaciones`, 'success');
+                
+                // Test 3: Progreso
+                addLog('📡 Probando /api/practica/rutinas/progreso-dia...', 'info');
+                const progresoResp = await axios.get('/api/practica/rutinas/progreso-dia');
+                addLog(`✅ Progreso: ${progresoResp.status} - ${progresoResp.data.data.porcentaje_progreso}%`, 'success');
+                
+                // Renderizar datos
+                const rutinas = rutinasResp.data.data;
+                const afirmaciones = afirmacionesResp.data.data;
+                const progreso = progresoResp.data.data;
+                
+                content.innerHTML = `
+                    <h2 class="text-xl font-bold mb-4">📊 Datos Cargados</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-slate-700 p-4 rounded">
+                            <h3 class="font-bold mb-2">🌅 Rutinas (${rutinas.length})</h3>
+                            ${rutinas.map(r => `<div class="text-sm">📝 ${r.nombre} (${r.tiempo_estimado}min)</div>`).join('')}
+                        </div>
+                        <div class="bg-slate-700 p-4 rounded">
+                            <h3 class="font-bold mb-2">💎 Afirmaciones (${afirmaciones.length})</h3>
+                            ${afirmaciones.slice(0,3).map(a => `<div class="text-sm">💬 "${a.texto.slice(0,50)}..."</div>`).join('')}
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-green-800 rounded">
+                        <h3 class="font-bold">📈 Progreso del día: ${progreso.porcentaje_progreso}%</h3>
+                        <p>Completadas: ${progreso.completadas_hoy}/${progreso.total_rutinas}</p>
+                    </div>
+                `;
+                
+                addLog('🎉 ¡Test completado exitosamente!', 'success');
+                
+            } catch (error) {
+                addLog(`💥 Error: ${error.message}`, 'error');
+                if (error.response) {
+                    addLog(`📡 Status: ${error.response.status}`, 'error');
+                    addLog(`📡 Data: ${JSON.stringify(error.response.data)}`, 'error');
+                }
+                console.error('Error completo:', error);
+            }
+        }
+        
+        // Ejecutar test al cargar
+        testPractica();
+    </script>
+</body>
+</html>
