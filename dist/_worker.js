@@ -122,19 +122,19 @@ var Qr=Object.defineProperty;var Ht=e=>{throw TypeError(e)};var ea=(e,t,r)=>t in
         accion_id, que_se_hizo, como_se_hizo, resultados_obtenidos, 
         tareas_pendientes, proxima_revision, calificacion
       ) VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).bind(t,r,a||"",s||"",JSON.stringify(n||"[]"),o||null,i||5).run();let c=0;if(n&&Array.isArray(n)&&n.length>0){for(const l of n)if(typeof l=="string"&&l.trim()){const d=l.trim(),p=await e.env.DB.prepare("SELECT decreto_id FROM acciones WHERE id = ?").bind(t).first();if(p){const f=new Date;f.setDate(f.getDate()+1);const h=f.toISOString(),m=await e.env.DB.prepare(`
+    `).bind(t,r,a||"",s||"",JSON.stringify(n||"[]"),o||null,i||5).run();let c=0;if(n&&Array.isArray(n)&&n.length>0){for(const l of n)if(typeof l=="string"&&l.trim()){const d=l.trim(),p=await e.env.DB.prepare("SELECT decreto_id FROM acciones WHERE id = ?").bind(t).first();if(p){let f;if(o)f=o;else{const m=new Date;m.setDate(m.getDate()+1),f=m.toISOString()}const h=await e.env.DB.prepare(`
               INSERT INTO acciones (
                 decreto_id, titulo, que_hacer, como_hacerlo, tipo, 
                 proxima_revision, origen
               ) VALUES (?, ?, ?, ?, ?, ?, ?)
               RETURNING id
-            `).bind(p.decreto_id,d,"Tarea generada desde seguimiento",`Completar: ${d}`,"secundaria",h,`seguimiento:${t}`).first();if(m){const E=m.id,_=new Date().toISOString().split("T")[0],v=await e.env.DB.prepare(`
+            `).bind(p.decreto_id,d,"Tarea generada desde seguimiento",`Completar: ${d}`,"secundaria",f,`seguimiento:${t}`).first();if(h){const m=h.id;let E,_;if(o){const v=new Date(o);E=v.toISOString().split("T")[0],_=v.toTimeString().split(" ")[0].slice(0,5)}else{const v=new Date;v.setDate(v.getDate()+1),E=v.toISOString().split("T")[0],_="09:00"}const g=await e.env.DB.prepare(`
                 INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
                 VALUES (?, ?, ?, ?, ?, ?)
                 RETURNING id
-              `).bind(E,d,`[Auto-generada] ${d}`,_,"09:00","media").first();v&&await e.env.DB.prepare(`
+              `).bind(m,d,`[Auto-generada] ${d}`,E,_,"media").first();g&&await e.env.DB.prepare(`
                   UPDATE acciones SET agenda_event_id = ? WHERE id = ?
-                `).bind(v.id,E).run()}c++}}}return e.json({success:!0,message:`Seguimiento guardado. ${c} tareas nuevas creadas.`})}catch(t){return e.json({success:!1,error:"Error al crear seguimiento",details:t.message},500)}});const L=new ne;L.get("/metricas/:fecha",async e=>{try{const t=e.req.param("fecha"),r=await e.env.DB.prepare(`
+                `).bind(g.id,m).run()}c++}}}return e.json({success:!0,message:`Seguimiento guardado. ${c} tareas nuevas creadas.`})}catch(t){return e.json({success:!1,error:"Error al crear seguimiento",details:t.message},500)}});const L=new ne;L.get("/metricas/:fecha",async e=>{try{const t=e.req.param("fecha"),r=await e.env.DB.prepare(`
       SELECT 
         ae.*, 
         a.titulo as accion_titulo, 
@@ -171,13 +171,16 @@ var Qr=Object.defineProperty;var Ht=e=>{throw TypeError(e)};var ea=(e,t,r)=>t in
         a.tipo,
         a.fecha_creacion as accion_fecha_creacion,
         a.fecha_cierre as accion_fecha_cierre,
+        a.proxima_revision,
         d.area,
         d.titulo as decreto_titulo,
+        d.sueno_meta,
         d.id as decreto_id
       FROM agenda_eventos ae
       LEFT JOIN acciones a ON ae.accion_id = a.id
       LEFT JOIN decretos d ON a.decreto_id = d.id
-      WHERE ae.fecha_evento = ?
+      WHERE ae.fecha_evento = ? 
+         OR (a.proxima_revision IS NOT NULL AND date(a.proxima_revision) = ?)
       ORDER BY 
         CASE ae.prioridad 
           WHEN 'alta' THEN 1 
@@ -187,7 +190,7 @@ var Qr=Object.defineProperty;var Ht=e=>{throw TypeError(e)};var ea=(e,t,r)=>t in
         END ASC, 
         ae.hora_evento ASC, 
         ae.created_at ASC
-    `).bind(t).all();return e.json({success:!0,data:r.results})}catch{return e.json({success:!1,error:"Error al obtener timeline"},500)}});L.get("/enfoque/:fecha",async e=>{try{const t=e.req.param("fecha"),r=await e.env.DB.prepare(`
+    `).bind(t,t).all();return e.json({success:!0,data:r.results})}catch{return e.json({success:!1,error:"Error al obtener timeline"},500)}});L.get("/enfoque/:fecha",async e=>{try{const t=e.req.param("fecha"),r=await e.env.DB.prepare(`
       SELECT 
         ae.*,
         a.titulo as accion_titulo,

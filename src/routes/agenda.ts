@@ -107,6 +107,7 @@ agendaRoutes.get('/timeline/:fecha', async (c) => {
   try {
     const fecha = c.req.param('fecha')
     
+    // 🔧 ARREGLO: Obtener tareas tanto por fecha_evento como por próxima_revision
     const tareas = await c.env.DB.prepare(`
       SELECT 
         ae.*,
@@ -115,13 +116,16 @@ agendaRoutes.get('/timeline/:fecha', async (c) => {
         a.tipo,
         a.fecha_creacion as accion_fecha_creacion,
         a.fecha_cierre as accion_fecha_cierre,
+        a.proxima_revision,
         d.area,
         d.titulo as decreto_titulo,
+        d.sueno_meta,
         d.id as decreto_id
       FROM agenda_eventos ae
       LEFT JOIN acciones a ON ae.accion_id = a.id
       LEFT JOIN decretos d ON a.decreto_id = d.id
-      WHERE ae.fecha_evento = ?
+      WHERE ae.fecha_evento = ? 
+         OR (a.proxima_revision IS NOT NULL AND date(a.proxima_revision) = ?)
       ORDER BY 
         CASE ae.prioridad 
           WHEN 'alta' THEN 1 
@@ -131,7 +135,7 @@ agendaRoutes.get('/timeline/:fecha', async (c) => {
         END ASC, 
         ae.hora_evento ASC, 
         ae.created_at ASC
-    `).bind(fecha).all()
+    `).bind(fecha, fecha).all()
 
     return c.json({
       success: true,

@@ -317,6 +317,8 @@ decretosRoutes.post('/:id/acciones', async (c) => {
     
     console.log('🎯 VALIDANDO TIPO DE DECRETO:', { decreto_tipo, decretoId })
     
+
+    
     if (!titulo || !que_hacer) {
       return c.json({ success: false, error: 'Campos requeridos: titulo, que_hacer' }, 400)
     }

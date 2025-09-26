@@ -723,7 +723,7 @@ const Agenda = {
                       </span>
                     ` : ''}
                   </div>
-                  <h4 class="font-medium text-sm ${tarea.estado === 'completada' ? 'line-through text-slate-400' : 'text-white'} cursor-pointer hover:text-accent-blue transition-colors" onclick="Agenda.openDetalleTarea('${tarea.id}')">${tarea.titulo}</h4>
+                  <h4 class="font-medium text-sm ${tarea.estado === 'completada' ? 'line-through text-slate-400' : 'text-white'} cursor-pointer hover:text-accent-blue transition-colors" onclick="Agenda.abrirModalAccionComoDecretos('${tarea.accion_id}', '${tarea.decreto_id}')">${tarea.titulo}</h4>
                   ${tarea.accion_titulo ? `
                     <p class="text-slate-400 text-xs mt-1">
                       <i class="fas fa-tasks mr-1"></i>
@@ -3295,7 +3295,7 @@ const Agenda = {
         <div class="timeline-connector"></div>
         
         <!-- Card de Tarea -->
-        <div class="timeline-card cursor-pointer" data-evento-id="${tarea.id}" onclick="Agenda.openDetalleTarea('${tarea.id}')" style="transition: all 0.3s ease; cursor: pointer;"
+        <div class="timeline-card cursor-pointer" data-evento-id="${tarea.id}" onclick="Agenda.abrirModalAccionComoDecretos('${tarea.accion_id}', '${tarea.decreto_id}')" style="transition: all 0.3s ease; cursor: pointer;"
           onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'"
           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
         >
@@ -3626,7 +3626,7 @@ const Agenda = {
       <div class="accion-maestra-card border-l-4 ${config.color} ${config.bg} ${config.pulse} fade-in-masonry cursor-pointer" 
            style="animation-delay: ${index * 0.05}s"
            data-accion-id="${accion.id}"
-           onclick="Agenda.openDetalleTarea('${accion.id}')"
+           onclick="Agenda.abrirModalAccionComoDecretos('${accion.id}', '${accion.decreto_id}')"
            onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'"
            onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
            title="Ver detalles de: ${accion.titulo}">
@@ -3647,7 +3647,7 @@ const Agenda = {
         <!-- Título y Decreto -->
         <div class="mb-3">
           <h4 class="font-semibold text-white mb-1 line-clamp-2 hover:text-accent-green transition-colors cursor-pointer"
-              onclick="Agenda.openDetalleTarea('${accion.id}')"
+              onclick="Agenda.abrirModalAccionComoDecretos('${accion.id}', '${accion.decreto_id}')"
               title="Ver detalles de la acción">
             ${accion.titulo}
           </h4>
@@ -4163,6 +4163,39 @@ const Agenda = {
   contarPendientes() {
     const recordatorios = this.obtenerRecordatorios()
     return recordatorios.filter(r => !r.completado).length
+  },
+
+  // 🔧 ARREGLO: Función para abrir modal de acciones igual que en decretos
+  async abrirModalAccionComoDecretos(accionId, decretoId) {
+    if (!accionId || !decretoId) {
+      Utils.showToast('❌ Información de acción no disponible', 'error')
+      return
+    }
+    
+    try {
+      console.log('🎯 Abriendo modal de acción desde agenda:', { accionId, decretoId })
+      
+      // Cambiar temporalmente a la sección de decretos
+      const seccionAnterior = AppState.currentSection
+      AppState.currentSection = 'decretos'
+      
+      // Cargar el decreto en decretos (necesario para que funcione el modal)
+      await Decretos.openDetalleDecreto(decretoId)
+      
+      // Abrir el modal de seguimiento de la acción específica
+      setTimeout(() => {
+        if (typeof Decretos !== 'undefined' && Decretos.openSeguimientoModal) {
+          Decretos.openSeguimientoModal(accionId)
+        } else {
+          console.error('❌ Función openSeguimientoModal no disponible')
+          Utils.showToast('❌ Error al abrir detalles de acción', 'error')
+        }
+      }, 300)
+      
+    } catch (error) {
+      console.error('❌ Error abriendo modal de acción:', error)
+      Utils.showToast('❌ Error al cargar detalles de la acción', 'error')
+    }
   }
 }
 

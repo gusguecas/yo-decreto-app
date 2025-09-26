@@ -522,6 +522,8 @@ const Decretos = {
                 type="datetime-local" 
                 name="proxima_revision"
                 class="form-input w-full px-4 py-2"
+                min="2024-09-01T00:00"
+                onchange="console.log('📅 FECHA CAMBIADA:', this.value, 'Fecha objeto:', new Date(this.value))"
               >
             </div>
           </div>
@@ -777,6 +779,40 @@ const Decretos = {
     
     document.getElementById('accionDecretoId').value = decretoId
     Modal.open('createAccionModal')
+    
+    // 🔧 ARREGLO: Limpiar todos los campos del formulario después de abrir modal
+    setTimeout(() => {
+      const form = document.getElementById('createAccionForm')
+      if (form) {
+        // Limpiar todos los campos excepto el decreto_id
+        const inputs = form.querySelectorAll('input:not([name="decreto_id"]), textarea, select')
+        inputs.forEach(input => {
+          if (input.type === 'datetime-local') {
+            // 🔧 ARREGLO: Configurar fecha/hora por defecto en lugar de limpiar
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            tomorrow.setHours(9, 0, 0, 0) // 9:00 AM
+            input.value = tomorrow.toISOString().slice(0, 16) // Formato YYYY-MM-DDTHH:MM
+            console.log('🔧 Configurando fecha por defecto:', input.name, input.value)
+          } else if (input.type === 'date') {
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            input.value = tomorrow.toISOString().slice(0, 10) // Formato YYYY-MM-DD
+          } else if (input.type === 'time') {
+            input.value = '09:00' // 9:00 AM por defecto
+          } else if (input.type === 'range') {
+            input.value = '5' // Valor por defecto para calificación
+          } else if (input.type === 'checkbox') {
+            input.checked = false
+          } else if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0
+          } else {
+            input.value = '' // Limpiar otros campos
+          }
+        })
+        console.log('✅ Formulario de acción limpiado')
+      }
+    }, 100)
   },
 
   async handleCreateDecreto(event) {
@@ -882,6 +918,9 @@ const Decretos = {
     // 3. Crear hash único del formulario para detectar envíos duplicados
     const formData = new FormData(formElement)
     const data = Object.fromEntries(formData.entries())
+    
+
+    
     const dataHash = `${formId}_${JSON.stringify(data)}`
     
     if (this._lastFormHash === dataHash && (Date.now() - this._lastFormTime) < 3000) {
@@ -922,7 +961,8 @@ const Decretos = {
       console.log('Enviando datos al API:', {
         decretoId,
         hasSubtareas: Boolean(data.subtareas?.length),
-        subtareaCount: data.subtareas?.length || 0
+        subtareaCount: data.subtareas?.length || 0,
+        '📅 PROXIMA_REVISION_ENVIADA': data.proxima_revision
       })
       
       const response = await API.decretos.createAccion(decretoId, data)
@@ -2457,6 +2497,34 @@ Preparar presentación para próxima reunión"
       if (form) {
         form.dataset.decretoId = decretoId
         console.log('✅ Decreto ID configurado:', decretoId)
+        
+        // 🔧 ARREGLO: Limpiar todos los campos del formulario
+        const inputs = form.querySelectorAll('input:not([name="decreto_id"]), textarea, select')
+        inputs.forEach(input => {
+          if (input.type === 'datetime-local') {
+            // 🔧 ARREGLO: Configurar fecha/hora por defecto en lugar de limpiar
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            tomorrow.setHours(9, 0, 0, 0) // 9:00 AM
+            input.value = tomorrow.toISOString().slice(0, 16) // Formato YYYY-MM-DDTHH:MM
+            console.log('🔧 Configurando fecha por defecto:', input.name, input.value)
+          } else if (input.type === 'date') {
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            input.value = tomorrow.toISOString().slice(0, 10) // Formato YYYY-MM-DD
+          } else if (input.type === 'time') {
+            input.value = '09:00' // 9:00 AM por defecto
+          } else if (input.type === 'range') {
+            input.value = '5' // Valor por defecto para calificación
+          } else if (input.type === 'checkbox') {
+            input.checked = false
+          } else if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0
+          } else {
+            input.value = '' // Limpiar otros campos
+          }
+        })
+        console.log('✅ Formulario de acción detalle limpiado')
       } else {
         console.error('❌ No se encontró el formulario createAccionDetalleForm')
       }
@@ -2840,6 +2908,8 @@ Preparar presentación para próxima reunión"
               name="proxima_revision" 
               class="form-input w-full px-4 py-3 text-base"
               placeholder="Selecciona fecha y hora (opcional)"
+              min="2024-09-01T00:00"
+              onchange="console.log('📅 FECHA CAMBIADA:', this.value, 'Fecha objeto:', new Date(this.value))"
             >
             <div class="text-xs text-slate-400 mt-1">
               💡 Puedes usar fechas pasadas para registrar tareas olvidadas

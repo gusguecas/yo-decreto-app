@@ -57,10 +57,17 @@ seguimientosRoutes.post('/:decretoId/acciones/:accionId/seguimientos', async (c)
 
           if (accionOriginal) {
             // Crear nueva acción automáticamente
-            // Calcular fecha de próxima revisión (mañana por defecto)
-            const mañana = new Date()
-            mañana.setDate(mañana.getDate() + 1)
-            const proximaRevision = mañana.toISOString()
+            // 🔧 USAR LA FECHA QUE EL USUARIO SELECCIONÓ
+            let proximaRevision
+            if (proxima_revision) {
+              // Usar la fecha que el usuario seleccionó
+              proximaRevision = proxima_revision
+            } else {
+              // Solo si no hay fecha, usar mañana por defecto
+              const mañana = new Date()
+              mañana.setDate(mañana.getDate() + 1)
+              proximaRevision = mañana.toISOString()
+            }
 
             const resultNuevaAccion = await c.env.DB.prepare(`
               INSERT INTO acciones (
@@ -82,8 +89,20 @@ seguimientosRoutes.post('/:decretoId/acciones/:accionId/seguimientos', async (c)
               const nuevaAccionId = resultNuevaAccion.id
 
               // Crear evento en agenda automáticamente
-              const fechaEvento = new Date().toISOString().split('T')[0]
-              const horaEvento = '09:00'
+            // 🔧 USAR LA FECHA QUE EL USUARIO SELECCIONÓ, NO LA FECHA ACTUAL
+            let fechaEvento, horaEvento
+            if (proxima_revision) {
+              // Usar la fecha que el usuario seleccionó
+              const fechaSeleccionada = new Date(proxima_revision)
+              fechaEvento = fechaSeleccionada.toISOString().split('T')[0]
+              horaEvento = fechaSeleccionada.toTimeString().split(' ')[0].slice(0, 5) // HH:MM
+            } else {
+              // Solo si no hay fecha seleccionada, usar mañana
+              const mañana = new Date()
+              mañana.setDate(mañana.getDate() + 1)
+              fechaEvento = mañana.toISOString().split('T')[0]
+              horaEvento = '09:00'
+            }
               
               const agendaResult = await c.env.DB.prepare(`
                 INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
