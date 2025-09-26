@@ -1879,6 +1879,12 @@ const Agenda = {
     console.log('📝 Enviando seguimiento:', { tareaId, accionId, data })
     
     try {
+      // Si viene de panorámica (sin tareaId pero con accionId), usar función específica
+      if (accionId && !tareaId) {
+        await this.submitSeguimientoAccion(data, accionId)
+        return
+      }
+      
       // Si la tarea tiene accion_id (está sincronizada con decreto), usar el endpoint de decretos
       if (accionId) {
         // Parsear tareas pendientes
@@ -2704,84 +2710,182 @@ const Agenda = {
   // 🎯 ============ NUEVA FUNCIONALIDAD: PANORÁMICA DE PENDIENTES ============
   
   renderPanoramicaPendientes() {
-    const { acciones, estadisticas } = this.data.panoramicaPendientes
-    const filtroActual = this.data.panoramicaPendientes.filtroArea
+    const { acciones } = this.data.panoramicaPendientes
     
-    if (!acciones || acciones.length === 0) {
-      return `
-        <div class="gradient-card p-8 rounded-xl text-center">
-          <div class="text-6xl mb-4">🎉</div>
-          <h3 class="text-xl font-semibold mb-2">¡Excelente trabajo!</h3>
-          <p class="text-slate-300">No hay acciones pendientes en este momento</p>
-        </div>
-      `
-    }
+    // Separar acciones por áreas basado en el decreto
+    const empresariales = (acciones || []).filter(a => a.area === 'empresarial')
+    const materiales = (acciones || []).filter(a => a.area === 'material') 
+    const humanos = (acciones || []).filter(a => a.area === 'humano')
 
     return `
       <div class="gradient-card p-6 rounded-xl">
-        <!-- Header creativo -->
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center space-x-3">
-            <span class="text-3xl">🎯</span>
-            <div>
-              <h3 class="text-2xl font-bold text-gradient-green">Panorámica de Pendientes</h3>
-              <p class="text-slate-300">Vista cronológica de todas tus acciones • ${estadisticas.total || 0} tareas</p>
+        <!-- Header -->
+        <div class="flex items-center space-x-3 mb-6">
+          <span class="text-3xl">🎯</span>
+          <div>
+            <h3 class="text-2xl font-bold text-gradient-green">Panorámica por Áreas</h3>
+            <p class="text-slate-300">Todas tus acciones organizadas por área • ${(acciones || []).length} total</p>
+          </div>
+        </div>
+
+        <!-- 3 COLUMNAS POR ÁREA -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- COLUMNA EMPRESARIAL -->
+          <div class="bg-slate-800/30 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="font-bold text-accent-blue flex items-center">
+                <i class="fas fa-briefcase mr-2"></i>
+                EMPRESARIAL (${empresariales.length})
+              </h4>
+              <select 
+                id="filtro-empresarial"
+                onchange="Agenda.filtrarColumna('empresariales', this.value)"
+                class="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+              >
+                <option value="todos">Todos</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="en_progreso">En Progreso</option>
+                <option value="completada">Completadas</option>
+              </select>
+            </div>
+            <div id="columna-empresariales" class="space-y-2 max-h-80 overflow-y-auto">
+              ${this.renderAccionesColumna(empresariales, 'todos')}
             </div>
           </div>
-          
-          <!-- Filtro por área -->
-          <div class="flex items-center space-x-3">
-            <label class="text-sm text-slate-300">Filtrar por:</label>
-            <select 
-              id="panoramica-filtro-area"
-              onchange="Agenda.cambiarFiltroArea(this.value)"
-              class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:border-accent-green focus:outline-none"
-            >
-              <option value="todos" ${filtroActual === 'todos' ? 'selected' : ''}>Todos los decretos</option>
-              <option value="empresarial" ${filtroActual === 'empresarial' ? 'selected' : ''}>Empresariales</option>
-              <option value="material" ${filtroActual === 'material' ? 'selected' : ''}>Materiales</option>
-              <option value="humano" ${filtroActual === 'humano' ? 'selected' : ''}>Humanos</option>
-            </select>
-            <button 
-              onclick="Agenda.refrescarPanoramica()"
-              class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
-              title="Refrescar vista"
-            >
-              <i class="fas fa-sync-alt text-sm"></i>
-            </button>
+
+          <!-- COLUMNA MATERIAL -->
+          <div class="bg-slate-800/30 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="font-bold text-accent-green flex items-center">
+                <i class="fas fa-box mr-2"></i>
+                MATERIAL (${materiales.length})
+              </h4>
+              <select 
+                id="filtro-material"
+                onchange="Agenda.filtrarColumna('materiales', this.value)"
+                class="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+              >
+                <option value="todos">Todos</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="en_progreso">En Progreso</option>
+                <option value="completada">Completadas</option>
+              </select>
+            </div>
+            <div id="columna-materiales" class="space-y-2 max-h-80 overflow-y-auto">
+              ${this.renderAccionesColumna(materiales, 'todos')}
+            </div>
           </div>
-        </div>
 
-        <!-- Estadísticas rápidas -->
-        ${this.renderEstadisticasPanoramica(estadisticas)}
-
-        <!-- Lista de acciones pendientes -->
-        <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
-          ${acciones.map((accion, index) => this.renderAccionPendiente(accion, index)).join('')}
-        </div>
-
-        <!-- Footer con acciones -->
-        <div class="mt-6 pt-4 border-t border-slate-700 flex justify-between items-center">
-          <div class="text-sm text-slate-400">
-            Ordenado cronológicamente: más antigua → más reciente
+          <!-- COLUMNA HUMANO -->
+          <div class="bg-slate-800/30 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="font-bold text-accent-purple flex items-center">
+                <i class="fas fa-user mr-2"></i>
+                HUMANO (${humanos.length})
+              </h4>
+              <select 
+                id="filtro-humano"
+                onchange="Agenda.filtrarColumna('humanos', this.value)"
+                class="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+              >
+                <option value="todos">Todos</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="en_progreso">En Progreso</option>
+                <option value="completada">Completadas</option>
+              </select>
+            </div>
+            <div id="columna-humanos" class="space-y-2 max-h-80 overflow-y-auto">
+              ${this.renderAccionesColumna(humanos, 'todos')}
+            </div>
           </div>
-          <div class="flex space-x-2">
+
+        </div>
+      </div>
+    `
+  },
+
+  // Nueva función para renderizar acciones de cada columna
+  renderAccionesColumna(acciones, filtroEstado) {
+    if (!acciones || acciones.length === 0) {
+      return `<div class="text-center text-slate-400 py-4 text-sm">Sin acciones</div>`
+    }
+
+    // Filtrar por estado si no es "todos"
+    let accionesFiltradas = acciones
+    if (filtroEstado !== 'todos') {
+      accionesFiltradas = acciones.filter(a => a.estado === filtroEstado)
+    }
+
+    // Ordenar de más vieja a más nueva
+    accionesFiltradas.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+
+    if (accionesFiltradas.length === 0) {
+      return `<div class="text-center text-slate-400 py-4 text-sm">Sin acciones para este filtro</div>`
+    }
+
+    return accionesFiltradas.map(accion => `
+      <div class="bg-slate-700/50 rounded p-3 border-l-4 ${
+        accion.estado === 'completada' ? 'border-green-500 opacity-75' :
+        accion.estado === 'en_progreso' ? 'border-yellow-500' :
+        'border-slate-500'
+      }">
+        <h5 class="font-medium text-sm ${
+          accion.estado === 'completada' ? 'line-through text-slate-400' : 'text-white'
+        } cursor-pointer hover:text-accent-blue" 
+           onclick="Agenda.abrirModalAccionComoDecretos('${accion.id}', '${accion.decreto_id}')">
+          ${accion.titulo}
+        </h5>
+        <div class="flex items-center justify-between mt-2">
+          <span class="text-xs px-2 py-1 rounded ${
+            accion.estado === 'completada' ? 'bg-green-900/50 text-green-300' :
+            accion.estado === 'en_progreso' ? 'bg-yellow-900/50 text-yellow-300' :
+            'bg-slate-600 text-slate-300'
+          }">
+            ${accion.estado === 'completada' ? 'Completada' :
+              accion.estado === 'en_progreso' ? 'En Progreso' : 'Pendiente'}
+          </span>
+          <div class="flex space-x-1">
             <button 
-              onclick="Agenda.exportarPendientes()"
-              class="btn-secondary px-3 py-2 text-sm rounded-lg"
+              onclick="Agenda.openSeguimientoModalAccion('${accion.id}')"
+              class="group relative bg-gradient-to-r from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 border border-blue-400/50 text-blue-300 hover:text-blue-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20"
+              title="Seguimiento"
             >
-              <i class="fas fa-download mr-2"></i>Exportar
+              <i class="fas fa-lock text-sm"></i>
+              <div class="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
             <button 
-              onclick="Decretos.openCreateAccionDetalleModal()"
-              class="btn-primary px-3 py-2 text-sm rounded-lg"
+              onclick="Agenda.cambiarEstadoAccion('${accion.id}')"
+              class="group relative bg-gradient-to-r from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30 border border-purple-400/50 text-purple-300 hover:text-purple-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
+              title="${accion.estado === 'pendiente' ? 'Iniciar' : accion.estado === 'en_progreso' ? 'Completar' : 'Reiniciar'}"
             >
-              <i class="fas fa-plus mr-2"></i>Nueva Acción
+              <i class="fas fa-${accion.estado === 'pendiente' ? 'play' : accion.estado === 'en_progreso' ? 'check' : 'undo'} text-sm"></i>
+              <div class="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+            <button 
+              onclick="Agenda.confirmarBorrarAccion('${accion.id}')"
+              class="group relative bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-400/50 text-red-300 hover:text-red-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/20"
+              title="Borrar"
+            >
+              <i class="fas fa-trash text-sm"></i>
+              <div class="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
           </div>
         </div>
       </div>
-    `
+    `).join('')
+  },
+
+  // Nueva función para filtrar columnas individualmente
+  filtrarColumna(area, estado) {
+    const { acciones } = this.data.panoramicaPendientes
+    const accionesArea = (acciones || []).filter(a => a.area === area)
+    const contenedorId = `columna-${area}`
+    const contenedor = document.getElementById(contenedorId)
+    
+    if (contenedor) {
+      contenedor.innerHTML = this.renderAccionesColumna(accionesArea, estado)
+    }
   },
 
   renderEstadisticasPanoramica(estadisticas) {
@@ -3295,7 +3399,7 @@ const Agenda = {
         <div class="timeline-connector"></div>
         
         <!-- Card de Tarea -->
-        <div class="timeline-card cursor-pointer" data-evento-id="${tarea.id}" onclick="Agenda.abrirModalAccionComoDecretos('${tarea.accion_id}', '${tarea.decreto_id}')" style="transition: all 0.3s ease; cursor: pointer;"
+        <div class="timeline-card ${tarea.estado === 'completada' ? 'opacity-75' : ''}" data-evento-id="${tarea.id}" style="transition: all 0.3s ease;"
           onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'"
           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
         >
@@ -3309,7 +3413,7 @@ const Agenda = {
             <div class="flex-1 min-w-0">
               <div class="flex items-center space-x-2 mb-1">
                 <span class="text-sm">${prioridadIcon}</span>
-                <h4 class="font-medium text-white text-sm truncate">${tarea.titulo}</h4>
+                <h4 class="font-medium ${tarea.estado === 'completada' ? 'line-through text-slate-400' : 'text-white'} text-sm truncate cursor-pointer hover:text-accent-blue transition-colors" onclick="Agenda.abrirModalAccionComoDecretos('${tarea.accion_id}', '${tarea.decreto_id}')">${tarea.titulo}</h4>
               </div>
               
               ${tarea.decreto_titulo ? `
@@ -3321,28 +3425,31 @@ const Agenda = {
               ` : ''}
             </div>
             
-            <!-- Actions Flotantes -->
-            <div class="timeline-actions">
+            <!-- Botones de Acción (copy-paste exacto de Decretos) -->
+            <div class="flex items-center space-x-2">
               <button 
-                onclick="${tarea.estado === 'completada' ? `Agenda.marcarPendiente('${tarea.id}')` : `Agenda.completarTarea('${tarea.id}')`}" 
-                class="timeline-action-btn ${tarea.estado === 'completada' ? 'action-completed' : 'action-complete'}"
-                title="${tarea.estado === 'completada' ? 'Marcar pendiente' : 'Completar tarea'}"
+                onclick="Agenda.openSeguimientoModal('${tarea.accion_id}')"
+                class="group relative bg-gradient-to-r ${tarea.tipo === 'primaria' ? 'from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 border-green-400/50 text-green-300 hover:text-green-200' : 'from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 border-blue-400/50 text-blue-300 hover:text-blue-200'} border px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-${tarea.tipo === 'primaria' ? 'green' : 'blue'}-500/20"
+                title="Seguimiento"
               >
-                <i class="fas ${tarea.estado === 'completada' ? 'fa-undo' : 'fa-check'} text-xs"></i>
+                <i class="fas fa-lock text-sm"></i>
+                <div class="absolute -top-1 -right-1 w-2 h-2 ${tarea.tipo === 'primaria' ? 'bg-green-400' : 'bg-blue-400'} rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
               <button 
-                onclick="Agenda.openEditTareaModal('${tarea.id}')" 
-                class="timeline-action-btn action-edit"
-                title="Editar tarea"
+                onclick="Agenda.cambiarEstadoAccion('${tarea.accion_id}')"
+                class="group relative bg-gradient-to-r from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30 border border-purple-400/50 text-purple-300 hover:text-purple-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
+                title="${tarea.estado === 'pendiente' ? 'Iniciar' : tarea.estado === 'en_progreso' ? 'Completar' : 'Reiniciar'}"
               >
-                <i class="fas fa-edit text-xs"></i>
+                <i class="fas fa-${tarea.estado === 'pendiente' ? 'play' : tarea.estado === 'en_progreso' ? 'check' : 'undo'} text-sm"></i>
+                <div class="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
               <button 
-                onclick="Agenda.deleteTarea('${tarea.id}')" 
-                class="timeline-action-btn action-delete"
-                title="Eliminar tarea"
+                onclick="Agenda.confirmarBorrarAccion('${tarea.accion_id}')"
+                class="group relative bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-400/50 text-red-300 hover:text-red-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/20"
+                title="Borrar"
               >
-                <i class="fas fa-trash text-xs"></i>
+                <i class="fas fa-trash text-sm"></i>
+                <div class="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
             </div>
           </div>
@@ -4189,10 +4296,188 @@ const Agenda = {
       console.error('❌ Error abriendo modal de acción:', error)
       Utils.showToast('❌ Error al cargar detalles de la acción', 'error')
     }
+  },
+
+  // 🔗 COPY-PASTE EXACTO DE DECRETOS - Funciones de botones
+  openSeguimientoModal(accionId) {
+    console.log('🔍 Abriendo modal de seguimiento para acción desde agenda:', accionId)
+    
+    // Cargar decreto y usar función de decretos directamente
+    this.loadDecretoForAction(accionId).then(() => {
+      Decretos.openSeguimientoModal(accionId)
+    })
+  },
+
+  async loadDecretoForAction(accionId) {
+    try {
+      // Buscar la acción en los datos del timeline actual
+      const timelineData = this.data?.timeline || []
+      const accionTimeline = timelineData.find(t => t.accion_id === accionId)
+      
+      if (accionTimeline && accionTimeline.decreto_id) {
+        // Cargar el decreto en Decretos temporalmente
+        await Decretos.openDetalleDecreto(accionTimeline.decreto_id)
+      }
+    } catch (error) {
+      console.error('Error cargando decreto para acción:', error)
+    }
+  },
+
+  // 🎯 FUNCIONES PARA PANORÁMICA - COPY PASTE EXACTO de decretos que funcionan
+  async cambiarEstadoAccion(accionId) {
+    const accion = this.findAccionById(accionId)
+    if (!accion) {
+      Utils.showToast('❌ Acción no encontrada', 'error')
+      return
+    }
+
+    try {
+      switch (accion.estado) {
+        case 'pendiente':
+          console.log('▶️ Iniciando acción:', accionId)
+          await API.decretos.iniciarAccion(accion.decreto_id, accionId)
+          Utils.showToast('▶️ Acción iniciada - En Progreso', 'success')
+          break
+          
+        case 'en_progreso':
+          console.log('✅ Completando acción:', accionId)
+          await API.decretos.completarAccion(accion.decreto_id, accionId)
+          Utils.showToast('✅ Acción completada', 'success')
+          break
+          
+        case 'completada':
+          if (confirm('¿Estás seguro de reiniciar esta acción? Volverá a estado pendiente.')) {
+            console.log('🔄 Reiniciando acción:', accionId)
+            await API.decretos.marcarPendiente(accion.decreto_id, accionId)
+            Utils.showToast('🔄 Acción reiniciada - Pendiente', 'success')
+          } else {
+            return
+          }
+          break
+          
+        default:
+          Utils.showToast('❌ Estado de acción no reconocido', 'error')
+          return
+      }
+      
+      this.loadPanoramicaPendientes()
+      
+    } catch (error) {
+      console.error('❌ Error al cambiar estado:', error)
+      Utils.showToast('❌ Error al cambiar estado de acción', 'error')
+    }
+  },
+
+  confirmarBorrarAccion(accionId) {
+    const accion = this.findAccionById(accionId)
+    if (!accion) return
+    
+    if (confirm(`¿Estás seguro de que quieres borrar la acción "${accion.titulo}"?`)) {
+      this.borrarAccion(accionId)
+    }
+  },
+
+  async borrarAccion(accionId) {
+    try {
+      const accion = this.findAccionById(accionId)
+      if (!accion) return
+      
+      await API.decretos.deleteAccion(accion.decreto_id, accionId)
+      Utils.showToast('Acción eliminada', 'success')
+      this.loadPanoramicaPendientes()
+    } catch (error) {
+      Utils.showToast('Error al eliminar la acción', 'error')
+    }
+  },
+
+  async openSeguimientoModalAccion(accionId) {
+    console.log('🔍 Abriendo modal de seguimiento para acción desde agenda:', accionId)
+    
+    const accion = this.findAccionById(accionId)
+    if (!accion) {
+      console.error('❌ Acción no encontrada:', accionId)
+      Utils.showToast('Acción no encontrada', 'error')
+      return
+    }
+    
+    console.log('✅ Acción encontrada:', accion)
+    
+    setTimeout(() => {
+      const subtitle = document.getElementById('seguimiento-subtitle')
+      if (subtitle) {
+        const fecha = new Date().toLocaleDateString('es-ES')
+        subtitle.textContent = `${fecha} - ${accion.titulo}`
+      }
+      
+      const form = document.getElementById('seguimientoForm')
+      if (form) {
+        form.dataset.tareaId = ''
+        form.dataset.accionId = accionId
+        form.reset()
+        
+        const calificacionDisplay = document.getElementById('calificacion-display')
+        if (calificacionDisplay) {
+          calificacionDisplay.textContent = '5'
+        }
+        
+        console.log('✅ Modal configurado correctamente para acción')
+      }
+      
+      Modal.open('seguimientoModal')
+    }, 100)
+  },
+
+  async submitSeguimientoAccion(formData, accionId) {
+    try {
+      const accion = this.findAccionById(accionId)
+      if (!accion) {
+        Utils.showToast('❌ Acción no encontrada', 'error')
+        return
+      }
+
+      const pendientes = formData.pendientes || ''
+      const nuevasTareas = this.parsearTareasPendientes(pendientes)
+      
+      const seguimientoData = {
+        que_se_hizo: formData.que_se_hizo,
+        como_se_hizo: formData.como_se_hizo,
+        resultados_obtenidos: formData.resultados,
+        tareas_pendientes: nuevasTareas,
+        proxima_revision: formData.proxima_revision || null,
+        calificacion: parseInt(formData.calificacion)
+      }
+      
+      await API.decretos.createSeguimiento(accion.decreto_id, accionId, seguimientoData)
+      
+      if (nuevasTareas.length > 0) {
+        Utils.showToast(`✅ Seguimiento guardado y ${nuevasTareas.length} nueva${nuevasTareas.length !== 1 ? 's' : ''} tarea${nuevasTareas.length !== 1 ? 's' : ''} sincronizada${nuevasTareas.length !== 1 ? 's' : ''} con la agenda`, 'success')
+      } else {
+        Utils.showToast('✅ Seguimiento guardado correctamente', 'success')
+      }
+      
+      Modal.close('seguimientoModal')
+      this.loadPanoramicaPendientes()
+      
+    } catch (error) {
+      console.error('Error al guardar seguimiento:', error)
+      Utils.showToast('Error al guardar el seguimiento', 'error')
+    }
+  },
+
+  parsearTareasPendientes(texto) {
+    if (!texto || texto.trim() === '') return []
+    
+    return texto.split('\n')
+      .map(linea => linea.trim())
+      .filter(linea => linea.length > 0)
+      .map(titulo => ({ titulo }))
+  },
+
+  findAccionById(accionId) {
+    const acciones = this.data.panoramicaPendientes?.acciones || []
+    return acciones.find(a => a.id === accionId || a.id === parseInt(accionId))
   }
 }
-
-// 🚀 COMANDO EJECUTIVO - Funciones de acción rápida
 const ComandoEjecutivo = {
   
   async decretoExpress() {
