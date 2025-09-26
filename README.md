@@ -122,6 +122,7 @@ npm run deploy
 - [x] Agenda diaria con calendario
 - [x] **Click handlers consistentes**: Agenda, Decretos y Panorámica abren el mismo modal de detalles
 - [x] **🔧 ARREGLO CRÍTICO DE FECHAS**: Las fechas seleccionadas por el usuario en seguimientos ahora se respetan correctamente (NO TOCAR ESTE CÓDIGO)
+- [x] **🎯 LÓGICA CORRECTA DE TIMELINE**: Timeline muestra acciones por FECHA COMPROMISO (proxima_revision) únicamente - CÓDIGO PROTEGIDO
 - [x] Sistema de progreso y estadísticas
 - [x] Rutinas matutinas y afirmaciones
 - [x] Nombre de usuario editable
