@@ -4173,24 +4173,17 @@ const Agenda = {
     }
     
     try {
-      console.log('🎯 Abriendo modal de acción desde agenda:', { accionId, decretoId })
+      console.log('🎯 Abriendo modal de detalles de acción desde agenda:', { accionId, decretoId })
       
-      // Cambiar temporalmente a la sección de decretos
-      const seccionAnterior = AppState.currentSection
-      AppState.currentSection = 'decretos'
+      // Usar la misma función que decretos para abrir detalles
+      if (typeof Decretos !== 'undefined' && Decretos.openDetalleAccion) {
+        await Decretos.openDetalleAccion(accionId, decretoId)
+      } else {
+        console.error('❌ Función openDetalleAccion no disponible')
+        Utils.showToast('❌ Error al abrir detalles de acción', 'error')
+      }
       
-      // Cargar el decreto en decretos (necesario para que funcione el modal)
-      await Decretos.openDetalleDecreto(decretoId)
-      
-      // Abrir el modal de seguimiento de la acción específica
-      setTimeout(() => {
-        if (typeof Decretos !== 'undefined' && Decretos.openSeguimientoModal) {
-          Decretos.openSeguimientoModal(accionId)
-        } else {
-          console.error('❌ Función openSeguimientoModal no disponible')
-          Utils.showToast('❌ Error al abrir detalles de acción', 'error')
-        }
-      }, 300)
+      // NO cambiar de sección - mantener en agenda
       
     } catch (error) {
       console.error('❌ Error abriendo modal de acción:', error)

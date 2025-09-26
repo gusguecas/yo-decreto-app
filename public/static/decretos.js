@@ -2964,12 +2964,18 @@ Preparar presentación para próxima reunión"
   },
 
   // Funciones para modal de detalles y edición de acciones
-  async openDetalleAccion(accionId) {
+  async openDetalleAccion(accionId, decretoId = null) {
     try {
       Modal.open('detalleAccionModal')
       
+      // Usar decreto proporcionado o el seleccionado
+      const decretoIdFinal = decretoId || this.data.selectedDecreto?.id
+      if (!decretoIdFinal) {
+        throw new Error('No se puede obtener el ID del decreto')
+      }
+      
       // Cargar detalles de la acción
-      const response = await API.decretos.getAccion(this.data.selectedDecreto.id, accionId)
+      const response = await API.decretos.getAccion(decretoIdFinal, accionId)
       const accion = response.data
       
       // Renderizar detalles
