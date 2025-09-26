@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Seguimiento - SOLO PARA PROBAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+        <h1 class="text-2xl font-bold mb-4">🎯 TEST SEGUIMIENTO</h1>
+        
+        <form id="testForm" class="space-y-4">
+            <div>
+                <label class="block font-medium">Acción ID:</label>
+                <input type="text" id="accionId" value="test-action" class="w-full border p-2 rounded">
+            </div>
+            
+            <div>
+                <label class="block font-medium">¿Qué se hizo?:</label>
+                <textarea id="queSeHizo" class="w-full border p-2 rounded" rows="3" placeholder="Describe lo que hiciste..."></textarea>
+            </div>
+            
+            <div>
+                <label class="block font-medium">¿Cómo se hizo?:</label>
+                <textarea id="comoSeHizo" class="w-full border p-2 rounded" rows="2" placeholder="Describe cómo lo hiciste..."></textarea>
+            </div>
+            
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                🚀 PROBAR SEGUIMIENTO
+            </button>
+        </form>
+        
+        <div id="resultado" class="mt-4 p-3 rounded hidden"></div>
+    </div>
+
+    <script>
+        document.getElementById('testForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const resultado = document.getElementById('resultado');
+            resultado.className = 'mt-4 p-3 rounded bg-yellow-100 text-yellow-800';
+            resultado.textContent = 'Enviando...';
+            resultado.classList.remove('hidden');
+            
+            try {
+                const response = await axios.post('/api/decretos/decreto_1/acciones/test-action/seguimientos', {
+                    que_se_hizo: document.getElementById('queSeHizo').value,
+                    como_se_hizo: document.getElementById('comoSeHizo').value,
+                    resultados_obtenidos: null,
+                    tareas_pendientes: null,
+                    calificacion: 5
+                });
+                
+                resultado.className = 'mt-4 p-3 rounded bg-green-100 text-green-800';
+                resultado.innerHTML = `
+                    <strong>✅ ¡ÉXITO!</strong><br>
+                    ${JSON.stringify(response.data, null, 2)}
+                `;
+            } catch (error) {
+                resultado.className = 'mt-4 p-3 rounded bg-red-100 text-red-800';
+                resultado.innerHTML = `
+                    <strong>❌ ERROR:</strong><br>
+                    Status: ${error.response?.status || 'Unknown'}<br>
+                    Message: ${error.response?.data?.error || error.message}<br>
+                    Details: ${error.response?.data?.details || 'N/A'}
+                `;
+            }
+        };
+    </script>
+</body>
+</html>

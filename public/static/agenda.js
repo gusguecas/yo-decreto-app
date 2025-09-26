@@ -129,30 +129,67 @@ const Agenda = {
               flex-shrink: 0 !important;
             }
           </style>
-          <div class="agenda-equal-heights">
+          <!-- 🔄 NUEVO LAYOUT: Sin Centro de Comando, Timeline más grande -->
+          <style>
+            .agenda-new-layout {
+              display: flex !important;
+              flex-direction: row !important;
+              gap: 16px !important;
+              width: 100% !important;
+              align-items: stretch !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            .agenda-new-layout .calendar-col {
+              flex: 0 0 22% !important;
+              min-width: 22% !important;
+              max-width: 22% !important;
+            }
+            .agenda-new-layout .timeline-col {
+              flex: 0 0 40% !important;
+              min-width: 40% !important;
+              max-width: 40% !important;
+            }
+            .agenda-new-layout .panel-col {
+              flex: 0 0 19% !important;
+              min-width: 19% !important;
+              max-width: 19% !important;
+            }
+            .agenda-new-layout .recordatorios-col {
+              flex: 0 0 19% !important;
+              min-width: 19% !important;
+              max-width: 19% !important;
+            }
+            .agenda-new-layout > div {
+              height: 480px !important;
+              min-height: 480px !important;
+              max-height: 480px !important;
+              overflow: hidden !important;
+              box-sizing: border-box !important;
+              display: flex !important;
+              flex-direction: column !important;
+            }
+          </style>
+          
+          <div class="agenda-new-layout">
             
-            <!-- 📅 CALENDARIO ARTÍSTICO (1/3) -->
-            <div>
+            <!-- 📅 CALENDARIO (22%) -->
+            <div class="calendar-col">
               ${this.renderCalendarioPremium()}
             </div>
             
-            <!-- ⏰ TIMELINE CINEMATOGRÁFICO (1/3) -->
-            <div>
+            <!-- ⏰ TIMELINE AMPLIADO (40%) -->
+            <div class="timeline-col">
               ${this.renderTimelineCinematografico()}
             </div>
             
-            <!-- 🎛️ PANEL DE CONTROL FUTURISTA (1/4) -->
-            <div>
+            <!-- 🎛️ PANEL DE CONTROL (19%) -->
+            <div class="panel-col">
               ${this.renderPanelControlFuturista()}
             </div>
 
-            <!-- 🚀 CENTRO DE COMANDO EJECUTIVO (1/5) -->
-            <div>
-              ${this.renderCentroComandoEjecutivoCompacto()}
-            </div>
-
-            <!-- 📝 RECORDATORIOS EXPRESS (1/5) -->
-            <div>
+            <!-- 📝 RECORDATORIOS (19%) -->
+            <div class="recordatorios-col">
               ${this.renderRecordatoriosExpress()}
             </div>
             
@@ -160,7 +197,7 @@ const Agenda = {
 
           <!-- 🎯 PANORÁMICA MAESTRA - Dashboard de Pendientes -->
           <div class="w-full mt-12" data-section="panoramica-pendientes">
-            ${this.renderPanoramicaMaestra()}
+            ${this.renderPanoramicaPendientes()}
           </div>
           
         </div>
@@ -1475,11 +1512,11 @@ const Agenda = {
             </button>
           ` : `
             <button 
-              onclick="Modal.close('detalleTareaModal')" 
-              class="btn-secondary flex-1 py-3 rounded-lg font-medium"
+              onclick="Agenda.marcarPendiente('${tarea.id}'); Modal.close('detalleTareaModal')" 
+              class="btn-warning flex-1 py-3 rounded-lg font-medium"
             >
-              <i class="fas fa-times mr-2"></i>
-              Cerrar
+              <i class="fas fa-undo mr-2"></i>
+              Marcar Pendiente
             </button>
           `}
         </div>
@@ -2337,12 +2374,14 @@ const Agenda = {
             
             <!-- 📅 INFORMACIÓN DE FECHAS CLARIFICADA -->
             <div class="text-xs text-slate-500 mt-2 space-y-1">
-              <!-- Mostrar fecha de creación (de acción o de tarea) -->
+              <!-- Mostrar fecha de creación (de acción, tarea o fecha del evento como fallback) -->
               ${tarea.accion_fecha_creacion ? `
                 <div>📝 Creada: ${dayjs(tarea.accion_fecha_creacion).format('DD/MM/YYYY')}</div>
               ` : tarea.created_at ? `
                 <div>📝 Creada: ${dayjs(tarea.created_at).format('DD/MM/YYYY HH:mm')}</div>
-              ` : ''}
+              ` : `
+                <div>📝 Programada: ${dayjs(tarea.fecha_evento).format('DD/MM/YYYY')}</div>
+              `}
               
               <!-- Fecha de compromiso SIEMPRE visible -->
               <div class="text-blue-400">🎯 Compromiso: ${dayjs(tarea.fecha_evento + ' ' + (tarea.hora_evento || '09:00')).format('DD/MM/YYYY HH:mm')}</div>
@@ -3175,24 +3214,39 @@ const Agenda = {
   renderTimelineCinematografico() {
     const timeline = this.data.timeline || []
     const hoyFormatted = dayjs(this.data.selectedDate).format('dddd, D [de] MMMM')
+    const completadas = timeline.filter(t => t.estado === 'completada').length
+    const total = timeline.length
     
     return `
       <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important;">
-        <!-- Header Cinematográfico -->
+        <!-- Header Cinematográfico Ampliado -->
         <div class="p-4 border-b border-white/10">
-          <div class="flex items-center space-x-3 mb-2">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-blue to-blue-600 flex items-center justify-center premium-glow">
-              <i class="fas fa-clock text-white text-sm"></i>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-blue to-blue-600 flex items-center justify-center premium-glow">
+                <i class="fas fa-clock text-white text-sm"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-white tracking-tight">Timeline Detallado</h3>
+                <p class="text-xs text-slate-400 font-medium capitalize">${hoyFormatted}</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-white tracking-tight">Timeline Hoy</h3>
-              <p class="text-xs text-slate-400 font-medium capitalize">${hoyFormatted}</p>
+            <div class="text-right">
+              <div class="text-lg font-bold text-accent-green">${completadas}/${total}</div>
+              <div class="text-xs text-slate-400">Completadas</div>
             </div>
           </div>
+          
+          <!-- Progress Bar -->
+          ${total > 0 ? `
+            <div class="w-full bg-slate-700 rounded-full h-2 mb-2">
+              <div class="bg-gradient-to-r from-accent-green to-green-400 h-2 rounded-full" style="width: ${Math.round((completadas / total) * 100)}%"></div>
+            </div>
+          ` : ''}
         </div>
 
-        <!-- Timeline Vertical con Scroll -->
-        <div class="h-80 overflow-y-auto premium-scroll p-4">
+        <!-- Timeline Vertical Ampliado con Scroll -->
+        <div class="h-96 overflow-y-auto premium-scroll p-4">
           ${timeline.length === 0 ? `
             <div class="flex flex-col items-center justify-center h-full text-center">
               <div class="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center mb-3">
@@ -3241,7 +3295,10 @@ const Agenda = {
         <div class="timeline-connector"></div>
         
         <!-- Card de Tarea -->
-        <div class="timeline-card" data-evento-id="${tarea.id}">
+        <div class="timeline-card cursor-pointer" data-evento-id="${tarea.id}" onclick="Agenda.openDetalleTarea('${tarea.id}')" style="transition: all 0.3s ease; cursor: pointer;"
+          onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'"
+          onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+        >
           <div class="flex items-start space-x-3">
             <!-- Hora Digital -->
             <div class="hora-digital">
@@ -3267,11 +3324,11 @@ const Agenda = {
             <!-- Actions Flotantes -->
             <div class="timeline-actions">
               <button 
-                onclick="Agenda.completarTarea('${tarea.id}')" 
+                onclick="${tarea.estado === 'completada' ? `Agenda.marcarPendiente('${tarea.id}')` : `Agenda.completarTarea('${tarea.id}')`}" 
                 class="timeline-action-btn ${tarea.estado === 'completada' ? 'action-completed' : 'action-complete'}"
                 title="${tarea.estado === 'completada' ? 'Marcar pendiente' : 'Completar tarea'}"
               >
-                <i class="fas fa-check text-xs"></i>
+                <i class="fas ${tarea.estado === 'completada' ? 'fa-undo' : 'fa-check'} text-xs"></i>
               </button>
               <button 
                 onclick="Agenda.openEditTareaModal('${tarea.id}')" 
@@ -3415,6 +3472,13 @@ const Agenda = {
   renderPanoramicaMaestra() {
     const { acciones, estadisticas } = this.data.panoramicaPendientes
     
+    // 🐛 DEBUG: Log para depurar el problema de KPIs
+    console.log('🔍 DEBUG - Panorámica Maestra:', { 
+      acciones: acciones?.length, 
+      estadisticas,
+      dataCompleta: this.data.panoramicaPendientes 
+    })
+    
     if (!acciones || acciones.length === 0) {
       return `
         <div class="glassmorphism-card premium-shadow text-center p-12">
@@ -3493,24 +3557,27 @@ const Agenda = {
   },
 
   renderDashboardEstadisticas(estadisticas) {
+    // 🐛 DEBUG: Log para depurar el problema de KPIs
+    console.log('🔍 DEBUG - Renderizando estadísticas dashboard:', estadisticas)
+    
     const stats = [
       { 
         label: 'Total Pendientes', 
-        value: estadisticas.total || 0, 
+        value: estadisticas?.total || 0, 
         icon: 'fas fa-tasks',
         gradient: 'from-accent-green to-emerald-600',
         glow: 'premium-glow-green'
       },
       { 
         label: 'Días Promedio', 
-        value: estadisticas.antiguedad_promedio || 0, 
+        value: estadisticas?.antiguedad_promedio || 0, 
         icon: 'fas fa-calendar-day',
         gradient: 'from-accent-orange to-orange-600',
         glow: 'premium-glow-orange'
       },
       { 
         label: 'Con Revisión', 
-        value: estadisticas.con_revision_pendiente || 0, 
+        value: estadisticas?.con_revision_pendiente || 0, 
         icon: 'fas fa-clock',
         gradient: 'from-accent-blue to-blue-600',
         glow: 'premium-glow-blue'
@@ -3556,8 +3623,13 @@ const Agenda = {
     const config = urgenciaConfig[accion.urgencia] || urgenciaConfig.normal
     
     return `
-      <div class="accion-maestra-card border-l-4 ${config.color} ${config.bg} ${config.pulse} fade-in-masonry" 
-           style="animation-delay: ${index * 0.05}s">
+      <div class="accion-maestra-card border-l-4 ${config.color} ${config.bg} ${config.pulse} fade-in-masonry cursor-pointer" 
+           style="animation-delay: ${index * 0.05}s"
+           data-accion-id="${accion.id}"
+           onclick="Agenda.openDetalleTarea('${accion.id}')"
+           onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'"
+           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+           title="Ver detalles de: ${accion.titulo}">
         
         <!-- Header de la Acción -->
         <div class="flex items-start justify-between mb-3">
@@ -3574,7 +3646,9 @@ const Agenda = {
 
         <!-- Título y Decreto -->
         <div class="mb-3">
-          <h4 class="font-semibold text-white mb-1 line-clamp-2 hover:text-accent-green transition-colors cursor-pointer">
+          <h4 class="font-semibold text-white mb-1 line-clamp-2 hover:text-accent-green transition-colors cursor-pointer"
+              onclick="Agenda.openDetalleTarea('${accion.id}')"
+              title="Ver detalles de la acción">
             ${accion.titulo}
           </h4>
           <p class="text-sm text-accent-blue line-clamp-1">${accion.decreto_titulo}</p>
@@ -3605,30 +3679,46 @@ const Agenda = {
           ` : ''}
         </div>
 
-        <!-- Acciones -->
+        <!-- Acciones - 4 Botones Fijos Unificados -->
         <div class="flex space-x-2">
-          ${accion.evento_agenda_id ? `
-            <button 
-              onclick="Agenda.verEnTimeline('${accion.evento_agenda_id}')"
-              class="accion-btn accion-btn-blue"
-              title="Ver en timeline"
-            >
-              <i class="fas fa-calendar-alt text-xs"></i>
-            </button>
-          ` : ''}
+          <!-- Botón 1: Ir a Decretos -->
           <button 
-            onclick="Decretos.openAccionModal('${accion.decreto_id}', '${accion.id}')"
-            class="accion-btn accion-btn-green"
-            title="Ver detalles"
+            onclick="event.stopPropagation(); Agenda.verEnDecretos('${accion.id}')"
+            class="group relative bg-gradient-to-r from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 border border-blue-400/50 text-blue-300 hover:text-blue-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20"
+            title="Ver en Decretos"
           >
-            <i class="fas fa-eye text-xs"></i>
+            <i class="fas fa-scroll text-sm"></i>
+            <div class="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </button>
+          
+          <!-- Botón 2: Seguimiento -->
           <button 
-            onclick="Agenda.programarAccion('${accion.id}')"
-            class="accion-btn accion-btn-orange"
-            title="Programar"
+            onclick="event.stopPropagation(); Agenda.abrirSeguimiento('${accion.id}')"
+            class="group relative bg-gradient-to-r from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 border border-green-400/50 text-green-300 hover:text-green-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-green-500/20"
+            title="Seguimiento"
           >
-            <i class="fas fa-plus text-xs"></i>
+            <i class="fas fa-lock text-sm"></i>
+            <div class="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </button>
+          
+          <!-- Botón 3: Cambiar Estado -->
+          <button 
+            onclick="event.stopPropagation(); Agenda.cambiarEstadoAccion('${accion.id}')"
+            class="group relative bg-gradient-to-r from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30 border border-purple-400/50 text-purple-300 hover:text-purple-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
+            title="${accion.estado === 'pendiente' ? 'Iniciar' : accion.estado === 'en_progreso' ? 'Completar' : 'Reiniciar'}"
+          >
+            <i class="fas fa-${accion.estado === 'pendiente' ? 'play' : accion.estado === 'en_progreso' ? 'check' : 'undo'} text-sm"></i>
+            <div class="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </button>
+          
+          <!-- Botón 4: Borrar -->
+          <button 
+            onclick="event.stopPropagation(); Agenda.confirmarBorrarAccion('${accion.id}')"
+            class="group relative bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-400/50 text-red-300 hover:text-red-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/20"
+            title="Borrar Acción"
+          >
+            <i class="fas fa-trash text-sm"></i>
+            <div class="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </button>
         </div>
 
@@ -4246,6 +4336,180 @@ const ComandoEjecutivo = {
         document.body.removeChild(notif)
       }, 500)
     }, 4000)
+  },
+
+  // 🎯 FUNCIÓN PARA EDITAR ACCIÓN (como en Decretos)
+  async editarAccion(accionId) {
+    try {
+      // Redirigir a Decretos para editar la acción
+      Utils.showToast('🔄 Redirigiendo a editar acción...', 'info')
+      
+      // Cambiar a la sección Decretos
+      App.currentSection = 'decretos'
+      App.renderNavigation()
+      
+      // Cargar Decretos y abrir modal de edición
+      await Decretos.init()
+      
+      // Buscar y abrir modal de edición
+      setTimeout(() => {
+        // Buscar la acción en la vista de Decretos y abrir su detalle
+        const accionElement = document.querySelector(`[data-accion-id="${accionId}"]`)
+        if (accionElement) {
+          accionElement.click()
+        } else {
+          // Si no encuentra el elemento, intentar abrir directamente
+          Decretos.openDetalleAccionModal(accionId)
+        }
+      }, 500)
+      
+    } catch (error) {
+      console.error('Error al editar acción:', error)
+      Utils.showToast('❌ Error al abrir edición de acción', 'error')
+    }
+  },
+
+  // 🗑️ FUNCIÓN PARA CONFIRMAR BORRAR ACCIÓN (como en Decretos)
+  confirmarBorrarAccion(accionId) {
+    if (confirm('⚠️ ¿Estás seguro de que quieres eliminar esta acción?\n\nEsta acción no se puede deshacer.')) {
+      this.borrarAccion(accionId)
+    }
+  },
+
+  // 🗑️ FUNCIÓN PARA BORRAR ACCIÓN
+  async borrarAccion(accionId) {
+    try {
+      const response = await fetch(`/api/decretos/acciones/${accionId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        Utils.showToast('✅ Acción eliminada correctamente', 'success')
+        // Recargar la vista actual
+        this.loadPanoramicaPendientes()
+      } else {
+        const errorData = await response.json()
+        Utils.showToast(`❌ Error: ${errorData.error || 'No se pudo eliminar la acción'}`, 'error')
+      }
+    } catch (error) {
+      console.error('Error al borrar acción:', error)
+      Utils.showToast('❌ Error de conexión al borrar acción', 'error')
+    }
+  },
+
+  // 📜 VER EN DECRETOS - Mostrar acción específica en decretos
+  verEnDecretos(accionId) {
+    try {
+      console.log('📜 Navegando a decretos para acción:', accionId)
+      
+      // Usar Router para navegar (método seguro)
+      if (typeof Router !== 'undefined' && Router.navigate) {
+        Router.navigate('decretos')
+        
+        // Buscar y resaltar después de que cargue
+        setTimeout(() => {
+          if (typeof Decretos !== 'undefined' && Decretos.resaltarAccionEnDecretos) {
+            Decretos.resaltarAccionEnDecretos(accionId)
+          }
+        }, 1000)
+        
+        Utils.showToast('📜 Mostrando en decretos...', 'info')
+      } else {
+        // Fallback
+        window.location.hash = '#decretos'
+        Utils.showToast('📜 Redirigiendo a decretos...', 'info')
+      }
+      
+    } catch (error) {
+      console.error('❌ Error al ver en decretos:', error)
+      Utils.showToast('❌ Error al abrir decretos', 'error')
+    }
+  },
+
+  // 🔒 ABRIR SEGUIMIENTO - Redirigir a decretos para seguimiento  
+  abrirSeguimiento(accionId) {
+    try {
+      console.log('🔒 Abriendo seguimiento para acción:', accionId)
+      
+      // Usar Router para navegar
+      if (typeof Router !== 'undefined' && Router.navigate) {
+        Router.navigate('decretos')
+        
+        // Abrir modal de seguimiento después de cargar
+        setTimeout(() => {
+          if (typeof Decretos !== 'undefined' && Decretos.openSeguimientoModal) {
+            Decretos.openSeguimientoModal(accionId)
+          }
+        }, 1000)
+        
+        Utils.showToast('🔒 Abriendo seguimiento...', 'info')
+      } else {
+        Utils.showToast('❌ Error: Sistema de navegación no disponible', 'error')
+      }
+      
+    } catch (error) {
+      console.error('❌ Error al abrir seguimiento:', error)
+      Utils.showToast('❌ Error al abrir seguimiento', 'error')
+    }
+  },
+
+  // ⚡ CAMBIAR ESTADO - Botón inteligente como en Decretos
+  async cambiarEstadoAccion(accionId) {
+    try {
+      // Buscar la acción en los datos actuales
+      let accion = null
+      
+      // Buscar en panorámica de pendientes
+      if (this.data.panoramicaPendientes && this.data.panoramicaPendientes.acciones) {
+        accion = this.data.panoramicaPendientes.acciones.find(a => a.id === accionId)
+      }
+      
+      // Si no se encuentra, buscar en timeline
+      if (!accion && this.data.timeline) {
+        accion = this.data.timeline.find(t => t.id === accionId)
+      }
+      
+      if (!accion) {
+        Utils.showToast('❌ Acción no encontrada', 'error')
+        return
+      }
+
+      // Lógica de cambio de estado igual que en Decretos
+      switch (accion.estado) {
+        case 'pendiente':
+          console.log('▶️ Iniciando acción desde agenda:', accionId)
+          await API.decretos.iniciarAccion(accion.decreto_id, accionId)
+          Utils.showToast('▶️ Acción iniciada - En Progreso', 'success')
+          break
+          
+        case 'en_progreso':
+          console.log('✅ Completando acción desde agenda:', accionId)
+          await API.decretos.completarAccion(accion.decreto_id, accionId)
+          Utils.showToast('✅ Acción completada', 'success')
+          break
+          
+        case 'completada':
+          if (confirm('¿Estás seguro de reiniciar esta acción? Volverá a estado pendiente.')) {
+            console.log('🔄 Reiniciando acción desde agenda:', accionId)
+            await API.decretos.marcarPendiente(accion.decreto_id, accionId)
+            Utils.showToast('🔄 Acción reiniciada - Pendiente', 'success')
+          } else {
+            return
+          }
+          break
+          
+        default:
+          Utils.showToast('❌ Estado de acción no reconocido', 'error')
+          return
+      }
+      
+      // Recargar vista actual
+      this.loadPanoramicaPendientes()
+      
+    } catch (error) {
+      console.error('❌ Error al cambiar estado desde agenda:', error)
+      Utils.showToast('❌ Error al cambiar estado de acción', 'error')
+    }
   }
 }
 

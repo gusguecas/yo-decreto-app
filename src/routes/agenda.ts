@@ -378,6 +378,8 @@ agendaRoutes.get('/pendientes/:fecha', async (c) => {
   }
 })
 
+// 🔥 ENDPOINT DUPLICADO ELIMINADO - Usando solo el endpoint principal (línea 728+)
+
 // Obtener detalles completos de una tarea
 agendaRoutes.get('/tareas/:id', async (c) => {
   try {

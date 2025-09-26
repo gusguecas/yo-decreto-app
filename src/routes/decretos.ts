@@ -51,6 +51,70 @@ async function sincronizarAccionConAgenda(
 
 export const decretosRoutes = new Hono<{ Bindings: Bindings }>()
 
+// Endpoint para forzar sincronización completa de todas las acciones
+decretosRoutes.post('/sincronizar-agenda', async (c) => {
+  try {
+    console.log('🔄 Iniciando sincronización completa de agenda...')
+    
+    // Obtener todas las acciones que no tienen evento de agenda
+    const acciones = await c.env.DB.prepare(`
+      SELECT a.*, d.titulo as decreto_titulo 
+      FROM acciones a 
+      LEFT JOIN decretos d ON a.decreto_id = d.id
+      LEFT JOIN agenda_eventos ae ON a.id = ae.accion_id
+      WHERE ae.id IS NULL
+    `).all()
+    
+    console.log(`📋 Encontradas ${acciones.results.length} acciones sin sincronizar`)
+    
+    let sincronizadas = 0
+    
+    for (const accion of acciones.results as any[]) {
+      // Crear fecha de próxima revisión si no existe
+      let proximaRevision = accion.proxima_revision
+      if (!proximaRevision) {
+        // Crear fecha para mañana a las 9 AM
+        const mañana = new Date()
+        mañana.setDate(mañana.getDate() + 1)
+        proximaRevision = `${mañana.toISOString().split('T')[0]}T09:00`
+        
+        // Actualizar la acción con la nueva fecha
+        await c.env.DB.prepare(`
+          UPDATE acciones SET proxima_revision = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+        `).bind(proximaRevision, accion.id).run()
+      }
+      
+      // Sincronizar con agenda
+      await sincronizarAccionConAgenda(
+        c.env.DB, 
+        accion.id,
+        accion.titulo,
+        accion.que_hacer,
+        accion.como_hacerlo,
+        accion.tipo,
+        proximaRevision
+      )
+      
+      sincronizadas++
+    }
+    
+    console.log(`✅ Sincronización completa: ${sincronizadas} acciones sincronizadas`)
+    
+    return c.json({
+      success: true,
+      message: `Sincronización completa: ${sincronizadas} acciones sincronizadas con agenda`,
+      sincronizadas
+    })
+  } catch (error) {
+    console.error('❌ Error en sincronización:', error)
+    return c.json({ 
+      success: false, 
+      error: 'Error al sincronizar agenda',
+      details: error.message 
+    }, 500)
+  }
+})
+
 // Obtener configuración del usuario
 decretosRoutes.get('/config', async (c) => {
   try {
@@ -140,10 +204,11 @@ decretosRoutes.get('/:id', async (c) => {
       'SELECT * FROM acciones WHERE decreto_id = ? ORDER BY created_at DESC'
     ).bind(decretoId).all()
 
-    // Calcular métricas
+    // Calcular métricas con 3 estados
     const totalAcciones = acciones.results.length
     const completadas = acciones.results.filter((a: any) => a.estado === 'completada').length
-    const pendientes = totalAcciones - completadas
+    const enProgreso = acciones.results.filter((a: any) => a.estado === 'en_progreso').length
+    const pendientes = acciones.results.filter((a: any) => a.estado === 'pendiente').length
 
     // Recalcular progreso del decreto
     const progreso = totalAcciones > 0 ? Math.round((completadas / totalAcciones) * 100) : 0
@@ -161,6 +226,7 @@ decretosRoutes.get('/:id', async (c) => {
         metricas: {
           total_acciones: totalAcciones,
           completadas,
+          en_progreso: enProgreso,
           pendientes,
           progreso
         }
@@ -245,24 +311,71 @@ decretosRoutes.post('/:id/acciones', async (c) => {
       tipo, 
       proxima_revision, 
       calificacion,
+      decreto_tipo, // 🎯 NUEVO: Tipo de decreto obligatorio
       subtareas = [] // Sub-tareas simples
     } = requestData
     
+    console.log('🎯 VALIDANDO TIPO DE DECRETO:', { decreto_tipo, decretoId })
+    
     if (!titulo || !que_hacer) {
       return c.json({ success: false, error: 'Campos requeridos: titulo, que_hacer' }, 400)
+    }
+    
+    // 🔴 VALIDACIÓN OBLIGATORIA: Tipo de decreto
+    if (!decreto_tipo || !['Empresarial', 'Humano', 'Material'].includes(decreto_tipo)) {
+      return c.json({ 
+        success: false, 
+        error: 'El tipo de decreto es obligatorio. Debe ser: Empresarial, Humano o Material' 
+      }, 400)
+    }
+    
+    // 🎯 CREAR O BUSCAR DECRETO DEL TIPO CORRECTO
+    let decretoRealId = decretoId
+    
+    // Si no se especifica decreto (o es 'sin-decreto'), crear uno automático
+    if (!decretoId || decretoId === 'sin-decreto' || decretoId === 'undefined') {
+      console.log('🎯 Creando decreto automático tipo:', decreto_tipo)
+      
+      // Buscar si ya existe un decreto general de este tipo
+      const decretoExistente = await c.env.DB.prepare(`
+        SELECT id FROM decretos 
+        WHERE area = ? AND titulo LIKE '%[Decreto General]%'
+        LIMIT 1
+      `).bind(decreto_tipo.toLowerCase()).first()
+      
+      if (decretoExistente) {
+        decretoRealId = decretoExistente.id as string
+        console.log('✅ Usando decreto existente:', decretoRealId)
+      } else {
+        // Crear nuevo decreto general
+        decretoRealId = crypto.randomUUID().replace(/-/g, '').substring(0, 32)
+        
+        await c.env.DB.prepare(`
+          INSERT INTO decretos (id, area, titulo, sueno_meta, descripcion)
+          VALUES (?, ?, ?, ?, ?)
+        `).bind(
+          decretoRealId,
+          decreto_tipo.toLowerCase(),
+          `[Decreto General] ${decreto_tipo}`,
+          `Mi meta es alcanzar el éxito en el área ${decreto_tipo.toLowerCase()}`,
+          `Decreto automático para acciones del área ${decreto_tipo.toLowerCase()}`
+        ).run()
+        
+        console.log('✅ Decreto automático creado:', decretoRealId)
+      }
     }
 
     // Generar ID único para la acción principal
     const accionId = crypto.randomUUID().replace(/-/g, '').substring(0, 32)
     
-    // Crear la acción principal
+    // Crear la acción principal usando el decreto correcto
     await c.env.DB.prepare(`
       INSERT INTO acciones (
         id, decreto_id, titulo, que_hacer, como_hacerlo, resultados, 
         tareas_pendientes, tipo, proxima_revision, calificacion, origen
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'manual')
     `).bind(
-      accionId, decretoId, titulo, que_hacer, como_hacerlo || '', resultados || '',
+      accionId, decretoRealId, titulo, que_hacer, como_hacerlo || '', resultados || '',
       JSON.stringify(tareas_pendientes || []), tipo || 'secundaria',
       proxima_revision || null, calificacion || null
     ).run()
@@ -542,6 +655,26 @@ decretosRoutes.put('/:decretoId/acciones/:accionId/pendiente', async (c) => {
   }
 })
 
+// Iniciar acción (marcar como en progreso)
+decretosRoutes.put('/:decretoId/acciones/:accionId/iniciar', async (c) => {
+  try {
+    const accionId = c.req.param('accionId')
+    
+    await c.env.DB.prepare(
+      'UPDATE acciones SET estado = "en_progreso", fecha_cierre = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+    ).bind(accionId).run()
+
+    // Marcar evento de agenda como en progreso (o mantener pendiente)
+    await c.env.DB.prepare(
+      'UPDATE agenda_eventos SET estado = "pendiente", updated_at = CURRENT_TIMESTAMP WHERE accion_id = ?'
+    ).bind(accionId).run()
+
+    return c.json({ success: true })
+  } catch (error) {
+    return c.json({ success: false, error: 'Error al iniciar acción' }, 500)
+  }
+})
+
 // Eliminar acción
 decretosRoutes.delete('/:decretoId/acciones/:accionId', async (c) => {
   try {
@@ -555,162 +688,7 @@ decretosRoutes.delete('/:decretoId/acciones/:accionId', async (c) => {
   }
 })
 
-// Crear seguimiento de acción
-decretosRoutes.post('/:decretoId/acciones/:accionId/seguimientos', async (c) => {
-  try {
-    const accionId = c.req.param('accionId')
-    const { 
-      que_se_hizo, 
-      como_se_hizo, 
-      resultados_obtenidos, 
-      tareas_pendientes, 
-      proxima_revision, 
-      calificacion 
-    } = await c.req.json()
-    
-    if (!que_se_hizo || !como_se_hizo || !resultados_obtenidos) {
-      return c.json({ 
-        success: false, 
-        error: 'Campos requeridos: que_se_hizo, como_se_hizo, resultados_obtenidos' 
-      }, 400)
-    }
-
-    // Crear seguimiento
-    await c.env.DB.prepare(`
-      INSERT INTO seguimientos (
-        accion_id, que_se_hizo, como_se_hizo, resultados_obtenidos, 
-        tareas_pendientes, proxima_revision, calificacion
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).bind(
-      accionId, que_se_hizo, como_se_hizo, resultados_obtenidos,
-      JSON.stringify(tareas_pendientes || []), proxima_revision || null, calificacion || null
-    ).run()
-
-    // Actualizar acción con nueva información
-    await c.env.DB.prepare(`
-      UPDATE acciones SET 
-        resultados = ?, 
-        tareas_pendientes = ?, 
-        proxima_revision = ?,
-        calificacion = ?,
-        updated_at = CURRENT_TIMESTAMP 
-      WHERE id = ?
-    `).bind(
-      resultados_obtenidos,
-      JSON.stringify(tareas_pendientes || []),
-      proxima_revision || null,
-      calificacion || null,
-      accionId
-    ).run()
-
-    // Crear nuevas tareas si hay tareas_pendientes
-    let nuevasTareas = 0
-    if (tareas_pendientes && Array.isArray(tareas_pendientes)) {
-      for (const tarea of tareas_pendientes) {
-        if (typeof tarea === 'string' && tarea.trim()) {
-          let textoTarea = tarea.trim()
-          let tipo = 'secundaria'
-          let fechaRevision = null
-
-          // Detectar prefijos para tipo
-          if (textoTarea.startsWith('[P]') || textoTarea.includes('#primaria')) {
-            tipo = 'primaria'
-            textoTarea = textoTarea.replace(/\[P\]|#primaria/g, '').trim()
-          }
-          if (textoTarea.includes('#diaria')) {
-            tipo = 'secundaria'
-            textoTarea = textoTarea.replace(/#diaria/g, '').trim()
-          }
-
-          // Detectar fecha @YYYY-MM-DD
-          const fechaMatch = textoTarea.match(/@(\d{4}-\d{2}-\d{2})/)
-          if (fechaMatch) {
-            fechaRevision = fechaMatch[1] + 'T09:00'
-            textoTarea = textoTarea.replace(/@\d{4}-\d{2}-\d{2}/g, '').trim()
-          }
-
-          // Obtener decreto_id de la acción original
-          const accionOriginal = await c.env.DB.prepare(
-            'SELECT decreto_id FROM acciones WHERE id = ?'
-          ).bind(accionId).first()
-
-          if (accionOriginal) {
-            // Crear nueva acción
-            const resultNuevaAccion = await c.env.DB.prepare(`
-              INSERT INTO acciones (
-                decreto_id, titulo, que_hacer, como_hacerlo, tipo, 
-                proxima_revision, origen
-              ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            `).bind(
-              accionOriginal.decreto_id,
-              textoTarea,
-              `Tarea generada desde seguimiento`,
-              `Completar: ${textoTarea}`,
-              tipo,
-              fechaRevision,
-              `seguimiento:${accionId}`
-            ).run()
-
-            // Sincronizar con agenda automáticamente
-            let agendaEventId = null
-            
-            // Para tareas secundarias (diarias) SIEMPRE crear evento en agenda
-            if (tipo === 'secundaria') {
-              const fechaEvento = fechaRevision ? fechaRevision.split('T')[0] : new Date().toISOString().split('T')[0]
-              const horaEvento = fechaRevision ? fechaRevision.split('T')[1] : '09:00'
-              
-              const agendaResult = await c.env.DB.prepare(`
-                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
-                VALUES (?, ?, ?, ?, ?, ?)
-              `).bind(
-                resultNuevaAccion.meta.last_row_id,
-                textoTarea,
-                `[Auto-generada] ${textoTarea}`,
-                fechaEvento,
-                horaEvento,
-                'media' // Prioridad por defecto
-              ).run()
-              
-              agendaEventId = agendaResult.meta.last_row_id
-            }
-            // Para tareas primarias solo si hay fecha específica
-            else if (tipo === 'primaria' && fechaRevision) {
-              const agendaResult = await c.env.DB.prepare(`
-                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
-                VALUES (?, ?, ?, date(?), time(?), ?)
-              `).bind(
-                resultNuevaAccion.meta.last_row_id,
-                `[Semanal] ${textoTarea}`,
-                `Tarea generada desde seguimiento`,
-                fechaRevision.split('T')[0],
-                fechaRevision.split('T')[1],
-                'media' // Prioridad por defecto
-              ).run()
-              
-              agendaEventId = agendaResult.meta.last_row_id
-            }
-            
-            // Actualizar la acción con el agenda_event_id
-            if (agendaEventId) {
-              await c.env.DB.prepare(`
-                UPDATE acciones SET agenda_event_id = ? WHERE id = ?
-              `).bind(agendaEventId, resultNuevaAccion.meta.last_row_id).run()
-            }
-
-            nuevasTareas++
-          }
-        }
-      }
-    }
-
-    return c.json({ 
-      success: true, 
-      message: `Seguimiento guardado. ${nuevasTareas} tareas nuevas creadas.`
-    })
-  } catch (error) {
-    return c.json({ success: false, error: 'Error al crear seguimiento' }, 500)
-  }
-})
+// Endpoint de seguimientos movido a archivo separado
 
 // Obtener sugerencias para un decreto
 decretosRoutes.get('/:id/sugerencias', async (c) => {

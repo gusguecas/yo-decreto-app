@@ -126,6 +126,8 @@ const API = {
       API.request(`/decretos/${decretoId}/acciones/${accionId}/completar`, { method: 'PUT' }),
     marcarPendiente: (decretoId, accionId) => 
       API.request(`/decretos/${decretoId}/acciones/${accionId}/pendiente`, { method: 'PUT' }),
+    iniciarAccion: (decretoId, accionId) => 
+      API.request(`/decretos/${decretoId}/acciones/${accionId}/iniciar`, { method: 'PUT' }),
     deleteAccion: (decretoId, accionId) => 
       API.request(`/decretos/${decretoId}/acciones/${accionId}`, { method: 'DELETE' }),
     createSeguimiento: (decretoId, accionId, data) => 
@@ -576,8 +578,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // Cargar configuración inicial
-    const config = await API.config.get()
-    AppState.user = config.data
+    try {
+      const config = await API.config.get()
+      AppState.user = config.data
+    } catch (error) {
+      console.log('Config no disponible, usando defaults')
+      AppState.user = { name: 'Usuario', email: 'test@test.com' }
+    }
     
     // Inicializar router
     Router.init()

@@ -78,6 +78,81 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
+/* Timeline específico - Mejorar legibilidad */
+.timeline-item {
+  background: rgba(30, 41, 59, 0.4);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-left: 3px solid var(--color-accent-blue);
+  transition: all 0.2s ease;
+}
+
+.timeline-item:hover {
+  background: rgba(30, 41, 59, 0.6);
+  transform: translateX(2px);
+}
+
+.timeline-item.completada {
+  border-left-color: var(--color-accent-green);
+  opacity: 0.8;
+}
+
+.timeline-item.vencida {
+  border-left-color: var(--color-accent-red);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Timeline badges mejorados */
+.timeline-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.timeline-badge.empresarial {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--color-accent-green);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.timeline-badge.material {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--color-accent-orange);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.timeline-badge.humano {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--color-accent-blue);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Timeline títulos más legibles */
+.timeline-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.timeline-subtitle {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.3;
+}
+
+.timeline-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-accent-green);
+}
+
 /* Botones personalizados */
 .btn-primary {
   background: linear-gradient(135deg, var(--color-accent-green), #059669);
@@ -1406,8 +1481,9 @@
 }
 
 .action-completed {
-  background: linear-gradient(135deg, #6b7280, #4b5563);
-  color: #d1d5db;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  border: 1px solid #fb923c;
 }
 
 .action-edit {
