@@ -32,8 +32,8 @@ export const renderer = jsxRenderer(({ children }) => {
         {/* Axios para HTTP */}
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         
-        {/* Estilos personalizados */}
-        <link href="/static/styles.css" rel="stylesheet" />
+        {/* Estilos personalizados con cache busting */}
+        <link href={`/static/styles.css?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`} rel="stylesheet" />
         
         {/* Configuración de Tailwind personalizada */}
         <script dangerouslySetInnerHTML={{
@@ -80,9 +80,11 @@ export const renderer = jsxRenderer(({ children }) => {
         {/* Scripts principales con cache busting agresivo */}
         <script src={`/static/app.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
         <script src={`/static/decretos.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
+        <script src={`/static/rutina.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
         <script src={`/static/agenda.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
         <script src={`/static/progreso.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
         <script src={`/static/practica.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
+        <script src={`/static/chatbot.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
         <script src={`/static/acerca.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
       </body>
     </html>
