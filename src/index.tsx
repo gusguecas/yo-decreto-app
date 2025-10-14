@@ -12,6 +12,7 @@ import { chatbotRoutes } from './routes/chatbot'
 import rutinaRoutes from './routes/rutina'
 import authRoutes from './routes/auth'
 import googleCalendarRoutes from './routes/google-calendar'
+import aiRoutes from './routes/ai'
 
 type Bindings = {
   DB: D1Database;
@@ -37,6 +38,7 @@ app.route('/api/practica', practicaRoutes)
 app.route('/api/chatbot', chatbotRoutes)
 app.route('/api/rutina', rutinaRoutes)
 app.route('/api/google-calendar', googleCalendarRoutes)
+app.route('/api/ai', aiRoutes)
 
 // Ruta principal - renderiza la SPA
 app.get('/', (c) => {

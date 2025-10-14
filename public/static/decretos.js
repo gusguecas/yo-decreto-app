@@ -236,16 +236,26 @@ const Decretos = {
     return `
       <div class="decreto-card ${area} p-6 hover-lift cursor-pointer" onclick="Decretos.openDetalleDecreto('${decreto.id}')">
         <div class="flex items-start justify-between mb-4">
-          <h4 class="text-xl font-bold text-white uppercase">${decreto.titulo}</h4>
-          <div class="flex items-center space-x-2">
-            <button 
+          <div class="flex items-center space-x-3 flex-1">
+            ${decreto.logo_url ? `
+              <img src="${decreto.logo_url}" alt="${decreto.empresa_nombre || 'Logo'}" class="h-12 w-12 object-contain rounded border border-slate-600 flex-shrink-0" />
+            ` : ''}
+            <div class="flex-1">
+              ${decreto.empresa_nombre ? `
+                <div class="text-xs text-slate-400 mb-1 uppercase tracking-wider">${decreto.empresa_nombre}</div>
+              ` : ''}
+              <h4 class="text-xl font-bold text-white uppercase">${decreto.titulo}</h4>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 flex-shrink-0">
+            <button
               onclick="event.stopPropagation(); Decretos.openEditModal('${decreto.id}')"
               class="text-slate-400 hover:text-blue-400 transition-colors"
               title="Editar decreto"
             >
               <i class="fas fa-edit"></i>
             </button>
-            <button 
+            <button
               onclick="event.stopPropagation(); Decretos.confirmDelete('${decreto.id}')"
               class="text-slate-400 hover:text-red-400 transition-colors"
               title="Eliminar decreto"
@@ -254,7 +264,7 @@ const Decretos = {
             </button>
           </div>
         </div>
-        
+
         <p class="text-slate-300 mb-4 line-clamp-2">${decreto.sueno_meta}</p>
         
         ${decreto.descripcion ? `
@@ -305,51 +315,92 @@ const Decretos = {
     return UI.renderModal('editDecretoModal', '✏️ Editar Decreto', `
       <form onsubmit="Decretos.handleEditDecreto(event)">
         <input type="hidden" name="decreto_id" id="editDecretoId">
-        
+
         <div class="space-y-6">
           <div>
             <label class="block text-sm font-medium mb-2">Área *</label>
-            <select name="area" id="editAreaSelect" required class="form-select w-full px-4 py-2">
+            <select name="area" id="editAreaSelect" required class="form-select w-full px-4 py-2" onchange="Decretos.toggleLogoField('edit')">
               <option value="empresarial">🏢 Empresarial</option>
               <option value="material">💰 Material</option>
               <option value="humano">❤️ Humano</option>
             </select>
           </div>
-          
+
+          <div id="editEmpresaField" style="display: none;">
+            <label class="block text-sm font-medium mb-2">Empresa/Proyecto Asociado (opcional)</label>
+            <input
+              type="text"
+              name="empresa_nombre"
+              id="editEmpresaNombreInput"
+              maxlength="100"
+              class="form-input w-full px-4 py-2"
+              placeholder="Ej: QuantikGeo, KumoLabs, etc."
+            />
+            <p class="text-xs text-slate-400 mt-1">Nombre de tu empresa o proyecto</p>
+          </div>
+
+          <div id="editLogoField" style="display: none;">
+            <label class="block text-sm font-medium mb-2">Logo de la Empresa</label>
+            <div id="editLogoPreview" class="mb-2"></div>
+            <input
+              type="file"
+              accept="image/*"
+              id="editLogoFileInput"
+              class="form-input w-full px-4 py-2"
+              onchange="Decretos.handleLogoUpload(event, 'edit')"
+            />
+            <input type="hidden" name="logo_url" id="editLogoUrlInput" />
+            <p class="text-xs text-slate-400 mt-1">Sube una imagen (máx. 2MB) - PNG, JPG, o SVG</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Imagen de Visualización (opcional) 🎯</label>
+            <div id="editVisualizacionPreview" class="mb-2"></div>
+            <input
+              type="file"
+              accept="image/*"
+              id="editVisualizacionFileInput"
+              class="form-input w-full px-4 py-2"
+              onchange="Decretos.handleVisualizacionUpload(event, 'edit')"
+            />
+            <input type="hidden" name="imagen_visualizacion" id="editVisualizacionUrlInput" />
+            <p class="text-xs text-slate-400 mt-1">Sube una imagen que represente tu meta alcanzada (máx. 2MB)</p>
+          </div>
+
           <div>
             <label class="block text-sm font-medium mb-2">Título del Decreto *</label>
-            <input 
-              type="text" 
-              name="titulo" 
+            <input
+              type="text"
+              name="titulo"
               id="editTituloInput"
-              required 
+              required
               maxlength="100"
-              class="form-input w-full px-4 py-2" 
+              class="form-input w-full px-4 py-2"
               placeholder="Ej: Ser el CEO más exitoso de Colombia"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium mb-2">Mi Sueño/Meta *</label>
-            <textarea 
-              name="sueno_meta" 
+            <textarea
+              name="sueno_meta"
               id="editSuenoMetaTextarea"
-              required 
+              required
               rows="3"
               maxlength="500"
-              class="form-textarea w-full px-4 py-2" 
+              class="form-textarea w-full px-4 py-2"
               placeholder="Describe tu sueño o meta específica..."
             ></textarea>
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium mb-2">Descripción Adicional</label>
-            <textarea 
-              name="descripcion" 
+            <textarea
+              name="descripcion"
               id="editDescripcionTextarea"
               rows="4"
               maxlength="1000"
-              class="form-textarea w-full px-4 py-2" 
+              class="form-textarea w-full px-4 py-2"
               placeholder="Agrega detalles, contexto o motivación adicional (opcional)..."
             ></textarea>
           </div>
@@ -380,39 +431,80 @@ const Decretos = {
         <div class="space-y-6">
           <div>
             <label class="block text-sm font-medium mb-2">Área *</label>
-            <select name="area" required class="form-select w-full px-4 py-2">
+            <select name="area" required class="form-select w-full px-4 py-2" onchange="Decretos.toggleLogoField('create')">
               <option value="">Selecciona un área</option>
               <option value="empresarial">🏢 Empresarial</option>
               <option value="material">💰 Material</option>
               <option value="humano">❤️ Humano</option>
             </select>
           </div>
-          
+
+          <div id="createEmpresaField" style="display: none;">
+            <label class="block text-sm font-medium mb-2">Empresa/Proyecto Asociado (opcional)</label>
+            <input
+              type="text"
+              name="empresa_nombre"
+              id="createEmpresaNombreInput"
+              maxlength="100"
+              class="form-input w-full px-4 py-2"
+              placeholder="Ej: QuantikGeo, KumoLabs, etc."
+            />
+            <p class="text-xs text-slate-400 mt-1">Nombre de tu empresa o proyecto</p>
+          </div>
+
+          <div id="createLogoField" style="display: none;">
+            <label class="block text-sm font-medium mb-2">Logo de la Empresa</label>
+            <div id="createLogoPreview" class="mb-2"></div>
+            <input
+              type="file"
+              accept="image/*"
+              id="createLogoFileInput"
+              class="form-input w-full px-4 py-2"
+              onchange="Decretos.handleLogoUpload(event, 'create')"
+            />
+            <input type="hidden" name="logo_url" id="createLogoUrlInput" />
+            <p class="text-xs text-slate-400 mt-1">Sube una imagen (máx. 2MB) - PNG, JPG, o SVG</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Imagen de Visualización (opcional) 🎯</label>
+            <div id="createVisualizacionPreview" class="mb-2"></div>
+            <input
+              type="file"
+              accept="image/*"
+              id="createVisualizacionFileInput"
+              class="form-input w-full px-4 py-2"
+              onchange="Decretos.handleVisualizacionUpload(event, 'create')"
+            />
+            <input type="hidden" name="imagen_visualizacion" id="createVisualizacionUrlInput" />
+            <p class="text-xs text-slate-400 mt-1">Sube una imagen que represente tu meta alcanzada (máx. 2MB)</p>
+          </div>
+
           <div>
             <label class="block text-sm font-medium mb-2">Título del decreto *</label>
-            <input 
-              type="text" 
-              name="titulo" 
-              required 
+            <input
+              type="text"
+              name="titulo"
+              required
               class="form-input w-full px-4 py-2"
               placeholder="Ej: Salud Física Perfecta"
             >
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium mb-2">Sueño/Meta *</label>
-            <textarea 
-              name="sueno_meta" 
-              required 
+            <textarea
+              name="sueno_meta"
+              required
               rows="3"
               class="form-textarea w-full px-4 py-2"
               placeholder="Qué quiero lograr con este decreto..."
             ></textarea>
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium mb-2">Descripción / Información general</label>
-            <textarea 
+            <textarea
               name="descripcion"
               rows="4"
               class="form-textarea w-full px-4 py-2"
@@ -522,6 +614,8 @@ const Decretos = {
                 type="datetime-local" 
                 name="proxima_revision"
                 class="form-input w-full px-4 py-2"
+                min="2024-09-01T00:00"
+                onchange="console.log('📅 FECHA CAMBIADA:', this.value, 'Fecha objeto:', new Date(this.value))"
               >
             </div>
           </div>
@@ -646,7 +740,7 @@ const Decretos = {
 
   renderSeguimientoModal() {
     return UI.renderModal('seguimientoModal', '📝 Seguimiento de Acción', `
-      <form onsubmit="Decretos.handleSeguimiento(event)">
+      <form onsubmit="Decretos.submitSeguimiento(event)">
         <input type="hidden" name="decreto_id" id="seguimientoDecretoId">
         <input type="hidden" name="accion_id" id="seguimientoAccionId">
         
@@ -744,6 +838,112 @@ const Decretos = {
   },
 
   // Event handlers
+  toggleLogoField(mode) {
+    const empresaField = document.getElementById(mode === 'edit' ? 'editEmpresaField' : 'createEmpresaField')
+    const logoField = document.getElementById(mode === 'edit' ? 'editLogoField' : 'createLogoField')
+    const areaSelect = document.getElementById(mode === 'edit' ? 'editAreaSelect' : null) ||
+                       document.querySelector('#createDecretoModal select[name="area"]')
+
+    if (empresaField && logoField && areaSelect) {
+      const area = areaSelect.value
+      const isEmpresarial = area === 'empresarial'
+      empresaField.style.display = isEmpresarial ? 'block' : 'none'
+      logoField.style.display = isEmpresarial ? 'block' : 'none'
+    }
+  },
+
+  async handleLogoUpload(event, mode) {
+    const file = event.target.files[0]
+    if (!file) return
+
+    // Validar tamaño
+    if (file.size > 2 * 1024 * 1024) {
+      Utils.showToast('La imagen no debe superar 2MB', 'error')
+      event.target.value = ''
+      return
+    }
+
+    // Mostrar preview
+    const preview = document.getElementById(mode === 'edit' ? 'editLogoPreview' : 'createLogoPreview')
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      preview.innerHTML = `<img src="${e.target.result}" class="h-16 w-16 object-contain rounded border border-slate-600" />`
+    }
+    reader.readAsDataURL(file)
+
+    // Subir a R2
+    try {
+      const formData = new FormData()
+      formData.append('logo', file)
+
+      const response = await fetch('/api/upload-logo', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Guardar URL en campo oculto
+        const hiddenInput = document.getElementById(mode === 'edit' ? 'editLogoUrlInput' : 'createLogoUrlInput')
+        hiddenInput.value = data.logo_url
+        Utils.showToast('Logo subido exitosamente', 'success')
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      Utils.showToast('Error al subir logo: ' + error.message, 'error')
+      event.target.value = ''
+      preview.innerHTML = ''
+    }
+  },
+
+  async handleVisualizacionUpload(event, mode) {
+    const file = event.target.files[0]
+    if (!file) return
+
+    // Validar tamaño
+    if (file.size > 2 * 1024 * 1024) {
+      Utils.showToast('La imagen no debe superar 2MB', 'error')
+      event.target.value = ''
+      return
+    }
+
+    // Mostrar preview
+    const preview = document.getElementById(mode === 'edit' ? 'editVisualizacionPreview' : 'createVisualizacionPreview')
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      preview.innerHTML = `<img src="${e.target.result}" class="h-24 w-auto max-w-full object-contain rounded border border-purple-500" />`
+    }
+    reader.readAsDataURL(file)
+
+    // Subir a R2
+    try {
+      const formData = new FormData()
+      formData.append('logo', file)
+
+      const response = await fetch('/api/upload-logo', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Guardar URL en campo oculto
+        const hiddenInput = document.getElementById(mode === 'edit' ? 'editVisualizacionUrlInput' : 'createVisualizacionUrlInput')
+        hiddenInput.value = data.logo_url
+        Utils.showToast('Imagen de visualización subida exitosamente', 'success')
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      Utils.showToast('Error al subir imagen: ' + error.message, 'error')
+      event.target.value = ''
+      preview.innerHTML = ''
+    }
+  },
+
   openCreateModal() {
     Modal.open('createDecretoModal')
   },
@@ -777,6 +977,40 @@ const Decretos = {
     
     document.getElementById('accionDecretoId').value = decretoId
     Modal.open('createAccionModal')
+    
+    // 🔧 ARREGLO: Limpiar todos los campos del formulario después de abrir modal
+    setTimeout(() => {
+      const form = document.getElementById('createAccionForm')
+      if (form) {
+        // Limpiar todos los campos excepto el decreto_id
+        const inputs = form.querySelectorAll('input:not([name="decreto_id"]), textarea, select')
+        inputs.forEach(input => {
+          if (input.type === 'datetime-local') {
+            // 🔧 ARREGLO: Configurar fecha/hora por defecto en lugar de limpiar
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            tomorrow.setHours(9, 0, 0, 0) // 9:00 AM
+            input.value = tomorrow.toISOString().slice(0, 16) // Formato YYYY-MM-DDTHH:MM
+            console.log('🔧 Configurando fecha por defecto:', input.name, input.value)
+          } else if (input.type === 'date') {
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            input.value = tomorrow.toISOString().slice(0, 10) // Formato YYYY-MM-DD
+          } else if (input.type === 'time') {
+            input.value = '09:00' // 9:00 AM por defecto
+          } else if (input.type === 'range') {
+            input.value = '5' // Valor por defecto para calificación
+          } else if (input.type === 'checkbox') {
+            input.checked = false
+          } else if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0
+          } else {
+            input.value = '' // Limpiar otros campos
+          }
+        })
+        console.log('✅ Formulario de acción limpiado')
+      }
+    }, 100)
   },
 
   async handleCreateDecreto(event) {
@@ -809,6 +1043,28 @@ const Decretos = {
       document.getElementById('editTituloInput').value = decreto.titulo
       document.getElementById('editSuenoMetaTextarea').value = decreto.sueno_meta
       document.getElementById('editDescripcionTextarea').value = decreto.descripcion || ''
+      document.getElementById('editEmpresaNombreInput').value = decreto.empresa_nombre || ''
+      document.getElementById('editLogoUrlInput').value = decreto.logo_url || ''
+      document.getElementById('editVisualizacionUrlInput').value = decreto.imagen_visualizacion || ''
+
+      // Mostrar logo existente si hay
+      const logoPreview = document.getElementById('editLogoPreview')
+      if (decreto.logo_url) {
+        logoPreview.innerHTML = `<img src="${decreto.logo_url}" class="h-16 w-16 object-contain rounded border border-slate-600" />`
+      } else {
+        logoPreview.innerHTML = ''
+      }
+
+      // Mostrar imagen de visualización existente si hay
+      const visualizacionPreview = document.getElementById('editVisualizacionPreview')
+      if (decreto.imagen_visualizacion) {
+        visualizacionPreview.innerHTML = `<img src="${decreto.imagen_visualizacion}" class="h-24 w-auto max-w-full object-contain rounded border border-purple-500" />`
+      } else {
+        visualizacionPreview.innerHTML = ''
+      }
+
+      // Mostrar campos de empresa/logo si es empresarial
+      this.toggleLogoField('edit')
     }, 100)
 
     Modal.open('editDecretoModal')
@@ -816,15 +1072,18 @@ const Decretos = {
 
   async handleEditDecreto(event) {
     event.preventDefault()
-    
+
     const formData = new FormData(event.target)
     const decretoId = formData.get('decreto_id')
-    
+
     const data = {
       area: formData.get('area'),
       titulo: formData.get('titulo'),
       sueno_meta: formData.get('sueno_meta'),
-      descripcion: formData.get('descripcion')
+      descripcion: formData.get('descripcion'),
+      empresa_nombre: formData.get('empresa_nombre') || null,
+      logo_url: formData.get('logo_url') || null,
+      imagen_visualizacion: formData.get('imagen_visualizacion') || null
     }
     
     try {
@@ -882,6 +1141,9 @@ const Decretos = {
     // 3. Crear hash único del formulario para detectar envíos duplicados
     const formData = new FormData(formElement)
     const data = Object.fromEntries(formData.entries())
+    
+
+    
     const dataHash = `${formId}_${JSON.stringify(data)}`
     
     if (this._lastFormHash === dataHash && (Date.now() - this._lastFormTime) < 3000) {
@@ -922,7 +1184,8 @@ const Decretos = {
       console.log('Enviando datos al API:', {
         decretoId,
         hasSubtareas: Boolean(data.subtareas?.length),
-        subtareaCount: data.subtareas?.length || 0
+        subtareaCount: data.subtareas?.length || 0,
+        '📅 PROXIMA_REVISION_ENVIADA': data.proxima_revision
       })
       
       const response = await API.decretos.createAccion(decretoId, data)
@@ -1012,6 +1275,31 @@ const Decretos = {
     
     const formData = new FormData(formElement)
     const data = Object.fromEntries(formData.entries())
+    
+    // 🔴 VALIDACIÓN OBLIGATORIA: Tipo de Decreto
+    if (!data.decreto_tipo || data.decreto_tipo.trim() === '') {
+      Utils.showToast('⚠️ Debes seleccionar el tipo de decreto (Empresarial, Humano o Material)', 'error')
+      
+      // Resetear el procesamiento
+      this._processingForm = null
+      if (submitButton) {
+        submitButton.disabled = false
+        submitButton.innerHTML = '💾 Guardar Acción'
+      }
+      
+      // Resaltar el campo faltante
+      const decretoSelect = document.getElementById('decretoTipoSelect')
+      if (decretoSelect) {
+        decretoSelect.focus()
+        decretoSelect.classList.add('border-red-500', 'bg-red-900/20')
+        setTimeout(() => {
+          decretoSelect.classList.remove('border-red-500', 'bg-red-900/20')
+        }, 3000)
+      }
+      
+      return
+    }
+    
     const dataHash = `${formId}_${JSON.stringify(data)}`
     
     if (this._lastFormHash === dataHash && (Date.now() - this._lastFormTime) < 3000) {
@@ -1211,42 +1499,123 @@ const Decretos = {
       console.error('No hay decreto seleccionado en renderDetalleDecreto')
       return this.renderError()
     }
-    
+
     if (!decreto.titulo) {
       console.error('Decreto sin título:', decreto)
       return this.renderError('Datos del decreto incompletos')
     }
 
+    const areaConfig = {
+      empresarial: { color: 'accent-green', icon: '🏢', gradient: 'from-green-600 to-emerald-600' },
+      material: { color: 'accent-orange', icon: '💰', gradient: 'from-orange-600 to-amber-600' },
+      humano: { color: 'accent-blue', icon: '❤️', gradient: 'from-blue-600 to-purple-600' }
+    }
+    const config = areaConfig[decreto.area] || areaConfig.empresarial
+
     return `
-      <div class="container mx-auto px-4 py-8">
-        <!-- Botón de regreso -->
-        <div class="mb-6">
-          <button 
-            onclick="Decretos.volverALista()" 
-            class="flex items-center text-slate-300 hover:text-white transition-colors"
+      <div class="min-h-screen bg-slate-900">
+        <!-- Botón de regreso flotante -->
+        <div class="fixed top-6 left-6 z-50">
+          <button
+            onclick="Decretos.volverALista()"
+            class="flex items-center space-x-2 bg-slate-800/90 backdrop-blur-sm hover:bg-slate-700 text-white px-4 py-2 rounded-full transition-all shadow-lg hover:shadow-xl hover:scale-105"
           >
-            <i class="fas fa-arrow-left mr-2"></i>
-            Volver a Mis Decretos
+            <i class="fas fa-arrow-left"></i>
+            <span>Volver</span>
           </button>
         </div>
 
-        <!-- Encabezado del decreto -->
-        ${this.renderDetalleHeader(decreto)}
+        <!-- Layout 50/50 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
 
-        <!-- Progreso General -->
-        ${this.renderDetalleProgreso(decreto)}
+          <!-- LADO IZQUIERDO: Imagen de Visualización -->
+          <div class="relative bg-slate-900 p-4 lg:p-6 flex items-start justify-center overflow-hidden pt-24">
 
-        <!-- Dos columnas -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Izquierda: Mis Acciones -->
-          <div class="fade-in">
-            ${this.renderMisAcciones(decreto)}
+            <div class="relative z-10 w-full flex flex-col items-center">
+              ${decreto.imagen_visualizacion ? `
+                <!-- Imagen existente - MÁS GRANDE -->
+                <div class="w-full flex flex-col items-center">
+                  <div class="relative group w-full max-w-3xl mb-4">
+                    <img
+                      src="${decreto.imagen_visualizacion}"
+                      alt="Visualización de ${decreto.titulo}"
+                      class="w-full h-auto object-contain rounded-2xl shadow-2xl transition-transform duration-300 group-hover:scale-[1.02]"
+                    />
+                  </div>
+                  <div class="text-center">
+                    <button
+                      onclick="Decretos.regenerarImagenVisualizacion('${decreto.id}')"
+                      class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-full font-semibold transition-all hover:scale-105 border border-white/20"
+                    >
+                      <i class="fas fa-sync-alt mr-2"></i>
+                      Regenerar Visualización
+                    </button>
+                  </div>
+                </div>
+              ` : `
+                <!-- Generar imagen por primera vez -->
+                <div class="text-center">
+                  <div class="mb-8">
+                    <div class="text-8xl mb-4">${config.icon}</div>
+                    <h3 class="text-3xl font-bold text-white mb-4">Visualiza tu éxito</h3>
+                    <p class="text-white/90 text-lg mb-2">Genera una imagen que represente</p>
+                    <p class="text-white/90 text-lg font-semibold">cómo te ves logrando este decreto</p>
+                  </div>
+                  <button
+                    onclick="Decretos.generarImagenVisualizacion('${decreto.id}')"
+                    class="bg-white hover:bg-white/90 text-slate-900 px-8 py-4 rounded-full font-bold text-lg transition-all hover:scale-105 shadow-2xl"
+                  >
+                    <i class="fas fa-magic mr-2"></i>
+                    Generar Mi Visualización
+                  </button>
+                  <p class="text-white/70 text-sm mt-4">Powered by IA</p>
+                </div>
+              `}
+            </div>
           </div>
 
-          <!-- Derecha: Sugerencias para Hoy -->
-          <div class="fade-in">
-            ${this.renderSugerenciasHoy(decreto)}
+          <!-- LADO DERECHO: Información del Decreto -->
+          <div class="bg-slate-900 p-8 lg:p-12 overflow-y-auto">
+
+            <!-- Header compacto -->
+            <div class="mb-8">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                  ${decreto.logo_url ? `
+                    <img src="${decreto.logo_url}" alt="${decreto.empresa_nombre || 'Logo'}" class="h-16 w-16 object-contain" />
+                  ` : `
+                    <span class="text-5xl">${config.icon}</span>
+                  `}
+                  <div>
+                    ${decreto.empresa_nombre ? `
+                      <div class="text-xs text-slate-400 uppercase tracking-wider">${decreto.empresa_nombre}</div>
+                    ` : ''}
+                    <h1 class="text-3xl font-bold text-white">${decreto.titulo}</h1>
+                  </div>
+                </div>
+                <button
+                  onclick="Decretos.openEditModal('${decreto.id}')"
+                  class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-all"
+                  title="Editar"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+              </div>
+              <p class="text-xl text-slate-300 mb-3">${decreto.sueno_meta}</p>
+              ${decreto.descripcion ? `<p class="text-slate-400">${decreto.descripcion}</p>` : ''}
+            </div>
+
+            <!-- Progreso -->
+            ${this.renderDetalleProgreso(decreto)}
+
+            <!-- Acciones y Sugerencias -->
+            <div class="space-y-6">
+              ${this.renderMisAcciones(decreto)}
+              ${this.renderSugerenciasHoy(decreto)}
+            </div>
+
           </div>
+
         </div>
       </div>
     `
@@ -1261,22 +1630,43 @@ const Decretos = {
     const config = areaConfig[decreto.area] || areaConfig.empresarial
 
     return `
-      <div class="text-center mb-8 relative">
+      <div class="mb-8 relative">
         <!-- Botón de editar (esquina superior derecha) -->
-        <button 
+        <button
           onclick="Decretos.openEditModal('${decreto.id}')"
           class="absolute top-0 right-0 w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-slate-300 hover:text-white transition-all duration-300 hover:scale-110"
           title="Editar decreto"
         >
           <i class="fas fa-edit"></i>
         </button>
-        
-        <div class="flex items-center justify-center mb-4">
-          <span class="text-4xl mr-3">${config.icon}</span>
-          <h1 class="text-4xl font-bold text-${config.color}">${decreto.titulo}</h1>
+
+        <div class="flex items-start space-x-6">
+          ${decreto.logo_url ? `
+            <div class="flex-shrink-0">
+              <img src="${decreto.logo_url}" alt="${decreto.empresa_nombre || 'Logo'}" class="h-44 w-44 object-contain" />
+            </div>
+          ` : ''}
+
+          <div class="flex-1">
+            ${decreto.empresa_nombre ? `
+              <div class="text-sm text-slate-400 mb-2 uppercase tracking-widest font-semibold">${decreto.empresa_nombre}</div>
+            ` : ''}
+
+            <div class="flex items-center mb-4">
+              <span class="text-4xl mr-3">${config.icon}</span>
+              <h1 class="text-4xl font-bold text-${config.color}">${decreto.titulo}</h1>
+            </div>
+            <p class="text-xl text-slate-300">${decreto.sueno_meta}</p>
+            ${decreto.descripcion ? `<p class="text-slate-400 mt-4">${decreto.descripcion}</p>` : ''}
+          </div>
+
+          ${decreto.imagen_visualizacion ? `
+            <div class="flex-shrink-0">
+              <div class="text-xs text-purple-400 mb-2 uppercase tracking-wider font-semibold text-center">🎯 Tu Visión</div>
+              <img src="${decreto.imagen_visualizacion}" alt="Visualización de ${decreto.titulo}" class="w-64 h-auto object-contain rounded-lg border-2 border-purple-500/50 shadow-lg" />
+            </div>
+          ` : ''}
         </div>
-        <p class="text-xl text-slate-300 max-w-2xl mx-auto">${decreto.sueno_meta}</p>
-        ${decreto.descripcion ? `<p class="text-slate-400 mt-4 max-w-2xl mx-auto">${decreto.descripcion}</p>` : ''}
       </div>
     `
   },
@@ -1305,7 +1695,7 @@ const Decretos = {
           </div>
         </div>
 
-        <!-- 4 tarjetas métricas -->
+        <!-- 4 tarjetas métricas con 3 estados -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="metric-card p-4 text-center">
             <div class="text-2xl font-bold text-white">${metricas.total_acciones}</div>
@@ -1316,12 +1706,12 @@ const Decretos = {
             <div class="text-slate-300 text-sm">Completadas</div>
           </div>
           <div class="metric-card p-4 text-center">
-            <div class="text-2xl font-bold text-accent-orange">${metricas.pendientes}</div>
-            <div class="text-slate-300 text-sm">Pendientes</div>
+            <div class="text-2xl font-bold text-accent-blue">${metricas.en_progreso || 0}</div>
+            <div class="text-slate-300 text-sm">En Progreso</div>
           </div>
           <div class="metric-card p-4 text-center">
-            <div class="text-2xl font-bold text-accent-blue">${metricas.sugerencias_disponibles}</div>
-            <div class="text-slate-300 text-sm">Sugerencias Disponibles</div>
+            <div class="text-2xl font-bold text-accent-orange">${metricas.pendientes}</div>
+            <div class="text-slate-300 text-sm">Pendientes</div>
           </div>
         </div>
       </div>
@@ -1389,7 +1779,7 @@ const Decretos = {
   renderAccionCard(accion, tipo) {
     const isCompleted = accion.estado === 'completada'
     const typeColor = tipo === 'primaria' ? 'accent-green' : 'accent-blue'
-    const hasAgendaSync = accion.agenda_event_id || tipo === 'secundaria' // Secundarias siempre se sincronizan
+    const hasAgendaSync = accion.agenda_event_id || tipo === 'secundaria' || tipo === 'primaria' // Secundarias y Primarias siempre tienen acceso a agenda
     
     // Determinar si la acción está retrasada
     const isOverdue = this.isAccionOverdue(accion, isCompleted)
@@ -1446,7 +1836,7 @@ const Decretos = {
           <div class="flex items-center space-x-2">
             ${hasAgendaSync ? `
               <button 
-                onclick="Router.navigate('agenda')"
+                onclick="Decretos.verEnAgenda('${accion.id}')"
                 class="group relative bg-gradient-to-r from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 border border-blue-400/50 text-blue-300 hover:text-blue-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20"
                 title="Ver en agenda"
               >
@@ -1459,28 +1849,17 @@ const Decretos = {
               class="group relative bg-gradient-to-r ${tipo === 'primaria' ? 'from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 border-green-400/50 text-green-300 hover:text-green-200' : 'from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 border-blue-400/50 text-blue-300 hover:text-blue-200'} border px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-${tipo === 'primaria' ? 'green' : 'blue'}-500/20"
               title="Seguimiento"
             >
-              <i class="fas fa-clipboard-check text-sm"></i>
+              <i class="fas fa-lock text-sm"></i>
               <div class="absolute -top-1 -right-1 w-2 h-2 ${tipo === 'primaria' ? 'bg-green-400' : 'bg-blue-400'} rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
-            ${!isCompleted ? `
-              <button 
-                onclick="Decretos.completarAccion('${accion.id}')"
-                class="group relative bg-gradient-to-r from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 border border-green-400/50 text-green-300 hover:text-green-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-green-500/20"
-                title="Completar"
-              >
-                <i class="fas fa-check text-sm"></i>
-                <div class="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </button>
-            ` : `
-              <button 
-                onclick="Decretos.marcarPendiente('${accion.id}')"
-                class="group relative bg-gradient-to-r from-orange-500/20 to-orange-600/20 hover:from-orange-500/30 hover:to-orange-600/30 border border-orange-400/50 text-orange-300 hover:text-orange-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20"
-                title="Marcar como Pendiente"
-              >
-                <i class="fas fa-undo text-sm"></i>
-                <div class="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </button>
-            `}
+            <button 
+              onclick="Decretos.cambiarEstadoAccion('${accion.id}')"
+              class="group relative bg-gradient-to-r from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30 border border-purple-400/50 text-purple-300 hover:text-purple-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
+              title="${accion.estado === 'pendiente' ? 'Iniciar' : accion.estado === 'en_progreso' ? 'Completar' : 'Reiniciar'}"
+            >
+              <i class="fas fa-${accion.estado === 'pendiente' ? 'play' : accion.estado === 'en_progreso' ? 'check' : 'undo'} text-sm"></i>
+              <div class="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
             <button 
               onclick="Decretos.confirmarBorrarAccion('${accion.id}')"
               class="group relative bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-400/50 text-red-300 hover:text-red-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/20"
@@ -1593,6 +1972,56 @@ const Decretos = {
     this.render()
   },
 
+  async generarImagenVisualizacion(decretoId) {
+    try {
+      // Mostrar loading
+      Utils.showToast('Generando visualización con IA...', 'info')
+
+      const decreto = this.data.decretos.find(d => d.id === decretoId)
+      if (!decreto) {
+        Utils.showToast('No se encontró el decreto', 'error')
+        return
+      }
+
+      // Llamar API para generar imagen
+      const response = await fetch('/api/ai/generate-visualization', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          decretoId: decretoId,
+          titulo: decreto.titulo,
+          sueno_meta: decreto.sueno_meta,
+          descripcion: decreto.descripcion,
+          area: decreto.area
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success && data.imageUrl) {
+        // Actualizar el decreto con la nueva imagen
+        decreto.imagen_visualizacion = data.imageUrl
+
+        // Refrescar la vista
+        await this.openDetalleDecreto(decretoId)
+        Utils.showToast('¡Visualización generada con éxito!', 'success')
+      } else {
+        Utils.showToast(data.error || 'Error al generar la visualización', 'error')
+      }
+    } catch (error) {
+      console.error('Error generando visualización:', error)
+      Utils.showToast('Error al generar la visualización', 'error')
+    }
+  },
+
+  async regenerarImagenVisualizacion(decretoId) {
+    const confirmed = confirm('¿Estás seguro de regenerar la visualización? Se perderá la imagen actual.')
+    if (!confirmed) return
+
+    // Usar la misma función de generación
+    await this.generarImagenVisualizacion(decretoId)
+  },
+
   renderDetalleModals() {
     // Limpiar modales existentes para evitar duplicados
     const existingSeguimiento = document.getElementById('seguimientoModal')
@@ -1612,7 +2041,7 @@ const Decretos = {
     return UI.renderModal('seguimientoModal', '📝 Seguimiento de Acción', `
       <div id="seguimiento-subtitle" class="text-slate-400 text-sm mb-6"></div>
       
-      <form id="seguimientoForm" onsubmit="Decretos.handleSeguimiento(event)" class="space-y-6">
+      <form id="seguimientoForm" onsubmit="Decretos.submitSeguimiento(event)" class="space-y-6">
         <!-- ¿Qué se hizo exactamente? -->
         <div>
           <label class="block text-sm font-medium text-slate-300 mb-2">
@@ -1748,6 +2177,28 @@ Preparar presentación para próxima reunión"
             placeholder="Ej: Hacer ejercicio matutino"
             required
           >
+        </div>
+
+        <!-- Tipo de Decreto (OBLIGATORIO) -->
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">
+            <span class="text-accent-red">*</span> Tipo de Decreto (Obligatorio)
+          </label>
+          <select 
+            name="decreto_tipo" 
+            id="decretoTipoSelect"
+            class="form-select w-full px-4 py-3 text-base border-2 border-accent-red/50 focus:border-accent-red"
+            required
+            onchange="Decretos.updateDecretoSelect(this.value)"
+          >
+            <option value="">🔸 Selecciona el tipo de decreto</option>
+            <option value="Empresarial">🏢 Empresarial - Negocios y trabajo</option>
+            <option value="Humano">👤 Humano - Personal y relaciones</option>
+            <option value="Material">💎 Material - Finanzas y bienes</option>
+          </select>
+          <div class="text-xs text-accent-red mt-1">
+            ⚠️ Debes seleccionar un tipo antes de guardar
+          </div>
         </div>
 
         <!-- Qué se debe hacer -->
@@ -2003,7 +2454,29 @@ Preparar presentación para próxima reunión"
     }, 100)
   },
 
-  async submitSeguimiento(formData, accionId) {
+  async submitSeguimiento(eventOrFormData, accionId) {
+    // Si es un evento del formulario, extraer los datos
+    if (eventOrFormData && eventOrFormData.preventDefault) {
+      eventOrFormData.preventDefault()
+      
+      const form = eventOrFormData.target
+      const formDataObj = new FormData(form)
+      accionId = form.dataset.accionId || this.data.selectedAccionId
+      
+      const formData = {
+        que_se_hizo: formDataObj.get('que_se_hizo'),
+        como_se_hizo: formDataObj.get('como_se_hizo'),
+        resultados: formDataObj.get('resultados_obtenidos'),
+        pendientes: formDataObj.get('tareas_pendientes'),
+        calificacion: formDataObj.get('calificacion') || 5,
+        proxima_revision: formDataObj.get('proxima_revision')
+      }
+      
+      return this.submitSeguimiento(formData, accionId)
+    }
+    
+    // Código original para cuando se llama con formData directamente
+    const formData = eventOrFormData
     try {
       // Parsear tareas pendientes
       const pendientes = formData.pendientes || ''
@@ -2034,9 +2507,17 @@ Preparar presentación para próxima reunión"
         Utils.showToast('✅ Seguimiento guardado correctamente', 'success')
       }
       
-      // Recargar vista de detalle
-      this.openDetalleDecreto(this.data.selectedDecreto.id)
-      UI.closeModal('seguimientoModal')
+      // Cerrar modal de seguimiento
+      Modal.close('seguimientoModal')
+      
+      // Actualizar solo los datos del decreto actual sin recargar la página completa
+      if (this.data.selectedDecreto && this.data.selectedDecreto.id) {
+        await this.openDetalleDecreto(this.data.selectedDecreto.id)
+      } else {
+        // Si no hay decreto seleccionado, actualizar la vista principal
+        await this.loadDecretos()
+        this.renderDecretosView()
+      }
       
     } catch (error) {
       console.error('Error al guardar seguimiento:', error)
@@ -2158,12 +2639,191 @@ Preparar presentación para próxima reunión"
       try {
         console.log('🔄 Revirtiendo acción a pendiente:', accionId)
         await API.decretos.marcarPendiente(this.data.selectedDecreto.id, accionId)
-        Utils.showToast('Acción marcada como pendiente', 'success')
+        Utils.showToast('✅ Acción marcada como pendiente', 'success')
         this.openDetalleDecreto(this.data.selectedDecreto.id) // Recargar
       } catch (error) {
         console.error('❌ Error al marcar como pendiente:', error)
-        Utils.showToast('Error al marcar como pendiente', 'error')
+        Utils.showToast('❌ Error al marcar como pendiente', 'error')
       }
+    }
+  },
+
+  async iniciarAccion(accionId) {
+    try {
+      console.log('▶️ Iniciando acción:', accionId)
+      await API.decretos.iniciarAccion(this.data.selectedDecreto.id, accionId)
+      Utils.showToast('✅ Acción iniciada - En Progreso', 'success')
+      this.openDetalleDecreto(this.data.selectedDecreto.id) // Recargar
+    } catch (error) {
+      console.error('❌ Error al iniciar acción:', error)
+      Utils.showToast('❌ Error al iniciar acción', 'error')
+    }
+  },
+
+  // 📅 VER EN AGENDA - Mostrar acción específica en agenda
+  verEnAgenda(accionId) {
+    try {
+      console.log('📅 Navegando a agenda para acción:', accionId)
+      
+      // Usar Router para navegar a agenda (método simple y seguro)
+      if (typeof Router !== 'undefined' && Router.navigate) {
+        Router.navigate('agenda')
+        
+        // Buscar y resaltar después de un breve delay
+        setTimeout(() => {
+          this.resaltarAccionEnAgenda(accionId)
+        }, 1000) // Más tiempo para que cargue la agenda
+        
+        Utils.showToast('📅 Mostrando en agenda...', 'info')
+      } else {
+        // Fallback: cambiar sección manualmente
+        window.location.hash = '#agenda'
+        Utils.showToast('📅 Redirigiendo a agenda...', 'info')
+      }
+      
+    } catch (error) {
+      console.error('❌ Error al ver en agenda:', error)
+      Utils.showToast('❌ Error al abrir agenda', 'error')
+    }
+  },
+
+  // 🎯 Resaltar acción específica en decretos (desde agenda)  
+  resaltarAccionEnDecretos(accionId) {
+    // Buscar elemento de la acción en decretos
+    const accionElement = document.querySelector(`[data-accion-id="${accionId}"]`)
+    
+    if (accionElement) {
+      // Scroll hacia el elemento
+      accionElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      })
+      
+      // Añadir efecto de resaltado temporal
+      accionElement.style.boxShadow = '0 0 20px rgba(34, 197, 94, 0.6)'
+      accionElement.style.border = '2px solid #22c55e'
+      accionElement.style.transition = 'all 0.3s ease'
+      
+      // Quitar resaltado después de 3 segundos
+      setTimeout(() => {
+        accionElement.style.boxShadow = ''
+        accionElement.style.border = ''
+      }, 3000)
+      
+      Utils.showToast('✨ Acción encontrada y resaltada', 'success')
+    } else {
+      Utils.showToast('⚠️ Acción no encontrada en decretos', 'warning')
+      console.log('🔍 Acción no encontrada en DOM con ID:', accionId)
+    }
+  },
+
+  // 🎯 Resaltar acción específica en agenda
+  resaltarAccionEnAgenda(accionId) {
+    console.log('🔍 Buscando acción en agenda con ID:', accionId)
+    
+    // Buscar en múltiples lugares de la agenda
+    let accionElement = null
+    
+    // 1. Buscar en Panorámica de Pendientes (data-accion-id)
+    accionElement = document.querySelector(`[data-accion-id="${accionId}"]`)
+    
+    // 2. Si no se encuentra, buscar en Timeline (data-evento-id)
+    if (!accionElement) {
+      accionElement = document.querySelector(`[data-evento-id="${accionId}"]`)
+    }
+    
+    // 3. Si no se encuentra, buscar por clase y onclick que contenga el ID
+    if (!accionElement) {
+      const allElements = document.querySelectorAll('.accion-maestra-card, .timeline-card')
+      for (const element of allElements) {
+        if (element.onclick && element.onclick.toString().includes(accionId)) {
+          accionElement = element
+          break
+        }
+      }
+    }
+    
+    if (accionElement) {
+      console.log('✅ Acción encontrada en agenda:', accionElement)
+      
+      // Scroll hacia el elemento
+      accionElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      })
+      
+      // Guardar estilos originales
+      const originalBoxShadow = accionElement.style.boxShadow
+      const originalBorder = accionElement.style.border
+      const originalTransition = accionElement.style.transition
+      
+      // Añadir efecto de resaltado temporal
+      accionElement.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.4)'
+      accionElement.style.border = '2px solid #3b82f6'
+      accionElement.style.transition = 'all 0.3s ease'
+      accionElement.style.transform = 'scale(1.05)'
+      
+      // Quitar resaltado después de 3 segundos
+      setTimeout(() => {
+        accionElement.style.boxShadow = originalBoxShadow
+        accionElement.style.border = originalBorder
+        accionElement.style.transition = originalTransition
+        accionElement.style.transform = 'scale(1)'
+      }, 3000)
+      
+      Utils.showToast('✨ Acción encontrada y resaltada en agenda', 'success')
+    } else {
+      console.log('❌ Acción no encontrada en agenda. Elementos disponibles:')
+      console.log('- Panorámica:', document.querySelectorAll('[data-accion-id]').length)
+      console.log('- Timeline:', document.querySelectorAll('[data-evento-id]').length)
+      
+      Utils.showToast('⚠️ Acción no visible en agenda actual', 'warning')
+    }
+  },
+
+  // 🎯 BOTÓN INTELIGENTE - Cambia estado según contexto
+  async cambiarEstadoAccion(accionId) {
+    const accion = this.findAccionById(accionId)
+    if (!accion) {
+      Utils.showToast('❌ Acción no encontrada', 'error')
+      return
+    }
+
+    try {
+      switch (accion.estado) {
+        case 'pendiente':
+          console.log('▶️ Iniciando acción:', accionId)
+          await API.decretos.iniciarAccion(this.data.selectedDecreto.id, accionId)
+          Utils.showToast('▶️ Acción iniciada - En Progreso', 'success')
+          break
+          
+        case 'en_progreso':
+          console.log('✅ Completando acción:', accionId)
+          await API.decretos.completarAccion(this.data.selectedDecreto.id, accionId)
+          Utils.showToast('✅ Acción completada', 'success')
+          break
+          
+        case 'completada':
+          if (confirm('¿Estás seguro de reiniciar esta acción? Volverá a estado pendiente.')) {
+            console.log('🔄 Reiniciando acción:', accionId)
+            await API.decretos.marcarPendiente(this.data.selectedDecreto.id, accionId)
+            Utils.showToast('🔄 Acción reiniciada - Pendiente', 'success')
+          } else {
+            return // No hacer nada si cancela
+          }
+          break
+          
+        default:
+          Utils.showToast('❌ Estado de acción no reconocido', 'error')
+          return
+      }
+      
+      // Recargar vista
+      this.openDetalleDecreto(this.data.selectedDecreto.id)
+      
+    } catch (error) {
+      console.error('❌ Error al cambiar estado:', error)
+      Utils.showToast('❌ Error al cambiar estado de acción', 'error')
     }
   },
 
@@ -2212,6 +2872,34 @@ Preparar presentación para próxima reunión"
       if (form) {
         form.dataset.decretoId = decretoId
         console.log('✅ Decreto ID configurado:', decretoId)
+        
+        // 🔧 ARREGLO: Limpiar todos los campos del formulario
+        const inputs = form.querySelectorAll('input:not([name="decreto_id"]), textarea, select')
+        inputs.forEach(input => {
+          if (input.type === 'datetime-local') {
+            // 🔧 ARREGLO: Configurar fecha/hora por defecto en lugar de limpiar
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            tomorrow.setHours(9, 0, 0, 0) // 9:00 AM
+            input.value = tomorrow.toISOString().slice(0, 16) // Formato YYYY-MM-DDTHH:MM
+            console.log('🔧 Configurando fecha por defecto:', input.name, input.value)
+          } else if (input.type === 'date') {
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            input.value = tomorrow.toISOString().slice(0, 10) // Formato YYYY-MM-DD
+          } else if (input.type === 'time') {
+            input.value = '09:00' // 9:00 AM por defecto
+          } else if (input.type === 'range') {
+            input.value = '5' // Valor por defecto para calificación
+          } else if (input.type === 'checkbox') {
+            input.checked = false
+          } else if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0
+          } else {
+            input.value = '' // Limpiar otros campos
+          }
+        })
+        console.log('✅ Formulario de acción detalle limpiado')
       } else {
         console.error('❌ No se encontró el formulario createAccionDetalleForm')
       }
@@ -2595,6 +3283,8 @@ Preparar presentación para próxima reunión"
               name="proxima_revision" 
               class="form-input w-full px-4 py-3 text-base"
               placeholder="Selecciona fecha y hora (opcional)"
+              min="2024-09-01T00:00"
+              onchange="console.log('📅 FECHA CAMBIADA:', this.value, 'Fecha objeto:', new Date(this.value))"
             >
             <div class="text-xs text-slate-400 mt-1">
               💡 Puedes usar fechas pasadas para registrar tareas olvidadas
@@ -2649,12 +3339,18 @@ Preparar presentación para próxima reunión"
   },
 
   // Funciones para modal de detalles y edición de acciones
-  async openDetalleAccion(accionId) {
+  async openDetalleAccion(accionId, decretoId = null) {
     try {
       Modal.open('detalleAccionModal')
       
+      // Usar decreto proporcionado o el seleccionado
+      const decretoIdFinal = decretoId || this.data.selectedDecreto?.id
+      if (!decretoIdFinal) {
+        throw new Error('No se puede obtener el ID del decreto')
+      }
+      
       // Cargar detalles de la acción
-      const response = await API.decretos.getAccion(this.data.selectedDecreto.id, accionId)
+      const response = await API.decretos.getAccion(decretoIdFinal, accionId)
       const accion = response.data
       
       // Renderizar detalles
@@ -2716,14 +3412,24 @@ Preparar presentación para próxima reunión"
               <label class="text-xs font-medium text-slate-400 uppercase tracking-wide">Estado</label>
               <p class="text-white">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                  isCompleted 
+                  accion.estado === 'completada'
                     ? 'bg-green-900/30 text-green-400 border border-green-600/50' 
-                    : isOverdue 
-                      ? 'bg-red-900/30 text-red-400 border border-red-600/50'
-                      : 'bg-orange-900/30 text-orange-400 border border-orange-600/50'
+                    : accion.estado === 'en_progreso'
+                      ? 'bg-blue-900/30 text-blue-400 border border-blue-600/50'
+                      : isOverdue 
+                        ? 'bg-red-900/30 text-red-400 border border-red-600/50'
+                        : 'bg-orange-900/30 text-orange-400 border border-orange-600/50'
                 }">
-                  <i class="fas fa-${isCompleted ? 'check-circle' : isOverdue ? 'exclamation-triangle' : 'clock'} mr-1"></i>
-                  ${isCompleted ? 'Completada' : isOverdue ? 'Retrasada' : 'Pendiente'}
+                  <i class="fas fa-${
+                    accion.estado === 'completada' ? 'check-circle' : 
+                    accion.estado === 'en_progreso' ? 'play-circle' :
+                    isOverdue ? 'exclamation-triangle' : 'clock'
+                  } mr-1"></i>
+                  ${
+                    accion.estado === 'completada' ? 'Completada' : 
+                    accion.estado === 'en_progreso' ? 'En Progreso' :
+                    isOverdue ? 'Retrasada' : 'Pendiente'
+                  }
                 </span>
               </p>
             </div>
@@ -3069,5 +3775,38 @@ Preparar presentación para próxima reunión"
     })
     
     return subtareas
+  },
+
+  // 🎯 NUEVA FUNCIÓN: Manejar selección de tipo de decreto
+  updateDecretoSelect(tipoSeleccionado) {
+    console.log('🔄 Tipo de decreto seleccionado:', tipoSeleccionado)
+    
+    const select = document.getElementById('decretoTipoSelect')
+    if (!select) return
+    
+    // Cambiar estilos según la selección
+    if (tipoSeleccionado && tipoSeleccionado !== '') {
+      // Decreto seleccionado - cambiar a verde
+      select.classList.remove('border-accent-red/50', 'focus:border-accent-red')
+      select.classList.add('border-accent-green/50', 'focus:border-accent-green', 'bg-green-900/10')
+      
+      // Ocultar mensaje de error
+      const errorMsg = select.parentElement.querySelector('.text-accent-red')
+      if (errorMsg) {
+        errorMsg.style.display = 'none'
+      }
+      
+      Utils.showToast(`✅ Decreto ${tipoSeleccionado} seleccionado`, 'success')
+    } else {
+      // Sin selección - mantener rojo
+      select.classList.add('border-accent-red/50', 'focus:border-accent-red')
+      select.classList.remove('border-accent-green/50', 'focus:border-accent-green', 'bg-green-900/10')
+      
+      // Mostrar mensaje de error
+      const errorMsg = select.parentElement.querySelector('.text-accent-red')
+      if (errorMsg) {
+        errorMsg.style.display = 'block'
+      }
+    }
   }
 }
