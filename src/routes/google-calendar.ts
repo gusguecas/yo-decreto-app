@@ -13,14 +13,26 @@ const googleCalendarRoutes = new Hono<HonoEnv>()
  */
 googleCalendarRoutes.get('/auth-url', async (c) => {
   try {
+    console.log('DEBUG: Starting auth-url endpoint')
+    console.log('DEBUG: c.env:', c.env)
+    console.log('DEBUG: typeof c.env:', typeof c.env)
+    console.log('DEBUG: c.env keys:', c.env ? Object.keys(c.env) : 'c.env is null/undefined')
+
     // Obtener configuración de variables de entorno
-    const clientId = c.env.GOOGLE_CLIENT_ID
-    const redirectUri = c.env.GOOGLE_REDIRECT_URI || `${new URL(c.req.url).origin}/api/google-calendar/callback`
+    const clientId = c.env?.GOOGLE_CLIENT_ID
+    const redirectUri = c.env?.GOOGLE_REDIRECT_URI || `${new URL(c.req.url).origin}/api/google-calendar/callback`
+
+    console.log('DEBUG: clientId:', clientId ? 'SET' : 'NOT SET')
+    console.log('DEBUG: redirectUri:', redirectUri)
 
     if (!clientId) {
       return c.json({
         success: false,
-        error: 'Google Calendar no está configurado. Falta GOOGLE_CLIENT_ID.'
+        error: 'Google Calendar no está configurado. Falta GOOGLE_CLIENT_ID.',
+        debug: {
+          hasEnv: !!c.env,
+          envKeys: c.env ? Object.keys(c.env) : []
+        }
       }, 500)
     }
 
@@ -45,9 +57,12 @@ googleCalendarRoutes.get('/auth-url', async (c) => {
     })
   } catch (error: any) {
     console.error('Error generating auth URL:', error)
+    console.error('Error stack:', error.stack)
     return c.json({
       success: false,
-      error: error.message || 'Error al generar URL de autenticación'
+      error: error.message || 'Error al generar URL de autenticación',
+      errorType: error.constructor.name,
+      errorStack: error.stack
     }, 500)
   }
 })
