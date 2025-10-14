@@ -3,6 +3,10 @@
 const Acerca = {
   async render() {
     const mainContent = document.getElementById('main-content')
+
+    // Inicializar configuración de Google Calendar
+    await GoogleCalendarSettings.init()
+
     mainContent.innerHTML = this.renderAcercaView()
   },
 
@@ -10,7 +14,7 @@ const Acerca = {
     const user = AppState.user || {}
     return `
       <div class="container mx-auto px-4 py-8">
-        
+
         <!-- Header con logo gigante -->
         <div class="mb-12">
           <div class="flex items-center justify-center mb-8">
@@ -25,6 +29,11 @@ const Acerca = {
 
         <!-- Contenido principal -->
         <div class="max-w-4xl mx-auto space-y-12">
+
+          <!-- Sección: Configuración -->
+          <div id="google-calendar-settings-container">
+            ${GoogleCalendarSettings.renderSettingsPanel()}
+          </div>
           
           <!-- Sección: ¿Qué es Yo Decreto? -->
           <div class="gradient-card p-8 rounded-xl">

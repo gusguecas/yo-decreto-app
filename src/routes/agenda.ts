@@ -102,13 +102,13 @@ agendaRoutes.get('/calendario/:year/:month', async (c) => {
   }
 })
 
-// Obtener timeline del día
+// Obtener timeline del día (SOLO eventos locales - mantener por compatibilidad)
 agendaRoutes.get('/timeline/:fecha', async (c) => {
   try {
     const fecha = c.req.param('fecha')
-    
+
     const tareas = await c.env.DB.prepare(`
-      SELECT 
+      SELECT
         ae.*,
         a.titulo as accion_titulo,
         a.que_hacer,
@@ -122,14 +122,14 @@ agendaRoutes.get('/timeline/:fecha', async (c) => {
       LEFT JOIN acciones a ON ae.accion_id = a.id
       LEFT JOIN decretos d ON a.decreto_id = d.id
       WHERE ae.fecha_evento = ?
-      ORDER BY 
-        CASE ae.prioridad 
-          WHEN 'alta' THEN 1 
-          WHEN 'media' THEN 2 
-          WHEN 'baja' THEN 3 
-          ELSE 2 
-        END ASC, 
-        ae.hora_evento ASC, 
+      ORDER BY
+        CASE ae.prioridad
+          WHEN 'alta' THEN 1
+          WHEN 'media' THEN 2
+          WHEN 'baja' THEN 3
+          ELSE 2
+        END ASC,
+        ae.hora_evento ASC,
         ae.created_at ASC
     `).bind(fecha).all()
 
@@ -139,6 +139,124 @@ agendaRoutes.get('/timeline/:fecha', async (c) => {
     })
   } catch (error) {
     return c.json({ success: false, error: 'Error al obtener timeline' }, 500)
+  }
+})
+
+// 🆕 Obtener timeline UNIFICADO (eventos locales + Google Calendar)
+agendaRoutes.get('/timeline-unificado/:fecha', async (c) => {
+  try {
+    const fecha = c.req.param('fecha')
+    const userId = 'demo-user'
+
+    // Obtener eventos locales
+    const tareasLocales = await c.env.DB.prepare(`
+      SELECT
+        ae.id,
+        ae.titulo,
+        ae.descripcion,
+        ae.fecha_evento,
+        ae.hora_evento,
+        ae.estado,
+        ae.prioridad,
+        ae.es_enfoque_dia,
+        a.titulo as accion_titulo,
+        a.que_hacer,
+        a.tipo,
+        d.area,
+        d.titulo as decreto_titulo,
+        d.id as decreto_id,
+        'local' as origen
+      FROM agenda_eventos ae
+      LEFT JOIN acciones a ON ae.accion_id = a.id
+      LEFT JOIN decretos d ON a.decreto_id = d.id
+      WHERE ae.fecha_evento = ?
+    `).bind(fecha).all()
+
+    // Obtener eventos de Google Calendar del mismo día
+    const eventosGoogle = await c.env.DB.prepare(`
+      SELECT
+        id,
+        google_event_id,
+        titulo,
+        descripcion,
+        fecha_inicio,
+        fecha_fin,
+        all_day,
+        location,
+        color_id,
+        'google' as origen
+      FROM google_events
+      WHERE user_id = ?
+        AND deleted = 0
+        AND date(fecha_inicio) = ?
+      ORDER BY fecha_inicio ASC
+    `).bind(userId, fecha).all()
+
+    // Combinar y formatear eventos
+    const eventosUnificados = [
+      // Eventos locales
+      ...tareasLocales.results.map((e: any) => ({
+        id: e.id,
+        titulo: e.titulo,
+        descripcion: e.descripcion,
+        fecha_evento: e.fecha_evento,
+        hora_evento: e.hora_evento,
+        estado: e.estado,
+        prioridad: e.prioridad,
+        es_enfoque_dia: e.es_enfoque_dia,
+        accion_titulo: e.accion_titulo,
+        decreto_titulo: e.decreto_titulo,
+        decreto_id: e.decreto_id,
+        area: e.area,
+        tipo: e.tipo,
+        origen: 'local',
+        // Timestamp para ordenar
+        timestamp: e.hora_evento ? `${e.fecha_evento}T${e.hora_evento}` : `${e.fecha_evento}T23:59`,
+        // Campos específicos de local
+        all_day: !e.hora_evento
+      })),
+
+      // Eventos de Google Calendar
+      ...eventosGoogle.results.map((e: any) => ({
+        id: `google-${e.id}`,
+        google_event_id: e.google_event_id,
+        titulo: e.titulo,
+        descripcion: e.descripcion,
+        fecha_inicio: e.fecha_inicio,
+        fecha_fin: e.fecha_fin,
+        location: e.location,
+        color_id: e.color_id,
+        origen: 'google',
+        all_day: e.all_day === 1,
+        // Timestamp para ordenar
+        timestamp: e.fecha_inicio,
+        // Extraer hora para display
+        hora_evento: e.all_day ? null : e.fecha_inicio.split('T')[1]?.substring(0, 5)
+      }))
+    ]
+
+    // Ordenar por timestamp
+    eventosUnificados.sort((a, b) => {
+      const timeA = new Date(a.timestamp).getTime()
+      const timeB = new Date(b.timestamp).getTime()
+      return timeA - timeB
+    })
+
+    return c.json({
+      success: true,
+      data: eventosUnificados,
+      meta: {
+        total: eventosUnificados.length,
+        locales: tareasLocales.results.length,
+        google: eventosGoogle.results.length
+      }
+    })
+  } catch (error: any) {
+    console.error('Error getting unified timeline:', error)
+    return c.json({
+      success: false,
+      error: error.message || 'Error al obtener timeline unificado'
+    }, 500)
   }
 })
 
@@ -641,3 +759,155 @@ agendaRoutes.post('/tareas/:id/seguimiento', async (c) => {
     return c.json({ success: false, error: 'Error al crear seguimiento' }, 500)
   }
 })
+
+// 🎯 NUEVA FUNCIONALIDAD: Vista panorámica de acciones pendientes
+// Obtener todas las acciones pendientes con filtro por área de decreto
+agendaRoutes.get('/panoramica-pendientes', async (c) => {
+  try {
+    const { area } = c.req.query()
+    
+    console.log('🔍 Obteniendo panorámica pendientes, área:', area)
+    
+    let query = `
+      SELECT 
+        a.id,
+        a.titulo,
+        a.que_hacer,
+        a.tipo,
+        a.fecha_creacion,
+        a.proxima_revision,
+        a.calificacion,
+        d.titulo as decreto_titulo,
+        d.area,
+        d.sueno_meta,
+        d.id as decreto_id,
+        -- Obtener información del evento en agenda si existe
+        ae.fecha_evento,
+        ae.hora_evento,
+        ae.prioridad,
+        ae.estado as estado_agenda,
+        ae.id as evento_agenda_id
+      FROM acciones a
+      LEFT JOIN decretos d ON a.decreto_id = d.id
+      LEFT JOIN agenda_eventos ae ON a.id = ae.accion_id
+      WHERE a.estado = 'pendiente'
+    `
+    
+    const params: any[] = []
+    
+    // Filtro por área/tipo de decreto
+    if (area && area !== 'todos') {
+      query += ` AND d.area = ?`
+      params.push(area)
+    }
+    
+    // Ordenar cronológicamente desde la más antigua
+    query += `
+      ORDER BY 
+        a.fecha_creacion ASC,
+        a.proxima_revision ASC NULLS LAST,
+        a.created_at ASC
+    `
+
+    const result = await c.env.DB.prepare(query).bind(...params).all()
+    
+    // Procesar resultados para agrupar y enriquecer datos
+    const accionesProcesadas = result.results.map((accion: any) => ({
+      ...accion,
+      // Calcular días desde creación
+      dias_desde_creacion: Math.floor(
+        (Date.now() - new Date(accion.fecha_creacion).getTime()) / (1000 * 60 * 60 * 24)
+      ),
+      // Determinar estado de urgencia
+      urgencia: determinarUrgencia(accion),
+      // Formatear fechas
+      fecha_creacion_formatted: formatearFecha(accion.fecha_creacion),
+      proxima_revision_formatted: accion.proxima_revision ? formatearFecha(accion.proxima_revision) : null
+    }))
+    
+    // Estadísticas generales
+    const estadisticas = {
+      total: accionesProcesadas.length,
+      por_area: {},
+      antiguedad_promedio: 0,
+      con_revision_pendiente: 0,
+      sin_revision: 0
+    }
+    
+    // Calcular estadísticas por área
+    const areaStats: Record<string, number> = {}
+    let totalDias = 0
+    
+    accionesProcesadas.forEach((accion: any) => {
+      const area = accion.area || 'sin_area'
+      areaStats[area] = (areaStats[area] || 0) + 1
+      totalDias += accion.dias_desde_creacion
+      
+      if (accion.proxima_revision) {
+        estadisticas.con_revision_pendiente++
+      } else {
+        estadisticas.sin_revision++
+      }
+    })
+    
+    estadisticas.por_area = areaStats
+    estadisticas.antiguedad_promedio = accionesProcesadas.length > 0 
+      ? Math.round(totalDias / accionesProcesadas.length) 
+      : 0
+
+    console.log('✅ Panorámica obtenida:', {
+      total: estadisticas.total,
+      areas: estadisticas.por_area
+    })
+
+    return c.json({
+      success: true,
+      data: {
+        acciones: accionesProcesadas,
+        estadisticas
+      }
+    })
+  } catch (error) {
+    console.error('❌ Error panorámica pendientes:', error)
+    return c.json({ 
+      success: false, 
+      error: `Error al obtener panorámica de pendientes: ${error.message}` 
+    }, 500)
+  }
+})
+
+// Funciones auxiliares para procesamiento de datos
+function determinarUrgencia(accion: any): string {
+  const ahora = new Date()
+  const diasCreacion = Math.floor(
+    (ahora.getTime() - new Date(accion.fecha_creacion).getTime()) / (1000 * 60 * 60 * 24)
+  )
+  
+  // Si tiene próxima revisión
+  if (accion.proxima_revision) {
+    const fechaRevision = new Date(accion.proxima_revision)
+    const diasHastaRevision = Math.floor(
+      (fechaRevision.getTime() - ahora.getTime()) / (1000 * 60 * 60 * 24)
+    )
+    
+    if (diasHastaRevision < 0) return 'vencida' // 🔴
+    if (diasHastaRevision <= 1) return 'urgente' // 🟠
+    if (diasHastaRevision <= 3) return 'importante' // 🟡
+  }
+  
+  // Por antigüedad
+  if (diasCreacion > 14) return 'muy_antigua' // 🟣
+  if (diasCreacion > 7) return 'antigua' // 🔵
+  
+  return 'normal' // 🟢
+}
+
+function formatearFecha(fecha: string): string {
+  const date = new Date(fecha)
+  const opciones: Intl.DateTimeFormatOptions = { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric'
+  }
+  return date.toLocaleDateString('es-ES', opciones)
+}

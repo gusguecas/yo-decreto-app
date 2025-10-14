@@ -141,8 +141,9 @@ const API = {
     getMetricasDia: (fecha) => API.request(`/agenda/metricas/${fecha}`),
     getCalendario: (year, month) => API.request(`/agenda/calendario/${year}/${month}`),
     getTimeline: (fecha) => API.request(`/agenda/timeline/${fecha}`),
+    getTimelineUnificado: (fecha) => API.request(`/agenda/timeline-unificado/${fecha}`),
     getEnfoque: (fecha) => API.request(`/agenda/enfoque/${fecha}`),
-    setEnfoque: (fecha, tareaId) => 
+    setEnfoque: (fecha, tareaId) =>
       API.request(`/agenda/enfoque/${fecha}`, { method: 'PUT', data: { tarea_id: tareaId } }),
     createTarea: (data) => API.request('/agenda/tareas', { method: 'POST', data }),
     getTarea: (id) => API.request(`/agenda/tareas/${id}`),
@@ -152,10 +153,10 @@ const API = {
     deleteTarea: (id) => API.request(`/agenda/tareas/${id}`, { method: 'DELETE' }),
     getPendientes: (fecha) => API.request(`/agenda/pendientes/${fecha}`),
     filtrar: (params) => API.request('/agenda/filtros', { params }),
-    createSeguimiento: (id, data) => 
+    createSeguimiento: (id, data) =>
       API.request(`/agenda/tareas/${id}/seguimiento`, { method: 'POST', data }),
     // 🎯 NUEVO: Panorámica de acciones pendientes
-    getPanoramicaPendientes: (area = 'todos') => 
+    getPanoramicaPendientes: (area = 'todos') =>
       API.request(`/agenda/panoramica-pendientes?area=${area}`)
   },
 
@@ -229,7 +230,23 @@ const API = {
     saveMeritCommitment: (data) => API.request('/rutina/merit-commitment', { method: 'POST', data }),
     completeRoutine: (data) => API.request('/rutina/routine', { method: 'POST', data }),
     getStats: () => API.request('/rutina/stats'),
-    recordSignal: (data) => API.request('/rutina/signal', { method: 'POST', data })
+    recordSignal: (data) => API.request('/rutina/signal', { method: 'POST', data }),
+    swapPrimary: (data) => API.request('/rutina/swap-primary', { method: 'POST', data }),
+    getDecretosByArea: (area) => API.request(`/rutina/decretos-by-area/${area}`)
+  },
+
+  // Google Calendar Integration
+  googleCalendar: {
+    getAuthUrl: () => API.request('/google-calendar/auth-url'),
+    getStatus: () => API.request('/google-calendar/status'),
+    disconnect: () => API.request('/google-calendar/disconnect', { method: 'POST' }),
+    updateSettings: (data) => API.request('/google-calendar/settings', { method: 'PUT', data }),
+    importEvents: (data) => API.request('/google-calendar/import', { method: 'POST', data }),
+    getEvents: (params) => API.request('/google-calendar/events', { params }),
+    exportRutina: (data) => API.request('/google-calendar/export-rutina', { method: 'POST', data }),
+    exportDecretoPrimario: (data) => API.request('/google-calendar/export-decreto-primario', { method: 'POST', data }),
+    exportAgendaEvento: (data) => API.request('/google-calendar/export-agenda-evento', { method: 'POST', data }),
+    syncAll: () => API.request('/google-calendar/sync-all', { method: 'POST' })
   }
 }
 

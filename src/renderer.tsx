@@ -85,6 +85,7 @@ export const renderer = jsxRenderer(({ children }) => {
         <script src={`/static/progreso.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
         <script src={`/static/practica.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
         <script src={`/static/chatbot.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
+        <script src={`/static/google-calendar-settings.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
         <script src={`/static/acerca.js?v=${Date.now()}&cb=${Math.random()}&t=${new Date().getTime()}`}></script>
       </body>
     </html>

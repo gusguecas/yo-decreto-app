@@ -12,5 +12,8 @@
       "database_name": "yo-decreto-production",
       "database_id": "2054fd63-656d-47cf-94c6-00d01a5cb441"
     }
-  ]
+  ],
+  "vars": {
+    "GOOGLE_REDIRECT_URI": "https://yo-decreto.pages.dev/api/google-calendar/callback"
+  }
 }
