@@ -13,9 +13,11 @@ import rutinaRoutes from './routes/rutina'
 import authRoutes from './routes/auth'
 import googleCalendarRoutes from './routes/google-calendar'
 import aiRoutes from './routes/ai'
+import logosRoutes from './routes/logos'
 
 type Bindings = {
   DB: D1Database;
+  R2: R2Bucket;
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -31,6 +33,7 @@ app.use('/static/*', serveStatic())
 
 // Rutas API
 app.route('/api/auth', authRoutes)  // 🔐 Rutas de autenticación PRIMERO
+app.route('/api/logos', logosRoutes)  // 🖼️ Servir imágenes desde R2
 app.route('/api/decretos', decretosRoutes)
 app.route('/api/agenda', agendaRoutes)
 app.route('/api/progreso', progresoRoutes)

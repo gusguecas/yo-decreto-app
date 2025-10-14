@@ -141,8 +141,9 @@ const API = {
     getMetricasDia: (fecha) => API.request(`/agenda/metricas/${fecha}`),
     getCalendario: (year, month) => API.request(`/agenda/calendario/${year}/${month}`),
     getTimeline: (fecha) => API.request(`/agenda/timeline/${fecha}`),
+    getTimelineUnificado: (fecha) => API.request(`/agenda/timeline-unificado/${fecha}`),
     getEnfoque: (fecha) => API.request(`/agenda/enfoque/${fecha}`),
-    setEnfoque: (fecha, tareaId) => 
+    setEnfoque: (fecha, tareaId) =>
       API.request(`/agenda/enfoque/${fecha}`, { method: 'PUT', data: { tarea_id: tareaId } }),
     createTarea: (data) => API.request('/agenda/tareas', { method: 'POST', data }),
     getTarea: (id) => API.request(`/agenda/tareas/${id}`),
@@ -152,8 +153,11 @@ const API = {
     deleteTarea: (id) => API.request(`/agenda/tareas/${id}`, { method: 'DELETE' }),
     getPendientes: (fecha) => API.request(`/agenda/pendientes/${fecha}`),
     filtrar: (params) => API.request('/agenda/filtros', { params }),
-    createSeguimiento: (id, data) => 
-      API.request(`/agenda/tareas/${id}/seguimiento`, { method: 'POST', data })
+    createSeguimiento: (id, data) =>
+      API.request(`/agenda/tareas/${id}/seguimiento`, { method: 'POST', data }),
+    // 🎯 NUEVO: Panorámica de acciones pendientes
+    getPanoramicaPendientes: (area = 'todos') =>
+      API.request(`/agenda/panoramica-pendientes?area=${area}`)
   },
 
   // Progreso
@@ -205,6 +209,44 @@ const API = {
   config: {
     get: () => API.request('/decretos/config'),
     update: (data) => API.request('/decretos/config', { method: 'PUT', data })
+  },
+
+  // Chatbot con Helene
+  chatbot: {
+    sendMessage: (message, conversationHistory = []) =>
+      API.request('/chatbot/chat', {
+        method: 'POST',
+        data: { message, conversationHistory }
+      }),
+    getHistory: () => API.request('/chatbot/history'),
+    clearHistory: () => API.request('/chatbot/history', { method: 'DELETE' })
+  },
+
+  // Rutina Diaria Tripartito
+  rutina: {
+    getToday: () => API.request('/rutina/today'),
+    completeTask: (data) => API.request('/rutina/complete-task', { method: 'POST', data }),
+    faithCheckin: (data) => API.request('/rutina/faith-checkin', { method: 'POST', data }),
+    saveMeritCommitment: (data) => API.request('/rutina/merit-commitment', { method: 'POST', data }),
+    completeRoutine: (data) => API.request('/rutina/routine', { method: 'POST', data }),
+    getStats: () => API.request('/rutina/stats'),
+    recordSignal: (data) => API.request('/rutina/signal', { method: 'POST', data }),
+    swapPrimary: (data) => API.request('/rutina/swap-primary', { method: 'POST', data }),
+    getDecretosByArea: (area) => API.request(`/rutina/decretos-by-area/${area}`)
+  },
+
+  // Google Calendar Integration
+  googleCalendar: {
+    getAuthUrl: () => API.request('/google-calendar/auth-url'),
+    getStatus: () => API.request('/google-calendar/status'),
+    disconnect: () => API.request('/google-calendar/disconnect', { method: 'POST' }),
+    updateSettings: (data) => API.request('/google-calendar/settings', { method: 'PUT', data }),
+    importEvents: (data) => API.request('/google-calendar/import', { method: 'POST', data }),
+    getEvents: (params) => API.request('/google-calendar/events', { params }),
+    exportRutina: (data) => API.request('/google-calendar/export-rutina', { method: 'POST', data }),
+    exportDecretoPrimario: (data) => API.request('/google-calendar/export-decreto-primario', { method: 'POST', data }),
+    exportAgendaEvento: (data) => API.request('/google-calendar/export-agenda-evento', { method: 'POST', data }),
+    syncAll: () => API.request('/google-calendar/sync-all', { method: 'POST' })
   }
 }
 
@@ -231,9 +273,11 @@ const UI = {
   renderNavTabs() {
     const tabs = [
       { id: 'decretos', icon: 'fas fa-bullseye', label: 'Mis Decretos' },
+      { id: 'rutina', icon: 'fas fa-sun', label: 'Rutina Diaria' },
       { id: 'agenda', icon: 'fas fa-calendar-alt', label: 'Agenda Diaria' },
       { id: 'progreso', icon: 'fas fa-chart-line', label: 'Mi Progreso' },
       { id: 'practica', icon: 'fas fa-star', label: 'Mi Práctica' },
+      { id: 'chatbot', icon: 'fas fa-comments', label: 'Chat con Helene' },
       { id: 'acerca', icon: 'fas fa-info-circle', label: 'Acerca de' }
     ]
 
@@ -475,7 +519,7 @@ const Router = {
 
   getSectionFromHash() {
     const hash = window.location.hash.slice(1)
-    const validSections = ['decretos', 'agenda', 'progreso', 'practica']
+    const validSections = ['decretos', 'rutina', 'agenda', 'progreso', 'practica', 'chatbot']
     return validSections.includes(hash) ? hash : 'decretos'
   },
 
@@ -529,6 +573,9 @@ const Router = {
         // La vista de detalle se maneja desde Decretos.openDetalleDecreto()
         // No hacer nada aquí, ya se renderizó
         break
+      case 'rutina':
+        Rutina.render()
+        break
       case 'agenda':
         Agenda.render()
         break
@@ -537,6 +584,9 @@ const Router = {
         break
       case 'practica':
         Practica.render()
+        break
+      case 'chatbot':
+        Chatbot.render()
         break
       case 'acerca':
         Acerca.render()

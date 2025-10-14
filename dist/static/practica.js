@@ -36,23 +36,23 @@ const Practica = {
   async loadPracticaData() {
     try {
       console.log('🔄 Cargando rutinas...')
-      
+
       // Verificar si hay fecha simulada
       const fechaSimulada = localStorage.getItem('yo-decreto-fecha-simulada')
-      const rutinas = fechaSimulada 
+      const rutinas = fechaSimulada
         ? await API.practica.getRutinasConFecha(fechaSimulada)
         : await API.practica.getRutinas()
-      
+
       if (fechaSimulada) {
         console.log(`🗺️ Usando fecha simulada: ${fechaSimulada}`)
       }
-      
+
       console.log('✅ Rutinas cargadas:', rutinas.data.length, 'elementos')
-      
+
       console.log('🔄 Cargando afirmaciones...')
       const afirmaciones = await API.practica.getAfirmaciones()
       console.log('✅ Afirmaciones cargadas:', afirmaciones.data.length, 'elementos')
-      
+
       console.log('🔄 Cargando progreso...')
       const progresoRutinas = await API.practica.getProgresoDia()
       console.log('✅ Progreso cargado:', progresoRutinas.data.porcentaje_progreso + '%')
@@ -60,7 +60,11 @@ const Practica = {
       this.data.rutinas = rutinas.data || []
       this.data.afirmaciones = afirmaciones.data || []
       this.data.progresoRutinas = progresoRutinas.data || {}
-      
+
+      // Cargar estadísticas del ritual
+      console.log('🔄 Cargando estadísticas del ritual...')
+      await this.loadRitualStats()
+
       console.log('🎯 Datos finales:', {
         rutinas: this.data.rutinas.length,
         afirmaciones: this.data.afirmaciones.length,
@@ -92,6 +96,9 @@ const Practica = {
         <!-- Rutina Matutina -->
         ${this.renderRutinaMatutina()}
 
+        <!-- Ritual SPEC -->
+        ${this.renderRitualSPEC()}
+
         <!-- Analytics Dashboard -->
         ${this.renderAnalyticsDashboard()}
 
@@ -99,6 +106,322 @@ const Practica = {
         ${this.renderBancoAfirmaciones()}
       </div>
     `
+  },
+
+  renderRitualSPEC() {
+    return `
+      <div class="mb-12">
+        <div class="gradient-card p-6 rounded-xl">
+          <!-- Header compacto -->
+          <div class="text-center mb-4">
+            <div class="inline-block relative mb-2">
+              <div class="relative bg-gradient-to-r from-purple-600 to-pink-600 p-2 rounded-full shadow-lg">
+                <span class="text-2xl">🧘</span>
+              </div>
+            </div>
+            <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              Ritual SPEC (7 min)
+            </h2>
+            <p class="text-slate-400 text-sm mt-1">Select • Project • Expect • Collect</p>
+          </div>
+
+          <!-- Contenedor del ritual -->
+          <div id="ritual-spec-container">
+            ${this.renderRitualSPECContent()}
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  renderRitualSPECContent() {
+    // Obtener estadísticas del ritual si están disponibles
+    return `
+      <!-- Estadísticas compactas -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div class="card p-3 text-center">
+          <div class="text-xl mb-1">🔥</div>
+          <div class="text-xs text-slate-400">Racha</div>
+          <div class="text-lg font-bold" id="ritual-stat-racha">-</div>
+        </div>
+        <div class="card p-3 text-center">
+          <div class="text-xl mb-1">✅</div>
+          <div class="text-xs text-slate-400">Completadas</div>
+          <div class="text-lg font-bold" id="ritual-stat-completadas">-</div>
+        </div>
+        <div class="card p-3 text-center">
+          <div class="text-xl mb-1">☀️</div>
+          <div class="text-xs text-slate-400">Mañanas</div>
+          <div class="text-lg font-bold" id="ritual-stat-manana">-</div>
+        </div>
+        <div class="card p-3 text-center">
+          <div class="text-xl mb-1">🌙</div>
+          <div class="text-xs text-slate-400">Noches</div>
+          <div class="text-lg font-bold" id="ritual-stat-noche">-</div>
+        </div>
+      </div>
+
+      <!-- Botón para iniciar compacto -->
+      <div class="text-center">
+        <button
+          onclick="Practica.iniciarRitualSPEC()"
+          class="btn-primary px-6 py-2 rounded-lg font-bold hover:scale-105 transition-transform"
+        >
+          <i class="fas fa-play mr-2"></i>
+          Iniciar Ritual (7 min)
+        </button>
+      </div>
+    `
+  },
+
+  async iniciarRitualSPEC() {
+    // Cargar estadísticas primero
+    await this.loadRitualStats()
+
+    // Cambiar a vista de ritual
+    const container = document.getElementById('ritual-spec-container')
+    if (container) {
+      container.innerHTML = UI.renderLoading('Cargando ritual...')
+
+      // Cargar vista completa del ritual
+      setTimeout(async () => {
+        await RitualSPEC.loadDecretos()
+        container.innerHTML = `
+          <div class="card p-6">
+            <h3 class="text-xl font-bold mb-4">Iniciar Ritual SPEC</h3>
+
+            <div class="mb-4">
+              <label class="block text-sm font-medium mb-2">¿Cuándo vas a hacer el ritual?</label>
+              <div class="grid grid-cols-2 gap-4">
+                <button onclick="Practica.selectMomento('manana')" class="momento-btn card p-4 hover-lift cursor-pointer text-center" data-momento="manana">
+                  <div class="text-3xl mb-2">☀️</div>
+                  <div class="font-bold">Mañana</div>
+                  <div class="text-xs text-slate-400 mt-1">Al despertar</div>
+                </button>
+                <button onclick="Practica.selectMomento('noche')" class="momento-btn card p-4 hover-lift cursor-pointer text-center" data-momento="noche">
+                  <div class="text-3xl mb-2">🌙</div>
+                  <div class="font-bold">Noche</div>
+                  <div class="text-xs text-slate-400 mt-1">Antes de dormir</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-sm font-medium mb-2">Decreto relacionado (opcional)</label>
+              <select id="ritual-decreto-select" class="input-field w-full">
+                <option value="">Sin decreto específico</option>
+              </select>
+            </div>
+
+            <div class="flex space-x-3">
+              <button onclick="Practica.cancelarRitualSPEC()" class="btn-secondary flex-1 py-3">
+                <i class="fas fa-times mr-2"></i>
+                Cancelar
+              </button>
+              <button onclick="Practica.startRitual()" class="btn-primary flex-1 py-3" disabled id="start-ritual-btn">
+                <i class="fas fa-play mr-2"></i>
+                Comenzar Ritual
+              </button>
+            </div>
+          </div>
+        `
+
+        // Cargar decretos en el selector
+        const response = await API.decretos.getAll()
+        const select = document.getElementById('ritual-decreto-select')
+        if (select && response.data) {
+          response.data.forEach(d => {
+            const option = document.createElement('option')
+            option.value = d.id
+            option.textContent = `${d.titulo} (${d.area})`
+            select.appendChild(option)
+          })
+        }
+      }, 300)
+    }
+  },
+
+  selectMomento(momento) {
+    RitualSPEC.state.momento = momento
+
+    // Actualizar UI
+    document.querySelectorAll('.momento-btn').forEach(btn => {
+      btn.classList.remove('border-purple-500', 'bg-purple-900/20')
+      btn.classList.add('border-slate-700')
+    })
+
+    const selected = document.querySelector(`[data-momento="${momento}"]`)
+    selected.classList.remove('border-slate-700')
+    selected.classList.add('border-purple-500', 'bg-purple-900/20')
+
+    // Habilitar botón
+    document.getElementById('start-ritual-btn').disabled = false
+  },
+
+  async startRitual() {
+    if (!RitualSPEC.state.momento) {
+      Utils.showToast('Selecciona el momento del ritual', 'error')
+      return
+    }
+
+    const decretoSelect = document.getElementById('ritual-decreto-select')
+    RitualSPEC.state.decretoId = decretoSelect.value || null
+
+    try {
+      const response = await API.ritual.createSesion({
+        decreto_id: RitualSPEC.state.decretoId,
+        momento: RitualSPEC.state.momento
+      })
+
+      RitualSPEC.state.sessionId = response.session_id
+      RitualSPEC.state.isRunning = true
+      RitualSPEC.state.currentStage = 0
+      RitualSPEC.state.timeRemaining = RitualSPEC.stages[0].duration
+      RitualSPEC.state.startTime = Date.now()
+      RitualSPEC.state.totalElapsed = 0
+
+      // Renderizar timer en el contenedor
+      const container = document.getElementById('ritual-spec-container')
+      container.innerHTML = this.renderRitualTimer()
+
+      // Iniciar countdown
+      RitualSPEC.startTimer()
+
+      Utils.showToast('¡Ritual SPEC iniciado! 🧘', 'success')
+    } catch (error) {
+      console.error('Error starting ritual:', error)
+      Utils.showToast('Error al iniciar ritual', 'error')
+    }
+  },
+
+  renderRitualTimer() {
+    const stage = RitualSPEC.stages[RitualSPEC.state.currentStage]
+    const totalSeconds = RitualSPEC.stages.reduce((sum, s) => sum + s.duration, 0)
+    const elapsedSeconds = RitualSPEC.stages.slice(0, RitualSPEC.state.currentStage).reduce((sum, s) => sum + s.duration, 0) +
+                          (stage.duration - RitualSPEC.state.timeRemaining)
+    const progressPercent = (elapsedSeconds / totalSeconds) * 100
+
+    return `
+      <div class="card p-6">
+        <!-- Progreso general -->
+        <div class="mb-6">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-slate-400">Progreso total</span>
+            <span class="font-bold">${Math.floor(progressPercent)}%</span>
+          </div>
+          <div class="w-full bg-slate-700 rounded-full h-2">
+            <div class="bg-gradient-to-r from-purple-600 to-purple-400 h-2 rounded-full transition-all" style="width: ${progressPercent}%"></div>
+          </div>
+        </div>
+
+        <!-- Etapa actual -->
+        <div class="text-center mb-6">
+          <div class="text-6xl mb-3">${stage.icon}</div>
+          <h3 class="text-2xl font-bold mb-2">${stage.name}</h3>
+          <p class="text-slate-400 mb-4">${stage.description}</p>
+          <div class="bg-slate-800 rounded-lg p-4 mb-4">
+            <p class="text-sm italic">"${stage.instruction}"</p>
+          </div>
+        </div>
+
+        <!-- Timer -->
+        <div class="text-center mb-6">
+          <div class="text-6xl font-bold mb-2" id="timer-display">
+            ${RitualSPEC.formatTime(RitualSPEC.state.timeRemaining)}
+          </div>
+          <div class="text-slate-400 text-sm">
+            Etapa ${RitualSPEC.state.currentStage + 1} de ${RitualSPEC.stages.length}
+          </div>
+        </div>
+
+        <!-- Indicador de etapas -->
+        <div class="flex justify-center space-x-2 mb-6">
+          ${RitualSPEC.stages.map((s, i) => `
+            <div class="w-12 h-12 rounded-full flex items-center justify-center text-xl ${
+              i < RitualSPEC.state.currentStage ? 'bg-green-600' :
+              i === RitualSPEC.state.currentStage ? 'bg-purple-600 animate-pulse' :
+              'bg-slate-700'
+            }">
+              ${s.icon}
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Controles -->
+        <div class="flex justify-center space-x-4">
+          <button onclick="Practica.togglePauseRitual()" class="btn-secondary px-6 py-2">
+            <i class="fas fa-${RitualSPEC.state.isPaused ? 'play' : 'pause'} mr-2"></i>
+            ${RitualSPEC.state.isPaused ? 'Continuar' : 'Pausar'}
+          </button>
+          <button onclick="Practica.nextStageRitual()" class="btn-primary px-6 py-2">
+            <i class="fas fa-forward mr-2"></i>
+            Siguiente
+          </button>
+          <button onclick="Practica.stopRitual()" class="btn-danger px-6 py-2">
+            <i class="fas fa-stop mr-2"></i>
+            Terminar
+          </button>
+        </div>
+      </div>
+    `
+  },
+
+  togglePauseRitual() {
+    RitualSPEC.state.isPaused = !RitualSPEC.state.isPaused
+    const container = document.getElementById('ritual-spec-container')
+    if (container) {
+      container.innerHTML = this.renderRitualTimer()
+    }
+  },
+
+  async nextStageRitual() {
+    await RitualSPEC.nextStage()
+    const container = document.getElementById('ritual-spec-container')
+    if (container && RitualSPEC.state.isRunning) {
+      container.innerHTML = this.renderRitualTimer()
+    }
+  },
+
+  async stopRitual() {
+    if (!confirm('¿Detener el ritual?')) return
+
+    clearInterval(RitualSPEC.state.timerInterval)
+    await RitualSPEC.saveProgress()
+    RitualSPEC.resetState()
+
+    const container = document.getElementById('ritual-spec-container')
+    if (container) {
+      container.innerHTML = this.renderRitualSPECContent()
+      await this.loadRitualStats()
+    }
+
+    Utils.showToast('Ritual detenido', 'info')
+  },
+
+  cancelarRitualSPEC() {
+    const container = document.getElementById('ritual-spec-container')
+    if (container) {
+      container.innerHTML = this.renderRitualSPECContent()
+    }
+  },
+
+  async loadRitualStats() {
+    try {
+      const response = await API.ritual.getEstadisticas()
+      const stats = response.data
+
+      const rachaEl = document.getElementById('ritual-stat-racha')
+      const completadasEl = document.getElementById('ritual-stat-completadas')
+      const mananaEl = document.getElementById('ritual-stat-manana')
+      const nocheEl = document.getElementById('ritual-stat-noche')
+
+      if (rachaEl) rachaEl.textContent = `${stats.racha_dias || 0} días`
+      if (completadasEl) completadasEl.textContent = stats.sesiones_completadas || 0
+      if (mananaEl) mananaEl.textContent = stats.sesiones_manana || 0
+      if (nocheEl) nocheEl.textContent = stats.sesiones_noche || 0
+    } catch (error) {
+      console.error('Error loading ritual stats:', error)
+    }
   },
 
   renderRutinaMatutina() {
@@ -167,12 +490,12 @@ const Practica = {
                     <div class="text-center mb-4">
                       <div class="relative inline-block">
                         <div class="w-20 h-20 ${this.getIconBg(rutina.icono)} rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300">
-                          <span class="text-4xl">${rutina.icono}</span>
+                          <i class="${rutina.icono} ${this.getIconColor(rutina.icono)} text-3xl"></i>
                         </div>
                         <div class="absolute inset-0 ${this.getIconBg(rutina.icono)} rounded-full animate-ping opacity-20"></div>
                       </div>
                     </div>
-                    
+
                     <!-- Contenido -->
                     <div class="text-center">
                       <h3 class="font-bold text-white text-sm mb-2 leading-tight">${rutina.nombre}</h3>
@@ -909,8 +1232,15 @@ Esto simulará que hemos pasado al día siguiente:
   // Helper functions para iconos coloridos
   getIconColor(icono) {
     const colors = {
+      'fas fa-om': 'text-purple-400',
+      'fas fa-heart': 'text-red-400',
+      'fas fa-star': 'text-yellow-400',
+      'fas fa-eye': 'text-green-400',
+      'fas fa-dumbbell': 'text-orange-400',
+      'fas fa-book-open': 'text-blue-400',
+      // Fallbacks para iconos antiguos
       'fa-sun': 'text-yellow-400',
-      'fa-heart': 'text-red-400', 
+      'fa-heart': 'text-red-400',
       'fa-scroll': 'text-purple-400',
       'fa-microphone': 'text-blue-400',
       'fa-eye': 'text-green-400',
@@ -918,14 +1248,21 @@ Esto simulará que hemos pasado al día siguiente:
       'fa-running': 'text-orange-400',
       'fa-tasks': 'text-indigo-400'
     }
-    return colors[icono] || 'text-slate-400'
+    return colors[icono] || 'text-white'
   },
 
   getIconBg(icono) {
     const backgrounds = {
+      'fas fa-om': 'bg-purple-400/20',
+      'fas fa-heart': 'bg-red-400/20',
+      'fas fa-star': 'bg-yellow-400/20',
+      'fas fa-eye': 'bg-green-400/20',
+      'fas fa-dumbbell': 'bg-orange-400/20',
+      'fas fa-book-open': 'bg-blue-400/20',
+      // Fallbacks para iconos antiguos
       'fa-sun': 'bg-yellow-400/20',
       'fa-heart': 'bg-red-400/20',
-      'fa-scroll': 'bg-purple-400/20', 
+      'fa-scroll': 'bg-purple-400/20',
       'fa-microphone': 'bg-blue-400/20',
       'fa-eye': 'bg-green-400/20',
       'fa-tint': 'bg-cyan-400/20',
@@ -971,6 +1308,13 @@ Esto simulará que hemos pasado al día siguiente:
 
   getGlowColor(icono) {
     const glows = {
+      'fas fa-om': 'bg-purple-500/40',
+      'fas fa-heart': 'bg-red-500/40',
+      'fas fa-star': 'bg-yellow-500/40',
+      'fas fa-eye': 'bg-green-500/40',
+      'fas fa-dumbbell': 'bg-orange-500/40',
+      'fas fa-book-open': 'bg-blue-500/40',
+      // Fallbacks para iconos antiguos
       'fa-sun': 'bg-yellow-500/40',
       'fa-heart': 'bg-red-500/40',
       'fa-scroll': 'bg-purple-500/40',
