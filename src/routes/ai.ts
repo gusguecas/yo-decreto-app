@@ -28,11 +28,10 @@ aiRoutes.post('/chat', async (c) => {
 
         // Obtener decretos
         const decretos = await c.env.DB.prepare(`
-          SELECT titulo, area, sueno_meta, descripcion, estado, prioridad
-          FROM decretos_primarios
-          WHERE user_id = ?
+          SELECT titulo, area, sueno_meta, descripcion
+          FROM decretos
           LIMIT 10
-        `).bind(userId).all()
+        `).bind().all()
 
         // Obtener agenda del día
         const today = new Date().toISOString().split('T')[0]
@@ -314,16 +313,40 @@ High quality, 4K, cinematic lighting, motivational atmosphere.`
       }, 500)
     }
 
+    // Descargar imagen de Replicate
+    const imageResponse = await fetch(imageUrl)
+    if (!imageResponse.ok) {
+      return c.json({
+        success: false,
+        error: 'Error al descargar la imagen generada'
+      }, 500)
+    }
+
+    // Subir a R2
+    const imageBuffer = await imageResponse.arrayBuffer()
+    const timestamp = Date.now()
+    const random = Math.random().toString(36).substring(2, 8)
+    const filename = `visualization-${decretoId}-${timestamp}-${random}.png`
+
+    await c.env.R2.put(filename, imageBuffer, {
+      httpMetadata: {
+        contentType: 'image/png'
+      }
+    })
+
+    // URL final en R2
+    const finalImageUrl = `/api/logos/${filename}`
+
     // Actualizar decreto con la nueva imagen
     await c.env.DB.prepare(`
-      UPDATE decretos_primarios
+      UPDATE decretos
       SET imagen_visualizacion = ?, updated_at = datetime('now')
       WHERE id = ?
-    `).bind(imageUrl, decretoId).run()
+    `).bind(finalImageUrl, decretoId).run()
 
     return c.json({
       success: true,
-      imageUrl: imageUrl,
+      imageUrl: finalImageUrl,
       message: '¡Imagen generada exitosamente!'
     })
 
