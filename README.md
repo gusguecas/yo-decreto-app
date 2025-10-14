@@ -175,3 +175,4 @@ npm run deploy
 **Última actualización**: Septiembre 2024  
 **Estado**: ✅ Funcional y listo para producción# Google Calendar Integration
 # Trigger deployment
+
