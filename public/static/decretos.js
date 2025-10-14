@@ -2006,7 +2006,10 @@ const Decretos = {
         await this.openDetalleDecreto(decretoId)
         Utils.showToast('¡Visualización generada con éxito!', 'success')
       } else {
-        Utils.showToast(data.error || 'Error al generar la visualización', 'error')
+        // Mostrar error detallado en consola
+        console.error('Error detallado del servidor:', data)
+        const errorMsg = data.details ? `${data.error}: ${data.details}` : data.error || 'Error al generar la visualización'
+        Utils.showToast(errorMsg, 'error')
       }
     } catch (error) {
       console.error('Error generando visualización:', error)

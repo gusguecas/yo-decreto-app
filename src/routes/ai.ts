@@ -342,7 +342,9 @@ Responde SOLO con el prompt, sin explicaciones adicionales.`
     console.error('Error en /api/ai/generate-visualization:', error)
     return c.json({
       success: false,
-      error: 'Error al generar la visualización'
+      error: 'Error al generar la visualización',
+      details: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
     }, 500)
   }
 })
