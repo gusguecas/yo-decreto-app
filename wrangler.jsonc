@@ -13,6 +13,12 @@
       "database_id": "2054fd63-656d-47cf-94c6-00d01a5cb441"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "yo-decreto-logos"
+    }
+  ],
   "vars": {
     "GOOGLE_REDIRECT_URI": "https://yo-decreto.pages.dev/api/google-calendar/callback"
   }
