@@ -219,6 +219,17 @@ const API = {
       }),
     getHistory: () => API.request('/chatbot/history'),
     clearHistory: () => API.request('/chatbot/history', { method: 'DELETE' })
+  },
+
+  // Rutina Diaria Tripartito
+  rutina: {
+    getToday: () => API.request('/rutina/today'),
+    completeTask: (data) => API.request('/rutina/complete-task', { method: 'POST', data }),
+    faithCheckin: (data) => API.request('/rutina/faith-checkin', { method: 'POST', data }),
+    saveMeritCommitment: (data) => API.request('/rutina/merit-commitment', { method: 'POST', data }),
+    completeRoutine: (data) => API.request('/rutina/routine', { method: 'POST', data }),
+    getStats: () => API.request('/rutina/stats'),
+    recordSignal: (data) => API.request('/rutina/signal', { method: 'POST', data })
   }
 }
 
@@ -245,6 +256,7 @@ const UI = {
   renderNavTabs() {
     const tabs = [
       { id: 'decretos', icon: 'fas fa-bullseye', label: 'Mis Decretos' },
+      { id: 'rutina', icon: 'fas fa-sun', label: 'Rutina Diaria' },
       { id: 'agenda', icon: 'fas fa-calendar-alt', label: 'Agenda Diaria' },
       { id: 'progreso', icon: 'fas fa-chart-line', label: 'Mi Progreso' },
       { id: 'practica', icon: 'fas fa-star', label: 'Mi Práctica' },
@@ -490,7 +502,7 @@ const Router = {
 
   getSectionFromHash() {
     const hash = window.location.hash.slice(1)
-    const validSections = ['decretos', 'agenda', 'progreso', 'practica', 'chatbot']
+    const validSections = ['decretos', 'rutina', 'agenda', 'progreso', 'practica', 'chatbot']
     return validSections.includes(hash) ? hash : 'decretos'
   },
 
@@ -543,6 +555,9 @@ const Router = {
       case 'detalle-decreto':
         // La vista de detalle se maneja desde Decretos.openDetalleDecreto()
         // No hacer nada aquí, ya se renderizó
+        break
+      case 'rutina':
+        Rutina.render()
         break
       case 'agenda':
         Agenda.render()
