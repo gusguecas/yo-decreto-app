@@ -153,7 +153,10 @@ const API = {
     getPendientes: (fecha) => API.request(`/agenda/pendientes/${fecha}`),
     filtrar: (params) => API.request('/agenda/filtros', { params }),
     createSeguimiento: (id, data) => 
-      API.request(`/agenda/tareas/${id}/seguimiento`, { method: 'POST', data })
+      API.request(`/agenda/tareas/${id}/seguimiento`, { method: 'POST', data }),
+    // 🎯 NUEVO: Panorámica de acciones pendientes
+    getPanoramicaPendientes: (area = 'todos') => 
+      API.request(`/agenda/panoramica-pendientes?area=${area}`)
   },
 
   // Progreso
@@ -205,6 +208,17 @@ const API = {
   config: {
     get: () => API.request('/decretos/config'),
     update: (data) => API.request('/decretos/config', { method: 'PUT', data })
+  },
+
+  // Chatbot con Helene
+  chatbot: {
+    sendMessage: (message, conversationHistory = []) =>
+      API.request('/chatbot/chat', {
+        method: 'POST',
+        data: { message, conversationHistory }
+      }),
+    getHistory: () => API.request('/chatbot/history'),
+    clearHistory: () => API.request('/chatbot/history', { method: 'DELETE' })
   }
 }
 
@@ -234,6 +248,7 @@ const UI = {
       { id: 'agenda', icon: 'fas fa-calendar-alt', label: 'Agenda Diaria' },
       { id: 'progreso', icon: 'fas fa-chart-line', label: 'Mi Progreso' },
       { id: 'practica', icon: 'fas fa-star', label: 'Mi Práctica' },
+      { id: 'chatbot', icon: 'fas fa-comments', label: 'Chat con Helene' },
       { id: 'acerca', icon: 'fas fa-info-circle', label: 'Acerca de' }
     ]
 
@@ -475,7 +490,7 @@ const Router = {
 
   getSectionFromHash() {
     const hash = window.location.hash.slice(1)
-    const validSections = ['decretos', 'agenda', 'progreso', 'practica']
+    const validSections = ['decretos', 'agenda', 'progreso', 'practica', 'chatbot']
     return validSections.includes(hash) ? hash : 'decretos'
   },
 
@@ -537,6 +552,9 @@ const Router = {
         break
       case 'practica':
         Practica.render()
+        break
+      case 'chatbot':
+        Chatbot.render()
         break
       case 'acerca':
         Acerca.render()

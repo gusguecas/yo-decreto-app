@@ -8,6 +8,7 @@ import { decretosRoutes } from './routes/decretos'
 import { agendaRoutes } from './routes/agenda'
 import { progresoRoutes } from './routes/progreso'
 import { practicaRoutes } from './routes/practica'
+import { chatbotRoutes } from './routes/chatbot'
 import authRoutes from './routes/auth'
 
 type Bindings = {
@@ -31,6 +32,7 @@ app.route('/api/decretos', decretosRoutes)
 app.route('/api/agenda', agendaRoutes)
 app.route('/api/progreso', progresoRoutes)
 app.route('/api/practica', practicaRoutes)
+app.route('/api/chatbot', chatbotRoutes)
 
 // Ruta principal - renderiza la SPA
 app.get('/', (c) => {
