@@ -221,7 +221,7 @@ aiRoutes.post('/action', async (c) => {
   }
 })
 
-// ==================== GENERAR VISUALIZACIÓN CON FLUX ====================
+// ==================== GENERAR VISUALIZACIÓN CON GEMINI + CLOUDFLARE AI ====================
 aiRoutes.post('/generate-visualization', async (c) => {
   try {
     const { decretoId, titulo, sueno_meta, descripcion, area } = await c.req.json()
@@ -230,119 +230,98 @@ aiRoutes.post('/generate-visualization', async (c) => {
       return c.json({ success: false, error: 'Datos incompletos' }, 400)
     }
 
-    const fluxApiKey = c.env?.FLUX_API_KEY || c.env?.REPLICATE_API_TOKEN
-    if (!fluxApiKey) {
+    const geminiApiKey = c.env?.GEMINI_API_KEY
+    if (!geminiApiKey) {
       return c.json({
         success: false,
         error: 'Servicio de generación de imágenes no configurado'
       }, 500)
     }
 
-    // Crear prompt optimizado para visualización
-    const visualPrompt = `A beautiful, inspiring, photorealistic visualization of: ${titulo}.
-Context: ${sueno_meta || descripcion || 'achieving this goal'}.
-Style: Uplifting, bright, successful, ${area} related.
-High quality, 4K, cinematic lighting, motivational atmosphere.`
+    console.log('🎨 Paso 1: Generando prompt optimizado con Gemini...')
 
-    console.log('🎨 Generando imagen con prompt:', visualPrompt)
+    // PASO 1: Usar Gemini para generar un prompt optimizado para la imagen (máximo 200 palabras)
+    const geminiPromptRequest = `Eres un experto en generar prompts para modelos de generación de imágenes como Stable Diffusion.
 
-    // Llamar a Replicate API (FLUX)
-    const prediction = await fetch('https://api.replicate.com/v1/predictions', {
+Tu tarea: Crear un prompt en INGLÉS de máximo 200 palabras para generar una imagen motivacional que represente visualmente este objetivo:
+
+Título: ${titulo}
+Área: ${area}
+Sueño/Meta: ${sueno_meta || ''}
+Descripción: ${descripcion || ''}
+
+El prompt debe:
+- Ser muy descriptivo y visual
+- Incluir detalles de iluminación, colores, atmósfera
+- Ser inspirador y motivacional
+- Estar en inglés
+- Máximo 200 palabras
+- Enfocarse en el resultado final conseguido, no en el proceso
+
+Responde SOLO con el prompt, sin explicaciones adicionales.`
+
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Token ${fluxApiKey}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        version: 'black-forest-labs/flux-schnell', // Modelo FLUX rápido
-        input: {
-          prompt: visualPrompt,
-          num_outputs: 1,
-          aspect_ratio: '16:9',
-          output_format: 'jpg',
-          output_quality: 90
+        contents: [{ parts: [{ text: geminiPromptRequest }] }],
+        generationConfig: {
+          temperature: 0.9,
+          maxOutputTokens: 300
         }
       })
     })
 
-    const predictionData = await prediction.json()
+    const geminiData = await geminiResponse.json()
 
-    if (!prediction.ok) {
-      console.error('Replicate API error:', predictionData)
+    if (!geminiResponse.ok) {
+      console.error('Gemini API error:', geminiData)
       return c.json({
         success: false,
-        error: 'Error al iniciar generación de imagen'
+        error: 'Error al generar prompt de imagen'
       }, 500)
     }
 
-    const predictionId = predictionData.id
-    let imageUrl = null
-    let attempts = 0
-    const maxAttempts = 30 // 30 segundos máximo
+    const optimizedPrompt = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || ''
+    console.log('✅ Prompt optimizado generado:', optimizedPrompt.substring(0, 100) + '...')
 
-    // Polling para obtener el resultado
-    while (attempts < maxAttempts && !imageUrl) {
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Esperar 1 segundo
+    // PASO 2: Usar Cloudflare Workers AI para generar la imagen
+    console.log('🎨 Paso 2: Generando imagen con Cloudflare AI...')
 
-      const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
-        headers: {
-          'Authorization': `Token ${fluxApiKey}`,
-          'Content-Type': 'application/json'
-        }
-      })
+    const imageResponse = await c.env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', {
+      prompt: optimizedPrompt
+    })
 
-      const statusData = await statusResponse.json()
-
-      if (statusData.status === 'succeeded') {
-        imageUrl = statusData.output?.[0] || statusData.output
-        break
-      } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
-        return c.json({
-          success: false,
-          error: 'La generación de imagen falló'
-        }, 500)
-      }
-
-      attempts++
-    }
-
-    if (!imageUrl) {
+    if (!imageResponse || !imageResponse.image) {
       return c.json({
         success: false,
-        error: 'Tiempo de espera agotado. Intenta de nuevo.'
+        error: 'Error al generar imagen con Cloudflare AI'
       }, 500)
     }
 
-    // Descargar imagen de Replicate
-    const imageResponse = await fetch(imageUrl)
-    if (!imageResponse.ok) {
-      return c.json({
-        success: false,
-        error: 'Error al descargar la imagen generada'
-      }, 500)
-    }
+    // PASO 3: Subir imagen a R2
+    console.log('💾 Paso 3: Guardando imagen en R2...')
 
-    // Subir a R2
-    const imageBuffer = await imageResponse.arrayBuffer()
     const timestamp = Date.now()
     const random = Math.random().toString(36).substring(2, 8)
     const filename = `visualization-${decretoId}-${timestamp}-${random}.png`
 
-    await c.env.R2.put(filename, imageBuffer, {
+    await c.env.R2.put(filename, imageResponse.image, {
       httpMetadata: {
         contentType: 'image/png'
       }
     })
 
-    // URL final en R2
     const finalImageUrl = `/api/logos/${filename}`
 
-    // Actualizar decreto con la nueva imagen
+    // PASO 4: Actualizar decreto en base de datos
     await c.env.DB.prepare(`
       UPDATE decretos
       SET imagen_visualizacion = ?, updated_at = datetime('now')
       WHERE id = ?
     `).bind(finalImageUrl, decretoId).run()
+
+    console.log('✅ Imagen generada y guardada exitosamente')
 
     return c.json({
       success: true,

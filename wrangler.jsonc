@@ -19,6 +19,9 @@
       "bucket_name": "yo-decreto-logos"
     }
   ],
+  "ai": {
+    "binding": "AI"
+  },
   "vars": {
     "GOOGLE_REDIRECT_URI": "https://yo-decreto.pages.dev/api/google-calendar/callback"
   }

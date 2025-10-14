@@ -18,6 +18,7 @@ import logosRoutes from './routes/logos'
 type Bindings = {
   DB: D1Database;
   R2: R2Bucket;
+  AI: any;
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
