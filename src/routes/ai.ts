@@ -288,11 +288,20 @@ Responde SOLO con el prompt, sin explicaciones adicionales.`
     // PASO 2: Usar Cloudflare Workers AI para generar la imagen
     console.log('🎨 Paso 2: Generando imagen con Cloudflare AI...')
 
+    if (!c.env.AI) {
+      console.error('❌ Workers AI no está configurado')
+      return c.json({
+        success: false,
+        error: 'Workers AI no está habilitado. Por favor configura el binding de AI en Cloudflare Pages Dashboard.'
+      }, 500)
+    }
+
     const imageResponse = await c.env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', {
       prompt: optimizedPrompt
     })
 
     if (!imageResponse || !imageResponse.image) {
+      console.error('❌ Cloudflare AI no devolvió imagen válida:', imageResponse)
       return c.json({
         success: false,
         error: 'Error al generar imagen con Cloudflare AI'
