@@ -79,11 +79,11 @@ rutinaRoutes.get('/today', async (c) => {
       SELECT
         dr.*,
         dm.titulo as material_titulo,
-        dm.description as material_description,
+        dm.descripcion as material_description,
         dh.titulo as humano_titulo,
-        dh.description as humano_description,
+        dh.descripcion as humano_description,
         de.titulo as empresarial_titulo,
-        de.description as empresarial_description
+        de.descripcion as empresarial_description
       FROM daily_rotation dr
       LEFT JOIN decretos dm ON dr.decreto_material_id = dm.id
       LEFT JOIN decretos dh ON dr.decreto_humano_id = dh.id
@@ -119,13 +119,13 @@ rutinaRoutes.get('/today', async (c) => {
         SELECT
           dr.*,
           dm.titulo as material_titulo,
-          dm.description as material_description,
+          dm.descripcion as material_description,
           dm.faith_level as material_faith,
           dh.titulo as humano_titulo,
-          dh.description as humano_description,
+          dh.descripcion as humano_description,
           dh.faith_level as humano_faith,
           de.titulo as empresarial_titulo,
-          de.description as empresarial_description,
+          de.descripcion as empresarial_description,
           de.faith_level as empresarial_faith
         FROM daily_rotation dr
         LEFT JOIN decretos dm ON dr.decreto_material_id = dm.id
