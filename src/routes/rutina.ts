@@ -26,10 +26,10 @@ export const rutinaRoutes = new Hono<{ Bindings: Env }>()
  */
 async function selectPrimaryDecretos(db: D1Database, userId: string, date: string) {
   const categories = ['material', 'humano', 'empresarial']
-  const selectedDecretos: { [key: string]: any } = {}
+  const selectedDecretos: { [key: string]: any} = {}
 
   for (const categoria of categories) {
-    // Buscar decretos activos de esta categoría
+    // Buscar decretos de esta categoría
     const query = `
       SELECT
         d.*,
@@ -38,9 +38,7 @@ async function selectPrimaryDecretos(db: D1Database, userId: string, date: strin
           julianday(?) - julianday(d.created_at)
         ) as days_since_primary
       FROM decretos d
-      WHERE d.user_id = ?
-        AND d.categoria = ?
-        AND d.status = 'active'
+      WHERE d.categoria = ?
       ORDER BY
         days_since_primary DESC,
         d.faith_level ASC,
@@ -49,11 +47,11 @@ async function selectPrimaryDecretos(db: D1Database, userId: string, date: strin
     `
 
     const result = await db.prepare(query)
-      .bind(date, date, userId, categoria)
+      .bind(date, date, categoria)
       .first()
 
     if (!result) {
-      throw new Error(`No hay decretos activos en categoría ${categoria}`)
+      throw new Error(`No hay decretos en categoría ${categoria}`)
     }
 
     selectedDecretos[categoria] = result
@@ -79,11 +77,11 @@ rutinaRoutes.get('/today', async (c) => {
       SELECT
         dr.*,
         dm.titulo as material_titulo,
-        dm.description as material_description,
+        dm.descripcion as material_description,
         dh.titulo as humano_titulo,
-        dh.description as humano_description,
+        dh.descripcion as humano_description,
         de.titulo as empresarial_titulo,
-        de.description as empresarial_description
+        de.descripcion as empresarial_description
       FROM daily_rotation dr
       LEFT JOIN decretos dm ON dr.decreto_material_id = dm.id
       LEFT JOIN decretos dh ON dr.decreto_humano_id = dh.id
@@ -119,13 +117,13 @@ rutinaRoutes.get('/today', async (c) => {
         SELECT
           dr.*,
           dm.titulo as material_titulo,
-          dm.description as material_description,
+          dm.descripcion as material_description,
           dm.faith_level as material_faith,
           dh.titulo as humano_titulo,
-          dh.description as humano_description,
+          dh.descripcion as humano_description,
           dh.faith_level as humano_faith,
           de.titulo as empresarial_titulo,
-          de.description as empresarial_description,
+          de.descripcion as empresarial_description,
           de.faith_level as empresarial_faith
         FROM daily_rotation dr
         LEFT JOIN decretos dm ON dr.decreto_material_id = dm.id
@@ -135,7 +133,7 @@ rutinaRoutes.get('/today', async (c) => {
       `).bind(userId, today).first()
     }
 
-    // Obtener decretos secundarios (todos los demás activos)
+    // Obtener decretos secundarios (todos los demás)
     const secondaryDecretos = await db.prepare(`
       SELECT
         d.*,
@@ -146,14 +144,11 @@ rutinaRoutes.get('/today', async (c) => {
           ELSE 'secondary'
         END as role
       FROM decretos d
-      WHERE d.user_id = ?
-        AND d.status = 'active'
-        AND d.id NOT IN (?, ?, ?)
+      WHERE d.id NOT IN (?, ?, ?)
     `).bind(
       rotation.decreto_material_id,
       rotation.decreto_humano_id,
       rotation.decreto_empresarial_id,
-      userId,
       rotation.decreto_material_id,
       rotation.decreto_humano_id,
       rotation.decreto_empresarial_id
