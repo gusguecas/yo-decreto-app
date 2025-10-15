@@ -6,5 +6,6 @@ export type AppContext = {
     GEMINI_API_KEY?: string;
     GOOGLE_CLIENT_ID?: string;
     GOOGLE_CLIENT_SECRET?: string;
+    GOOGLE_SERVICE_ACCOUNT_JSON?: string;
   }
 }
