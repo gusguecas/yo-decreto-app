@@ -9,8 +9,11 @@ type Bindings = {
 
 export const chatbotRoutes = new Hono<{ Bindings: Bindings }>()
 
-// Cargar el prompt de Helene desde el archivo
-const HELENE_PROMPT = `# PROMPT CHATBOT - HELENE HADSELL (VERSIÓN HÍBRIDA DEFINITIVA)
+// Cargar el prompt de Helene desde el archivo externo
+const HELENE_PROMPT = readFileSync(join(process.cwd(), 'PROMPT-HELENE-HIBRIDO-FINAL.md'), 'utf-8')
+
+// Fallback prompt en caso de que falle la carga del archivo
+const HELENE_PROMPT_FALLBACK = `# PROMPT CHATBOT - HELENE HADSELL (VERSIÓN HÍBRIDA DEFINITIVA)
 
 ---
 
@@ -182,10 +185,12 @@ chatbotRoutes.post('/chat', async (c) => {
     }
 
     // Construir el historial de conversación para Gemini
+    const systemPrompt = (HELENE_PROMPT || HELENE_PROMPT_FALLBACK) + userContext
+
     const messages = [
       {
         role: 'user',
-        content: HELENE_PROMPT + userContext
+        content: systemPrompt
       },
       {
         role: 'assistant',
