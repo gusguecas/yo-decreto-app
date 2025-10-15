@@ -778,16 +778,6 @@ const Agenda = {
               </select>
             </div>
           </div>
-          
-          <div>
-            <label class="block text-sm font-medium mb-2">🎯 Prioridad *</label>
-            <select name="prioridad" required class="form-select w-full px-4 py-2">
-              <option value="baja">🟢 Baja - Puede esperar</option>
-              <option value="media" selected>🟡 Media - Importante</option>
-              <option value="alta">🔴 Alta - Urgente</option>
-            </select>
-            <p class="text-xs text-slate-400 mt-1">Ayuda a organizar tu agenda por importancia</p>
-          </div>
         </div>
         
         <div class="flex justify-end space-x-4 mt-8">
@@ -815,74 +805,6 @@ const Agenda = {
         ${UI.renderLoading('Cargando tareas pendientes...')}
       </div>
     `)
-  },
-
-  renderTareasPendientesParaEnfoque(tareas) {
-    if (!tareas || tareas.length === 0) {
-      return `
-        <div class="text-center py-8">
-          <div class="text-slate-400 mb-4">
-            <i class="fas fa-check-circle text-6xl"></i>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">No hay tareas pendientes</h3>
-          <p class="text-slate-400 mb-6">Todas las tareas de hoy han sido completadas</p>
-          <button onclick="Modal.close('selectorEnfoqueModal')" class="btn-secondary">
-            Cerrar
-          </button>
-        </div>
-      `
-    }
-
-    return `
-      <div class="mb-4">
-        <p class="text-slate-400 text-sm mb-4">
-          Selecciona la tarea más importante en la que te enfocarás hoy:
-        </p>
-      </div>
-      
-      <div class="space-y-3 mb-6 max-h-64 overflow-y-auto">
-        ${tareas.map(tarea => `
-          <div class="bg-slate-800 rounded-lg p-4 border border-slate-700 hover:border-purple-500 transition-colors cursor-pointer"
-               onclick="Agenda.seleccionarEnfoque('${tarea.id}')">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <h4 class="font-medium text-white mb-1">${tarea.titulo}</h4>
-                <div class="flex items-center space-x-3 text-sm text-slate-400">
-                  <span class="flex items-center">
-                    <i class="fas fa-clock mr-1"></i>
-                    ${tarea.hora_evento}
-                  </span>
-                  ${tarea.decreto_titulo ? `
-                    <span class="flex items-center">
-                      <i class="fas fa-bullseye mr-1"></i>
-                      ${tarea.decreto_titulo}
-                    </span>
-                  ` : ''}
-                  ${tarea.area ? `
-                    <span class="px-2 py-1 rounded-full text-xs ${
-                      tarea.area === 'empresarial' ? 'bg-blue-500/20 text-blue-400' :
-                      tarea.area === 'material' ? 'bg-green-500/20 text-green-400' :
-                      'bg-purple-500/20 text-purple-400'
-                    }">
-                      ${tarea.area}
-                    </span>
-                  ` : ''}
-                </div>
-              </div>
-              <div class="ml-4">
-                <i class="fas fa-star text-purple-400"></i>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      
-      <div class="flex space-x-3 pt-4 border-t border-slate-700">
-        <button onclick="Modal.close('selectorEnfoqueModal')" class="btn-secondary flex-1">
-          Cancelar
-        </button>
-      </div>
-    `
   },
 
   renderDetalleTareaModal() {
@@ -1065,82 +987,7 @@ const Agenda = {
 
   async openSelectorEnfoque() {
     Modal.open('selectorEnfoqueModal')
-    
-    try {
-      console.log('🎯 Cargando tareas pendientes para selección de enfoque...')
-      
-      // Cargar tareas pendientes del día actual
-      const pendientes = await API.agenda.getPendientes(this.data.selectedDate)
-      console.log('✅ Tareas pendientes cargadas:', pendientes.data)
-      
-      // Actualizar el contenido del modal
-      const container = document.getElementById('pendientesContainer')
-      if (container) {
-        container.innerHTML = this.renderTareasPendientesParaEnfoque(pendientes.data)
-      }
-      
-    } catch (error) {
-      console.error('❌ Error al cargar tareas pendientes:', error)
-      const container = document.getElementById('pendientesContainer')
-      if (container) {
-        container.innerHTML = `
-          <div class="text-center py-8">
-            <div class="text-red-400 mb-4">
-              <i class="fas fa-exclamation-triangle text-3xl"></i>
-            </div>
-            <p class="text-red-400">Error al cargar tareas pendientes</p>
-            <button onclick="Agenda.openSelectorEnfoque()" class="btn-primary mt-4">
-              <i class="fas fa-redo mr-2"></i>Reintentar
-            </button>
-          </div>
-        `
-      }
-    }
-  },
-
-  async seleccionarEnfoque(tareaId) {
-    try {
-      console.log(`🎯 Seleccionando tarea como enfoque del día: ${tareaId}`)
-      
-      // Establecer la tarea como enfoque del día
-      await API.agenda.setEnfoque(this.data.selectedDate, tareaId)
-      
-      // Cerrar modal
-      Modal.close('selectorEnfoqueModal')
-      
-      // Mostrar mensaje de éxito
-      Utils.showToast('🎯 Enfoque del día establecido exitosamente', 'success')
-      
-      // Recargar la vista para mostrar el nuevo enfoque
-      await this.render()
-      
-    } catch (error) {
-      console.error('❌ Error al seleccionar enfoque:', error)
-      Utils.showToast('Error al establecer enfoque del día', 'error')
-    }
-  },
-
-  async completarEnfoque() {
-    try {
-      if (!this.data.enfoque) {
-        Utils.showToast('No hay enfoque seleccionado para completar', 'warning')
-        return
-      }
-      
-      console.log('✅ Completando enfoque del día...')
-      
-      // Completar la tarea que es el enfoque
-      await API.agenda.completarTarea(this.data.enfoque.id)
-      
-      Utils.showToast('✅ ¡Enfoque del día completado!', 'success')
-      
-      // Recargar la vista
-      await this.render()
-      
-    } catch (error) {
-      console.error('❌ Error al completar enfoque:', error)
-      Utils.showToast('Error al completar enfoque del día', 'error')
-    }
+    // TODO: Cargar tareas pendientes del día
   },
 
   async handleCreateTarea(event) {
@@ -2232,16 +2079,6 @@ const Agenda = {
               <span class="text-accent-green font-medium text-xs">
                 ${tarea.hora_evento || '09:00'}
               </span>
-              
-              <!-- Indicador de prioridad -->
-              <span class="px-1.5 py-0.5 text-xs rounded font-medium ${
-                tarea.prioridad === 'alta' ? 'bg-red-500/20 text-red-400' :
-                tarea.prioridad === 'baja' ? 'bg-green-500/20 text-green-400' :
-                'bg-yellow-500/20 text-yellow-400'
-              }" title="Prioridad: ${tarea.prioridad}">
-                ${tarea.prioridad === 'alta' ? '🔴' : tarea.prioridad === 'baja' ? '🟢' : '🟡'}
-              </span>
-              
               ${tarea.es_enfoque_dia ? `
                 <span class="px-1.5 py-0.5 bg-accent-purple/20 text-accent-purple text-xs rounded">
                   🎯
@@ -2264,42 +2101,22 @@ const Agenda = {
             ${tarea.descripcion ? `
               <p class="text-xs text-slate-400 ${tarea.estado === 'completada' ? 'line-through' : ''}">${tarea.descripcion}</p>
             ` : ''}
-            
-            <!-- 📅 INFORMACIÓN DE FECHAS CLARIFICADA -->
-            <div class="text-xs text-slate-500 mt-2 space-y-1">
-              <!-- Mostrar fecha de creación (de acción o de tarea) -->
-              ${tarea.accion_fecha_creacion ? `
-                <div>📝 Creada: ${dayjs(tarea.accion_fecha_creacion).format('DD/MM/YYYY')}</div>
-              ` : tarea.created_at ? `
-                <div>📝 Creada: ${dayjs(tarea.created_at).format('DD/MM/YYYY HH:mm')}</div>
-              ` : ''}
-              
-              <!-- Fecha de compromiso SIEMPRE visible -->
-              <div class="text-blue-400">🎯 Compromiso: ${dayjs(tarea.fecha_evento + ' ' + (tarea.hora_evento || '09:00')).format('DD/MM/YYYY HH:mm')}</div>
-              
-              <!-- Fecha de realización si está completada -->
-              ${tarea.estado === 'completada' && tarea.fecha_completada ? `
-                <div class="text-green-400">✅ Realizada: ${dayjs(tarea.fecha_completada).format('DD/MM/YYYY HH:mm')}</div>
-              ` : ''}
-            </div>
           </div>
           
           <div class="flex items-center space-x-1 ml-2">
             ${tarea.estado !== 'completada' ? `
               <button 
-                onclick="Agenda.completarTarea('${tarea.id}')"
-                class="p-2 text-green-400 hover:bg-green-400/20 rounded transition-colors text-sm bg-slate-700/50"
-                title="Completar Tarea"
-                style="min-width: 32px; min-height: 32px;"
+                onclick="Agenda.completarTarea(${tarea.id})"
+                class="p-1 text-accent-green hover:bg-accent-green/20 rounded transition-colors text-xs"
+                title="Completar"
               >
                 <i class="fas fa-check"></i>
               </button>
             ` : `
               <button 
-                onclick="Agenda.marcarPendiente('${tarea.id}')"
-                class="p-2 text-yellow-400 hover:bg-yellow-400/20 rounded transition-colors text-sm bg-slate-700/50"
-                title="Marcar Pendiente"
-                style="min-width: 32px; min-height: 32px;"
+                onclick="Agenda.marcarPendiente(${tarea.id})"
+                class="p-1 text-accent-orange hover:bg-accent-orange/20 rounded transition-colors text-xs"
+                title="Pendiente"
               >
                 <i class="fas fa-undo"></i>
               </button>
@@ -2307,20 +2124,18 @@ const Agenda = {
             
             ${tarea.accion_id ? `
               <button 
-                onclick="Agenda.openSeguimientoModal('${tarea.id}')"
-                class="p-2 text-blue-400 hover:bg-blue-400/20 rounded transition-colors text-sm bg-slate-700/50"
-                title="Ver Seguimiento"
-                style="min-width: 32px; min-height: 32px;"
+                onclick="Agenda.openSeguimientoModal(${tarea.id})"
+                class="p-1 text-accent-blue hover:bg-accent-blue/20 rounded transition-colors text-xs"
+                title="Seguimiento"
               >
                 <i class="fas fa-chart-line"></i>
               </button>
             ` : ''}
             
             <button 
-              onclick="Agenda.confirmarEliminarTarea('${tarea.id}')"
-              class="p-2 text-red-400 hover:bg-red-400/20 rounded transition-colors text-sm bg-slate-700/50"
-              title="Eliminar Tarea"
-              style="min-width: 32px; min-height: 32px;"
+              onclick="Agenda.confirmarEliminarTarea(${tarea.id})"
+              class="p-1 text-red-400 hover:bg-red-400/20 rounded transition-colors text-xs"
+              title="Eliminar"
             >
               <i class="fas fa-trash"></i>
             </button>
@@ -2487,108 +2302,5 @@ const Agenda = {
         </div>
       </div>
     `
-  },
-
-  // 🔥 FUNCIONES PARA BOTONES DE ACCIÓN EN TIMELINE
-  async completarTarea(tareaId) {
-    try {
-      console.log('🎯 Completando tarea:', tareaId)
-      
-      const response = await fetch(`/api/agenda/tareas/${tareaId}/completar`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        showNotification('✅ Tarea completada', 'success')
-        // Recargar la agenda para reflejar cambios
-        await this.cargarEventos()
-        this.render()
-      } else {
-        throw new Error('Error al completar tarea')
-      }
-    } catch (error) {
-      console.error('❌ Error completando tarea:', error)
-      showNotification('❌ Error al completar tarea', 'error')
-    }
-  },
-
-  async marcarPendiente(tareaId) {
-    try {
-      console.log('🔄 Marcando tarea como pendiente:', tareaId)
-      
-      const response = await fetch(`/api/agenda/tareas/${tareaId}/pendiente`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        showNotification('🔄 Tarea marcada como pendiente', 'success')
-        // Recargar la agenda para reflejar cambios
-        await this.cargarEventos()
-        this.render()
-      } else {
-        throw new Error('Error al marcar tarea como pendiente')
-      }
-    } catch (error) {
-      console.error('❌ Error marcando tarea como pendiente:', error)
-      showNotification('❌ Error al marcar tarea como pendiente', 'error')
-    }
-  },
-
-  async confirmarEliminarTarea(tareaId) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
-      await this.eliminarTarea(tareaId)
-    }
-  },
-
-  async eliminarTarea(tareaId) {
-    try {
-      console.log('🗑️ Eliminando tarea:', tareaId)
-      
-      const response = await fetch(`/api/agenda/tareas/${tareaId}`, {
-        method: 'DELETE'
-      })
-
-      if (response.ok) {
-        showNotification('🗑️ Tarea eliminada', 'success')
-        // Recargar la agenda para reflejar cambios
-        await this.cargarEventos()
-        this.render()
-      } else {
-        throw new Error('Error al eliminar tarea')
-      }
-    } catch (error) {
-      console.error('❌ Error eliminando tarea:', error)
-      showNotification('❌ Error al eliminar tarea', 'error')
-    }
-  },
-
-  openSeguimientoModal(tareaId) {
-    try {
-      console.log('📊 Abriendo modal de seguimiento para tarea:', tareaId)
-      
-      // Buscar la tarea en los datos actuales
-      const tarea = this.data.timeline?.find(t => t.id === tareaId)
-      
-      if (tarea && tarea.accion_id) {
-        // Si tiene accion_id, abrir el modal de seguimiento de decretos
-        if (typeof openSeguimiento === 'function') {
-          openSeguimiento(tarea.accion_id)
-        } else {
-          console.warn('Función openSeguimiento no disponible')
-          showNotification('⚠️ Función de seguimiento no disponible', 'warning')
-        }
-      } else {
-        showNotification('ℹ️ Esta tarea no tiene seguimiento disponible', 'info')
-      }
-    } catch (error) {
-      console.error('❌ Error abriendo seguimiento:', error)
-      showNotification('❌ Error abriendo seguimiento', 'error')
-    }
   }
 }
