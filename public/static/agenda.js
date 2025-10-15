@@ -37,7 +37,7 @@ const Agenda = {
     // Cargar datos en paralelo
     const [calendario, timeline, metricas, enfoque] = await Promise.all([
       API.agenda.getCalendario(year, month),
-      API.agenda.getTimeline(this.data.selectedDate),
+      API.agenda.getTimelineUnificado(this.data.selectedDate),
       API.agenda.getMetricasDia(this.data.selectedDate),
       API.agenda.getEnfoque(this.data.selectedDate)
     ])
