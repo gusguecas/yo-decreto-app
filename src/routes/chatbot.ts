@@ -1,6 +1,5 @@
 import { Hono } from 'hono'
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import { HELENE_FULL_PROMPT } from './helene-prompt'
 
 type Bindings = {
   DB: D1Database
@@ -9,10 +8,10 @@ type Bindings = {
 
 export const chatbotRoutes = new Hono<{ Bindings: Bindings }>()
 
-// Cargar el prompt de Helene desde el archivo externo
-const HELENE_PROMPT = readFileSync(join(process.cwd(), 'PROMPT-HELENE-HIBRIDO-FINAL.md'), 'utf-8')
+// Usar el prompt completo de Helene desde el archivo separado
+const HELENE_PROMPT = HELENE_FULL_PROMPT
 
-// Fallback prompt en caso de que falle la carga del archivo
+// Fallback prompt reducido en caso de emergencia (no debería necesitarse)
 const HELENE_PROMPT_FALLBACK = `# PROMPT CHATBOT - HELENE HADSELL (VERSIÓN HÍBRIDA DEFINITIVA)
 
 ---
