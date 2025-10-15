@@ -99,14 +99,25 @@ const Rutina = {
         <!-- Decretos Secundarios (Rápidos) -->
         ${secondary && secondary.length > 0 ? `
           <div class="mb-8">
-            <h2 class="text-2xl font-bold mb-4 flex items-center">
-              ⚡ Decretos Secundarios (5-10 min cada uno)
-            </h2>
-            <p class="text-slate-400 mb-6">
-              Atención rápida diaria para mantener momentum
-            </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              ${secondary.map(decreto => this.renderSecondaryDecreto(decreto, tasksMap)).join('')}
+            <div class="gradient-card rounded-xl p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h2 class="text-2xl font-bold flex items-center">
+                    ⚡ Decretos Secundarios (${secondary.length})
+                  </h2>
+                  <p class="text-slate-400 text-sm mt-1">
+                    5-10 min cada uno para mantener momentum
+                  </p>
+                </div>
+                <button onclick="document.getElementById('secondaryDecretos').classList.toggle('hidden')"
+                        class="btn-secondary px-4 py-2 rounded-lg">
+                  <i class="fas fa-chevron-down"></i>
+                  <span class="ml-2">Expandir</span>
+                </button>
+              </div>
+              <div id="secondaryDecretos" class="hidden mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${secondary.map(decreto => this.renderSecondaryDecreto(decreto, tasksMap)).join('')}
+              </div>
             </div>
           </div>
         ` : ''}
