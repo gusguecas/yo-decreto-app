@@ -64,6 +64,28 @@ const Agenda = {
             </h1>
             <p class="text-slate-300">Organiza y prioriza tus tareas diarias</p>
           </div>
+          <div>
+            <button onclick="Agenda.openGoogleCalendarSettings()" class="btn-primary px-6 py-3 rounded-lg flex items-center space-x-2 shadow-lg hover:shadow-blue-500/50 transition-all">
+              <i class="fab fa-google text-xl"></i>
+              <span>Conectar Google Calendar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Google Calendar Settings Panel (hidden by default) -->
+        <div id="google-calendar-panel" class="hidden mb-8">
+          <div class="gradient-card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-2xl font-bold flex items-center">
+                <i class="fab fa-google text-blue-400 mr-3"></i>
+                Configuración de Google Calendar
+              </h2>
+              <button onclick="Agenda.closeGoogleCalendarSettings()" class="text-slate-400 hover:text-white transition-colors">
+                <i class="fas fa-times text-xl"></i>
+              </button>
+            </div>
+            <div id="google-calendar-settings-container"></div>
+          </div>
         </div>
 
         <!-- Enfoque del día -->
@@ -2571,10 +2593,10 @@ const Agenda = {
   openSeguimientoModal(tareaId) {
     try {
       console.log('📊 Abriendo modal de seguimiento para tarea:', tareaId)
-      
+
       // Buscar la tarea en los datos actuales
       const tarea = this.data.timeline?.find(t => t.id === tareaId)
-      
+
       if (tarea && tarea.accion_id) {
         // Si tiene accion_id, abrir el modal de seguimiento de decretos
         if (typeof openSeguimiento === 'function') {
@@ -2589,6 +2611,37 @@ const Agenda = {
     } catch (error) {
       console.error('❌ Error abriendo seguimiento:', error)
       showNotification('❌ Error abriendo seguimiento', 'error')
+    }
+  },
+
+  openGoogleCalendarSettings() {
+    console.log('🔗 Abriendo configuración de Google Calendar')
+    const panel = document.getElementById('google-calendar-panel')
+    const container = document.getElementById('google-calendar-settings-container')
+
+    if (panel && container) {
+      panel.classList.remove('hidden')
+
+      // Initialize Google Calendar Settings module
+      if (typeof GoogleCalendarSettings !== 'undefined') {
+        container.innerHTML = ''
+        GoogleCalendarSettings.render(container)
+      } else {
+        container.innerHTML = `
+          <div class="text-center py-8">
+            <p class="text-red-400">⚠️ Módulo de Google Calendar no disponible</p>
+            <p class="text-slate-400 text-sm mt-2">Por favor recarga la página</p>
+          </div>
+        `
+      }
+    }
+  },
+
+  closeGoogleCalendarSettings() {
+    console.log('🔗 Cerrando configuración de Google Calendar')
+    const panel = document.getElementById('google-calendar-panel')
+    if (panel) {
+      panel.classList.add('hidden')
     }
   }
 }
