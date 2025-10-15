@@ -23,7 +23,7 @@
     "binding": "AI"
   },
   "vars": {
-    "GOOGLE_REDIRECT_URI": "https://yo-decreto.pages.dev/api/google-calendar/callback",
+    "GOOGLE_REDIRECT_URI": "https://yo-decreto-app.pages.dev/api/google-calendar/callback",
     "GEMINI_API_KEY": "AIzaSyC0nLi25jIbYuwX71O1jAeTSqgQ22FhYUk"
   }
 }

@@ -71,7 +71,7 @@ Cuando te pregunte, pega el valor correspondiente de Google Cloud Console.
 
 Las siguientes variables ya están en `wrangler.jsonc` y no necesitan cambios:
 
-- `GOOGLE_REDIRECT_URI`: `https://yo-decreto.pages.dev/api/google-calendar/callback`
+- `GOOGLE_REDIRECT_URI`: `https://yo-decreto-app.pages.dev/api/google-calendar/callback`
 
 ### 6. Verificar Configuración
 
