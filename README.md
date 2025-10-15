@@ -176,3 +176,4 @@ npm run deploy
 **Estado**: ✅ Funcional y listo para producción# Google Calendar Integration
 # Trigger deployment
 
+
