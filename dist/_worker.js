@@ -829,10 +829,10 @@ Usa esta información para dar coaching personalizado y específico.`)}const o=[
           julianday(?) - julianday(d.created_at)
         ) as days_since_primary
       FROM decretos d
-      WHERE d.categoria = ?
+      WHERE COALESCE(d.categoria, d.area) = ?
       ORDER BY
         days_since_primary DESC,
-        d.faith_level ASC,
+        COALESCE(d.faith_level, 5.0) ASC,
         d.created_at ASC
       LIMIT 1
     `).bind(r,r,o).first();if(!i)throw new Error(`No hay decretos en categoría ${o}`);s[o]=i}return s}le.get("/today",async e=>{try{const t=e.req.header("X-User-ID")||"demo-user",r=e.env.DB,a=new Date().toISOString().split("T")[0];let s=await r.prepare(`

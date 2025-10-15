@@ -29,7 +29,7 @@ async function selectPrimaryDecretos(db: D1Database, userId: string, date: strin
   const selectedDecretos: { [key: string]: any} = {}
 
   for (const categoria of categories) {
-    // Buscar decretos de esta categoría
+    // Buscar decretos de esta categoría (usando area como fallback si categoria es null)
     const query = `
       SELECT
         d.*,
@@ -38,10 +38,10 @@ async function selectPrimaryDecretos(db: D1Database, userId: string, date: strin
           julianday(?) - julianday(d.created_at)
         ) as days_since_primary
       FROM decretos d
-      WHERE d.categoria = ?
+      WHERE COALESCE(d.categoria, d.area) = ?
       ORDER BY
         days_since_primary DESC,
-        d.faith_level ASC,
+        COALESCE(d.faith_level, 5.0) ASC,
         d.created_at ASC
       LIMIT 1
     `
