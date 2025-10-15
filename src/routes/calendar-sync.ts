@@ -106,13 +106,34 @@ calendarSyncRoutes.get('/test', async (c) => {
     const calendar = getCalendarClient(serviceAccountJson)
 
     // Obtener lista de calendarios
-    const response = await calendar.calendarList.list()
+    const calendarListResponse = await calendar.calendarList.list()
+
+    // Intentar leer eventos del calendario gusguecas@gmail.com
+    let canAccessCalendar = false
+    let eventsCount = 0
+    try {
+      const eventsResponse = await calendar.events.list({
+        calendarId: 'gusguecas@gmail.com',
+        maxResults: 10
+      })
+      canAccessCalendar = true
+      eventsCount = eventsResponse.data.items?.length || 0
+    } catch (error: any) {
+      canAccessCalendar = false
+    }
 
     return c.json({
       success: true,
       message: 'Conexión exitosa con Google Calendar',
       data: {
-        calendars: response.data.items?.length || 0,
+        calendars: calendarListResponse.data.items?.length || 0,
+        calendarsList: calendarListResponse.data.items?.map(cal => ({
+          id: cal.id,
+          summary: cal.summary,
+          accessRole: cal.accessRole
+        })) || [],
+        canAccessGusguecas: canAccessCalendar,
+        eventsInGusguecas: eventsCount,
         serviceAccount: serviceAccountJson.client_email
       }
     })
