@@ -285,7 +285,8 @@ const Rutina = {
         <!-- Acciones -->
         <div class="flex space-x-2">
           ${!isCompleted ? `
-            <button onclick="Rutina.openTaskModal(${decreto.id}, 'primary', '${decreto.titulo}')"
+            <button data-decreto-id="${decreto.id}" data-decreto-titulo="${Utils.escapeHtml(decreto.titulo)}"
+                    onclick="Rutina.openTaskModal(this.dataset.decretoId, 'primary', this.dataset.decretoTitulo)"
                     class="flex-1 btn-primary px-4 py-2 rounded-lg text-sm">
               <i class="fas fa-play mr-2"></i>
               Trabajar (40 min)
@@ -297,7 +298,8 @@ const Rutina = {
               Ver Detalles
             </button>
           `}
-          <button onclick="Rutina.recordSignal(${decreto.id}, '${decreto.titulo}')"
+          <button data-decreto-id="${decreto.id}" data-decreto-titulo="${Utils.escapeHtml(decreto.titulo)}"
+                  onclick="Rutina.recordSignal(this.dataset.decretoId, this.dataset.decretoTitulo)"
                   class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm"
                   title="Registrar señal o sincronicidad">
             <i class="fas fa-magic"></i>
@@ -336,7 +338,8 @@ const Rutina = {
         </div>
 
         ${!isCompleted ? `
-          <button onclick="Rutina.openTaskModal(${decreto.id}, 'secondary', '${decreto.titulo}')"
+          <button data-decreto-id="${decreto.id}" data-decreto-titulo="${Utils.escapeHtml(decreto.titulo)}"
+                  onclick="Rutina.openTaskModal(this.dataset.decretoId, 'secondary', this.dataset.decretoTitulo)"
                   class="w-full btn-secondary px-3 py-2 rounded-lg text-sm">
             <i class="fas fa-check mr-2"></i>
             Completar Rápido

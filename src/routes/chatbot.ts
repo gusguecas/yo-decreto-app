@@ -204,7 +204,7 @@ chatbotRoutes.post('/chat', async (c) => {
     console.log('🤖 Enviando mensaje a Gemini...')
 
     // Llamar a Gemini usando la API de Google AI
-    const GOOGLE_AI_KEY = c.env.GOOGLE_AI_API_KEY || ''
+    const GOOGLE_AI_KEY = (c.env as any).GEMINI_API_KEY || ''
 
     if (!GOOGLE_AI_KEY) {
       return c.json({
