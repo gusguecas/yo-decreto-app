@@ -211,6 +211,16 @@ const API = {
     update: (data) => API.request('/decretos/config', { method: 'PUT', data })
   },
 
+  // Ritual SPEC
+  ritual: {
+    createSesion: (data) => API.request('/ritual/sesiones', { method: 'POST', data }),
+    getSesiones: (fecha) => API.request(`/ritual/sesiones?fecha=${fecha}`),
+    getSesion: (id) => API.request(`/ritual/sesiones/${id}`),
+    updateSesion: (id, data) => API.request(`/ritual/sesiones/${id}`, { method: 'PUT', data }),
+    deleteSesion: (id) => API.request(`/ritual/sesiones/${id}`, { method: 'DELETE' }),
+    getEstadisticas: () => API.request('/ritual/estadisticas')
+  },
+
   // Chatbot con Helene
   chatbot: {
     sendMessage: (message, conversationHistory = []) =>

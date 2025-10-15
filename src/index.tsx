@@ -14,6 +14,7 @@ import authRoutes from './routes/auth'
 import googleCalendarRoutes from './routes/google-calendar'
 import aiRoutes from './routes/ai'
 import logosRoutes from './routes/logos'
+import ritualRoutes from './routes/ritual'
 
 type Bindings = {
   DB: D1Database;
@@ -41,6 +42,7 @@ app.route('/api/progreso', progresoRoutes)
 app.route('/api/practica', practicaRoutes)
 app.route('/api/chatbot', chatbotRoutes)
 app.route('/api/rutina', rutinaRoutes)
+app.route('/api/ritual', ritualRoutes)
 app.route('/api/google-calendar', googleCalendarRoutes)
 app.route('/api/ai', aiRoutes)
 
