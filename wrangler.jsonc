@@ -25,5 +25,8 @@
   "vars": {
     "GOOGLE_REDIRECT_URI": "https://yo-decreto-app.pages.dev/api/google-calendar/callback",
     "GEMINI_API_KEY": "AIzaSyC0nLi25jIbYuwX71O1jAeTSqgQ22FhYUk"
-  }
+  },
+  "routes": [
+    { "pattern": "/api/google-calendar/*", "custom_domain": true }
+  ]
 }
