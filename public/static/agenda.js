@@ -2614,7 +2614,7 @@ const Agenda = {
     }
   },
 
-  openGoogleCalendarSettings() {
+  async openGoogleCalendarSettings() {
     console.log('🔗 Abriendo configuración de Google Calendar')
     const panel = document.getElementById('google-calendar-panel')
     const container = document.getElementById('google-calendar-settings-container')
@@ -2624,8 +2624,13 @@ const Agenda = {
 
       // Initialize Google Calendar Settings module
       if (typeof GoogleCalendarSettings !== 'undefined') {
-        container.innerHTML = ''
-        GoogleCalendarSettings.render(container)
+        container.innerHTML = UI.renderLoading('Cargando configuración...')
+
+        // Initialize and load status
+        await GoogleCalendarSettings.init()
+
+        // Render the settings panel
+        container.innerHTML = GoogleCalendarSettings.renderSettingsPanel()
       } else {
         container.innerHTML = `
           <div class="text-center py-8">
