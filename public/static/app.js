@@ -283,7 +283,6 @@ const UI = {
   renderNavTabs() {
     const tabs = [
       { id: 'decretos', icon: 'fas fa-bullseye', label: 'Mis Decretos' },
-      { id: 'rutina', icon: 'fas fa-sun', label: 'Rutina Diaria' },
       { id: 'agenda', icon: 'fas fa-calendar-alt', label: 'Agenda Diaria' },
       { id: 'progreso', icon: 'fas fa-chart-line', label: 'Mi Progreso' },
       { id: 'practica', icon: 'fas fa-star', label: 'Mi Práctica' },
