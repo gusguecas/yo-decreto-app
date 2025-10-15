@@ -76,6 +76,14 @@ const Utils = {
       clearTimeout(timeout)
       timeout = setTimeout(later, wait)
     }
+  },
+
+  // Escapar HTML para prevenir inyección
+  escapeHtml(text) {
+    if (!text) return ''
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
   }
 }
 
