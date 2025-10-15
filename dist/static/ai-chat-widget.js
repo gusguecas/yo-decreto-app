@@ -113,13 +113,12 @@
             const loadingId = addMessageToChat('Pensando...', 'ai', true);
 
             try {
-                const response = await fetch('/api/ai/chat', {
+                const response = await fetch('/api/chatbot/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: message,
-                        includePortfolioContext: includePortfolio.checked,
-                        history: chatHistory.slice(-MAX_HISTORY * 2)
+                        conversationHistory: chatHistory.slice(-MAX_HISTORY * 2)
                     })
                 });
 
@@ -127,7 +126,7 @@
                 document.getElementById(loadingId).remove();
 
                 if (data.success) {
-                    const aiResponse = data.response;
+                    const aiResponse = data.data.message;
                     chatHistory.push({role: 'assistant', content: aiResponse});
                     localStorage.setItem('ai_chat_history', JSON.stringify(chatHistory));
 
@@ -135,14 +134,14 @@
                     const tick = String.fromCharCode(96);
                     const startMarker = tick + tick + tick + 'json';
                     const endMarker = tick + tick + tick;
-                    const startIdx = data.response.indexOf(startMarker);
+                    const startIdx = aiResponse.indexOf(startMarker);
 
                     if (startIdx !== -1) {
                         const jsonStart = startIdx + startMarker.length;
-                        const endIdx = data.response.indexOf(endMarker, jsonStart);
+                        const endIdx = aiResponse.indexOf(endMarker, jsonStart);
 
                         if (endIdx !== -1) {
-                            const jsonText = data.response.substring(jsonStart, endIdx).trim();
+                            const jsonText = aiResponse.substring(jsonStart, endIdx).trim();
                             try {
                                 const actionData = JSON.parse(jsonText);
                                 addMessageToChat('Ejecutando acción...', 'ai');
