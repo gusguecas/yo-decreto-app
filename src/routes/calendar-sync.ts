@@ -67,7 +67,7 @@ calendarSyncRoutes.post('/export', async (c) => {
 
     // Crear evento en Google Calendar
     const response = await calendar.events.insert({
-      calendarId: 'primary',
+      calendarId: 'gusguecas@gmail.com',
       requestBody: event
     })
 
