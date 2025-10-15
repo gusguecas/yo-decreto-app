@@ -62,13 +62,18 @@ calendarSyncRoutes.post('/export', async (c) => {
         dateTime: endDateTime,
         timeZone: 'America/Mexico_City'
       },
+      attendees: [
+        { email: 'gusguecas@gmail.com' }
+      ],
       colorId: '9' // Azul
     }
 
-    // Crear evento en Google Calendar
+    // Crear evento en el calendario PRIMARY del Service Account
+    // pero con gusguecas@gmail.com como asistente
     const response = await calendar.events.insert({
-      calendarId: 'gusguecas@gmail.com',
-      requestBody: event
+      calendarId: 'primary',
+      requestBody: event,
+      sendUpdates: 'all' // Enviar invitación por email
     })
 
     return c.json({
