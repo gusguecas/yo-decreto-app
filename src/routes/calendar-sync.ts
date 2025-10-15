@@ -30,10 +30,13 @@ async function generateJWT(serviceAccountJson: any): Promise<string> {
   const privateKey = serviceAccountJson.private_key
   const pemHeader = '-----BEGIN PRIVATE KEY-----'
   const pemFooter = '-----END PRIVATE KEY-----'
-  const pemContents = privateKey.substring(
-    pemHeader.length,
-    privateKey.length - pemFooter.length
-  ).replace(/\s/g, '')
+
+  // Remove headers, footers, and all whitespace/newlines
+  let pemContents = privateKey
+    .replace(pemHeader, '')
+    .replace(pemFooter, '')
+    .replace(/\s+/g, '')
+    .trim()
 
   const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0))
 
