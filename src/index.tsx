@@ -12,6 +12,7 @@ import { chatbotRoutes } from './routes/chatbot'
 import rutinaRoutes from './routes/rutina'
 import authRoutes from './routes/auth'
 import googleCalendarRoutes from './routes/google-calendar'
+import calendarSyncRoutes from './routes/calendar-sync'
 import aiRoutes from './routes/ai'
 import logosRoutes from './routes/logos'
 import ritualRoutes from './routes/ritual'
@@ -44,6 +45,7 @@ app.route('/api/chatbot', chatbotRoutes)
 app.route('/api/rutina', rutinaRoutes)
 app.route('/api/ritual', ritualRoutes)
 app.route('/api/google-calendar', googleCalendarRoutes)
+app.route('/api/calendar-sync', calendarSyncRoutes)
 app.route('/api/ai', aiRoutes)
 
 // Ruta principal - renderiza la SPA
