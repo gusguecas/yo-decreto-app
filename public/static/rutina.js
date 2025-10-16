@@ -1062,7 +1062,7 @@ const Rutina = {
         return
       }
 
-      const decretos = response.data.decretos.filter(d => d.id !== parseInt(decretoActualId))
+      const decretos = response.data.decretos.filter(d => d.id != decretoActualId)
 
       if (decretos.length === 0) {
         Utils.showToast('No hay otros decretos en esta categoría para intercambiar', 'info')
@@ -1091,7 +1091,7 @@ const Rutina = {
               const safeDesc = Utils.escapeHtml(decreto.descripcion || '')
               return `
               <div class="gradient-card p-4 rounded-lg hover:border-${info.color}-500 border-2 border-transparent transition-all cursor-pointer"
-                   onclick="Rutina.selectDecretoToSwap(${decreto.id}, ${decretoActualId}, '${categoria}')">
+                   onclick="Rutina.selectDecretoToSwap(${decreto.id}, '${decretoActualId}', '${categoria}')">
                 <div class="flex items-start justify-between">
                   <div class="flex items-center space-x-3 flex-1">
                     <span class="text-3xl">${info.emoji}</span>
@@ -1134,8 +1134,8 @@ const Rutina = {
       if (!confirmed) return
 
       const response = await API.rutina.swapPrimary({
-        decretoActualId: parseInt(decretoActualId),
-        nuevoDecretoId: parseInt(nuevoDecretoId),
+        decretoActualId: decretoActualId,
+        nuevoDecretoId: nuevoDecretoId,
         categoria
       })
 
