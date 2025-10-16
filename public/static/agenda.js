@@ -131,32 +131,27 @@ const Agenda = {
             }
           </style>
           <div class="agenda-equal-heights">
-            
-            <!-- 📅 CALENDARIO ARTÍSTICO (1/3) -->
+
+            <!-- 📅 CALENDARIO ARTÍSTICO (1/4) -->
             <div>
               ${this.renderCalendarioPremium()}
             </div>
-            
-            <!-- ⏰ TIMELINE CINEMATOGRÁFICO (1/3) -->
+
+            <!-- ⏰ TIMELINE CINEMATOGRÁFICO (1/4) -->
             <div>
               ${this.renderTimelineCinematografico()}
             </div>
-            
+
             <!-- 🎛️ PANEL DE CONTROL FUTURISTA (1/4) -->
             <div>
               ${this.renderPanelControlFuturista()}
             </div>
 
-            <!-- 🚀 CENTRO DE COMANDO EJECUTIVO (1/5) -->
-            <div>
-              ${this.renderCentroComandoEjecutivoCompacto()}
-            </div>
-
-            <!-- 📝 RECORDATORIOS EXPRESS (1/5) -->
+            <!-- 📝 RECORDATORIOS EXPRESS (1/4) -->
             <div>
               ${this.renderRecordatoriosExpress()}
             </div>
-            
+
           </div>
 
           <!-- 🎯 PANORÁMICA MAESTRA - Dashboard de Pendientes -->
