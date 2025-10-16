@@ -81,8 +81,14 @@ const Agenda = {
 
     // 🎯 NUEVO: Almacenar datos de panorámica
     if (panoramica.success) {
-      this.data.panoramicaPendientes.acciones = panoramica.data.acciones
-      this.data.panoramicaPendientes.estadisticas = panoramica.data.estadisticas
+      this.data.panoramicaPendientes.acciones = panoramica.data.acciones || []
+      this.data.panoramicaPendientes.estadisticas = panoramica.data.estadisticas || {}
+      console.log('📊 Panorámica cargada:', {
+        acciones: this.data.panoramicaPendientes.acciones.length,
+        estadisticas: this.data.panoramicaPendientes.estadisticas
+      })
+    } else {
+      console.error('❌ Error al cargar panorámica:', panoramica)
     }
 
     // Aplicar filtros después de cargar los datos
@@ -91,7 +97,7 @@ const Agenda = {
 
   renderAgendaView() {
     return `
-      <div class="container mx-auto px-4 py-8">
+      <div class="w-full px-6 py-8">
         <!-- Header moderno -->
         <div class="flex items-center justify-between mb-8">
           <div>
@@ -155,22 +161,22 @@ const Agenda = {
           <div class="agenda-equal-heights">
 
             <!-- 📅 CALENDARIO ARTÍSTICO (1/4) -->
-            <div>
+            <div style="flex: 1 !important;">
               ${this.renderCalendarioPremium()}
             </div>
 
-            <!-- ⏰ TIMELINE CINEMATOGRÁFICO (1/4) -->
-            <div>
+            <!-- ⏰ TIMELINE CINEMATOGRÁFICO (MÁS ANCHO - 2.3x) -->
+            <div style="flex: 2.3 !important;">
               ${this.renderTimelineCinematografico()}
             </div>
 
-            <!-- 🎛️ PANEL DE CONTROL FUTURISTA (1/4) -->
-            <div>
+            <!-- 🎛️ PANEL DE CONTROL FUTURISTA (MÁS PEQUEÑO - 0.7x) -->
+            <div style="flex: 0.7 !important;">
               ${this.renderPanelControlFuturista()}
             </div>
 
             <!-- 📝 RECORDATORIOS EXPRESS (1/4) -->
-            <div>
+            <div style="flex: 1 !important;">
               ${this.renderRecordatoriosExpress()}
             </div>
 
@@ -3072,61 +3078,63 @@ const Agenda = {
     const selectedDate = dayjs(this.data.selectedDate)
     
     return `
-      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important;">
+      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; border: 2px solid #10b981 !important; display: flex !important; flex-direction: column !important;">
         <!-- Header Elegante con Glassmorphism -->
-        <div class="flex items-center justify-between p-4 border-b border-white/10">
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-green to-emerald-600 flex items-center justify-center premium-glow">
-              <i class="fas fa-calendar-alt text-white text-sm"></i>
+        <div class="p-4 border-b border-white/10" style="flex-shrink: 0;">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-green to-emerald-600 flex items-center justify-center premium-glow">
+                <i class="fas fa-calendar-alt text-white text-sm"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-white tracking-tight">${currentDate.format('MMMM')}</h3>
+                <p class="text-xs text-slate-400 font-medium">${currentDate.format('YYYY')}</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-white tracking-tight">${currentDate.format('MMMM')}</h3>
-              <p class="text-xs text-slate-400 font-medium">${currentDate.format('YYYY')}</p>
+
+            <div class="flex items-center space-x-1">
+              <button
+                onclick="Agenda.previousMonth()"
+                class="premium-btn-nav group"
+                title="Mes anterior"
+              >
+                <i class="fas fa-chevron-left text-xs transition-transform group-hover:-translate-x-0.5"></i>
+              </button>
+              <button
+                onclick="Agenda.nextMonth()"
+                class="premium-btn-nav group"
+                title="Siguiente mes"
+              >
+                <i class="fas fa-chevron-right text-xs transition-transform group-hover:translate-x-0.5"></i>
+              </button>
             </div>
-          </div>
-          
-          <div class="flex items-center space-x-1">
-            <button 
-              onclick="Agenda.previousMonth()" 
-              class="premium-btn-nav group"
-              title="Mes anterior"
-            >
-              <i class="fas fa-chevron-left text-xs transition-transform group-hover:-translate-x-0.5"></i>
-            </button>
-            <button 
-              onclick="Agenda.nextMonth()" 
-              class="premium-btn-nav group"
-              title="Siguiente mes"
-            >
-              <i class="fas fa-chevron-right text-xs transition-transform group-hover:translate-x-0.5"></i>
-            </button>
           </div>
         </div>
 
         <!-- Grid del Calendario con Efectos Premium -->
-        <div class="p-4">
-          <div class="grid grid-cols-7 gap-1 mb-2">
+        <div class="px-3 pb-3 flex-1" style="display: flex; flex-direction: column;">
+          <div class="grid grid-cols-7 gap-1 mb-2" style="flex-shrink: 0;">
             ${['D', 'L', 'M', 'X', 'J', 'V', 'S'].map(day => `
-              <div class="text-center text-xs font-bold text-slate-500 py-2 tracking-wider">${day}</div>
+              <div class="text-center text-sm font-bold text-slate-400 py-2 tracking-wider">${day}</div>
             `).join('')}
           </div>
-          
-          <div class="grid grid-cols-7 gap-1">
+
+          <div class="grid grid-cols-7 gap-2 flex-1" style="grid-auto-rows: 1fr;">
             ${this.renderCalendarioDiasPremium()}
           </div>
 
           <!-- Leyenda Premium -->
-          <div class="mt-4 pt-3 border-t border-white/10">
-            <div class="flex items-center justify-center space-x-4 text-xs">
-              <div class="flex items-center space-x-1.5">
+          <div class="mt-2 pt-2 border-t border-white/10" style="flex-shrink: 0;">
+            <div class="flex items-center justify-center space-x-3 text-xs">
+              <div class="flex items-center space-x-1">
                 <div class="w-2 h-2 rounded-full bg-accent-green premium-pulse"></div>
                 <span class="text-slate-400">Completo</span>
               </div>
-              <div class="flex items-center space-x-1.5">
+              <div class="flex items-center space-x-1">
                 <div class="w-2 h-2 rounded-full bg-accent-orange premium-pulse"></div>
                 <span class="text-slate-400">Pendiente</span>
               </div>
-              <div class="flex items-center space-x-1.5">
+              <div class="flex items-center space-x-1">
                 <div class="w-2 h-2 rounded-full bg-accent-red premium-pulse"></div>
                 <span class="text-slate-400">Vencido</span>
               </div>
@@ -3175,12 +3183,19 @@ const Agenda = {
         else if (dayState === 'vencido') ledIndicator = '<div class="led-indicator led-red"></div>'
       }
       
+      // Estilos especiales para el día de hoy
+      let dayStyle = 'min-height: 50px; display: flex; align-items: center; justify-content: center; position: relative;'
+      if (isToday && isCurrentMonth) {
+        dayStyle += ' background: #10b981; color: white; font-weight: bold; border-radius: 8px;'
+      }
+
       calendarHTML += `
-        <div 
+        <div
           class="${dayClasses}"
           onclick="Agenda.selectDate('${dayKey}')"
+          style="${dayStyle}"
         >
-          <span class="relative z-10">${currentCalendarDate.format('D')}</span>
+          <span class="relative z-10 text-lg font-semibold">${currentCalendarDate.format('D')}</span>
           ${ledIndicator}
         </div>
       `
@@ -3196,7 +3211,7 @@ const Agenda = {
     const hoyFormatted = dayjs(this.data.selectedDate).format('dddd, D [de] MMMM')
     
     return `
-      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important;">
+      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; border: 2px solid #10b981 !important;">
         <!-- Header Cinematográfico -->
         <div class="p-4 border-b border-white/10">
           <div class="flex items-center space-x-3 mb-2">
@@ -3217,8 +3232,8 @@ const Agenda = {
               <div class="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center mb-3">
                 <i class="fas fa-calendar-check text-slate-600 text-xl"></i>
               </div>
-              <p class="text-slate-400 text-sm font-medium">No hay tareas programadas</p>
-              <p class="text-slate-500 text-xs">para este día</p>
+              <p class="text-slate-400 text-base font-medium">No hay tareas programadas</p>
+              <p class="text-slate-500 text-sm">para este día</p>
             </div>
           ` : `
             <div class="timeline-cinematografico">
@@ -3245,62 +3260,120 @@ const Agenda = {
     const horaFormateada = tarea.hora_evento || '09:00'
     const prioridadIcon = {
       'alta': '🔥',
-      'media': '⭐',  
+      'media': '⭐',
       'baja': '📌'
     }[tarea.prioridad] || '📌'
-    
+
     const estadoClass = {
       'completada': 'tarea-completada',
       'pendiente': 'tarea-pendiente'
     }[tarea.estado] || 'tarea-pendiente'
 
+    // Determinar ÁREA/ORIGEN (color + icono)
+    let areaConfig = {
+      color: '#6b7280', // gris por defecto
+      icon: '📋',
+      nombre: 'General'
+    }
+
+    if (tarea.tipo === 'google_calendar') {
+      areaConfig = {
+        color: '#8b5cf6', // Morado
+        icon: '📅',
+        nombre: 'Google Calendar'
+      }
+    } else if (tarea.area === 'empresarial') {
+      areaConfig = {
+        color: '#10b981', // Verde
+        icon: '💼',
+        nombre: 'Empresarial'
+      }
+    } else if (tarea.area === 'material') {
+      areaConfig = {
+        color: '#f59e0b', // Amarillo
+        icon: '💰',
+        nombre: 'Material'
+      }
+    } else if (tarea.area === 'humano') {
+      areaConfig = {
+        color: '#3b82f6', // Azul
+        icon: '❤️',
+        nombre: 'Humana'
+      }
+    }
+
+    // Determinar si es PRIMARIA o SECUNDARIA
+    const esPrimaria = tarea.tipo === 'primaria'
+    const bordeGrosor = esPrimaria ? '4px' : '2px'
+
     return `
       <div class="timeline-item-cinematografico ${estadoClass} fade-in-timeline" style="animation-delay: ${index * 0.1}s">
         <!-- Línea Temporal -->
         <div class="timeline-connector"></div>
-        
+
         <!-- Card de Tarea -->
-        <div class="timeline-card" data-evento-id="${tarea.id}">
+        <div class="timeline-card" data-evento-id="${tarea.id}"
+             style="border-left: ${bordeGrosor} solid ${areaConfig.color}; position: relative; background: transparent !important;">
+
+          <!-- Badge de PRIMARIA (solo si es primaria) -->
+          ${esPrimaria ? `
+            <div class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold"
+                 style="background: ${areaConfig.color}; color: white;">
+              ⭐ PRIMARIA
+            </div>
+          ` : ''}
+
           <div class="flex items-start space-x-3">
-            <!-- Hora Digital -->
-            <div class="hora-digital">
-              <div class="text-xs font-mono font-bold text-accent-green">${horaFormateada}</div>
+            <!-- Icono de Área -->
+            <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-2xl">
+              ${areaConfig.icon}
             </div>
-            
+
             <!-- Contenido -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center space-x-2 mb-1">
-                <span class="text-sm">${prioridadIcon}</span>
-                <h4 class="font-medium text-white text-sm truncate">${tarea.titulo}</h4>
+            <div class="flex-1 min-w-0" style="padding-top: ${esPrimaria ? '24px' : '0'};">
+              <!-- Hora -->
+              <div class="text-sm font-mono font-bold mb-1" style="color: ${areaConfig.color};">
+                ${horaFormateada}
               </div>
-              
+
+              <!-- Título -->
+              <div class="flex items-center space-x-2 mb-1">
+                <span class="text-base">${prioridadIcon}</span>
+                <h4 class="font-medium text-white text-base truncate">${tarea.titulo}</h4>
+              </div>
+
+              <!-- Área/Origen -->
+              <p class="text-xs font-semibold mb-1" style="color: ${areaConfig.color};">
+                ${areaConfig.nombre}
+              </p>
+
               ${tarea.decreto_titulo ? `
-                <p class="text-xs text-slate-400 truncate mb-1">${tarea.decreto_titulo}</p>
+                <p class="text-sm text-slate-400 truncate mb-1">${tarea.decreto_titulo}</p>
               ` : ''}
-              
+
               ${tarea.descripcion ? `
-                <p class="text-xs text-slate-500 line-clamp-2">${tarea.descripcion}</p>
+                <p class="text-sm text-slate-500 line-clamp-2">${tarea.descripcion}</p>
               ` : ''}
             </div>
-            
+
             <!-- Actions Flotantes -->
             <div class="timeline-actions">
-              <button 
-                onclick="Agenda.completarTarea('${tarea.id}')" 
+              <button
+                onclick="Agenda.completarTarea('${tarea.id}')"
                 class="timeline-action-btn ${tarea.estado === 'completada' ? 'action-completed' : 'action-complete'}"
                 title="${tarea.estado === 'completada' ? 'Marcar pendiente' : 'Completar tarea'}"
               >
                 <i class="fas fa-check text-xs"></i>
               </button>
-              <button 
-                onclick="Agenda.openEditTareaModal('${tarea.id}')" 
+              <button
+                onclick="Agenda.openEditTareaModal('${tarea.id}')"
                 class="timeline-action-btn action-edit"
                 title="Editar tarea"
               >
                 <i class="fas fa-edit text-xs"></i>
               </button>
-              <button 
-                onclick="Agenda.deleteTarea('${tarea.id}')" 
+              <button
+                onclick="Agenda.deleteTarea('${tarea.id}')"
                 class="timeline-action-btn action-delete"
                 title="Eliminar tarea"
               >
@@ -3319,7 +3392,7 @@ const Agenda = {
     
     return `
       <!-- 🎛️ PANEL PRINCIPAL CON ALTURA FIJA -->
-      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important;">
+      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; border: 2px solid #10b981 !important;">
           <div class="p-4">
             
             <!-- Header del Panel -->
@@ -3476,10 +3549,59 @@ const Agenda = {
           ${this.renderDashboardEstadisticas(estadisticas)}
         </div>
 
-        <!-- Grid Masonry de Acciones -->
+        <!-- Grid por Áreas: 3 columnas -->
         <div class="p-6">
-          <div class="masonry-grid">
-            ${acciones.map((accion, index) => this.renderAccionMaestra(accion, index)).join('')}
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Columna Empresarial -->
+            <div class="space-y-4">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <i class="fas fa-briefcase text-white"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-white">Empresarial</h3>
+                  <p class="text-xs text-slate-400">${acciones.filter(a => a.area === 'empresarial').length} pendientes</p>
+                </div>
+              </div>
+              ${acciones.filter(a => a.area === 'empresarial').length > 0
+                ? acciones.filter(a => a.area === 'empresarial').map((accion, index) => this.renderAccionMaestra(accion, index)).join('')
+                : '<p class="text-slate-400 text-sm text-center py-8">✨ Sin pendientes</p>'
+              }
+            </div>
+
+            <!-- Columna Material -->
+            <div class="space-y-4">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                  <i class="fas fa-coins text-white"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-white">Material</h3>
+                  <p class="text-xs text-slate-400">${acciones.filter(a => a.area === 'material').length} pendientes</p>
+                </div>
+              </div>
+              ${acciones.filter(a => a.area === 'material').length > 0
+                ? acciones.filter(a => a.area === 'material').map((accion, index) => this.renderAccionMaestra(accion, index)).join('')
+                : '<p class="text-slate-400 text-sm text-center py-8">✨ Sin pendientes</p>'
+              }
+            </div>
+
+            <!-- Columna Humana -->
+            <div class="space-y-4">
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                  <i class="fas fa-heart text-white"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-white">Humana</h3>
+                  <p class="text-xs text-slate-400">${acciones.filter(a => a.area === 'humano').length} pendientes</p>
+                </div>
+              </div>
+              ${acciones.filter(a => a.area === 'humano').length > 0
+                ? acciones.filter(a => a.area === 'humano').map((accion, index) => this.renderAccionMaestra(accion, index)).join('')
+                : '<p class="text-slate-400 text-sm text-center py-8">✨ Sin pendientes</p>'
+              }
+            </div>
           </div>
         </div>
 
@@ -3658,7 +3780,7 @@ const Agenda = {
   // 🚀 CENTRO DE COMANDO EJECUTIVO COMPACTO - Versión 4ta Columna
   renderCentroComandoEjecutivoCompacto() {
     return `
-      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important;">
+      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; border: 2px solid #10b981 !important;">
         <div class="p-4 flex-1">
           
           <!-- 🚀 Header Compacto -->
@@ -3960,7 +4082,7 @@ const Agenda = {
   // 📝 RECORDATORIOS EXPRESS - Libreta Digital
   renderRecordatoriosExpress() {
     return `
-      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important;">
+      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; border: 2px solid #10b981 !important;">
         <div class="p-4 flex-1 flex flex-col">
           
           <!-- 📝 Header -->
@@ -4448,4 +4570,4 @@ const Recordatorios = {
       ComandoEjecutivo.mostrarNotificación(mensaje, tipo)
     }
   }
-}/* Force redeploy miércoles, 15 de octubre de 2025, 22:50:51 MST */
+}// Force upload 1760595266
