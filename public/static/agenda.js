@@ -3342,14 +3342,14 @@ const Agenda = {
                 <h4 class="font-medium text-white text-base truncate">${tarea.titulo}</h4>
               </div>
 
+              ${tarea.decreto_titulo ? `
+                <p class="text-sm text-slate-400 truncate mb-1">${tarea.decreto_titulo}</p>
+              ` : ''}
+
               <!-- Área/Origen -->
               <p class="text-xs font-semibold mb-1" style="color: ${areaConfig.color};">
                 ${areaConfig.nombre}
               </p>
-
-              ${tarea.decreto_titulo ? `
-                <p class="text-sm text-slate-400 truncate mb-1">${tarea.decreto_titulo}</p>
-              ` : ''}
 
               ${tarea.descripcion ? `
                 <p class="text-sm text-slate-500 line-clamp-2">${tarea.descripcion}</p>
@@ -3693,11 +3693,21 @@ const Agenda = {
       'antigua': { color: 'border-accent-blue', bg: 'bg-blue-900/20', icon: '🔵', pulse: 'premium-pulse-blue' },
       'normal': { color: 'border-slate-600', bg: 'bg-slate-800/50', icon: '⚪', pulse: '' }
     }
-    
+
     const config = urgenciaConfig[accion.urgencia] || urgenciaConfig.normal
+
+    // Determinar color del decreto por área
+    let decretoColor = '#3b82f6' // azul por defecto
+    if (accion.area === 'empresarial') {
+      decretoColor = '#10b981' // verde
+    } else if (accion.area === 'material') {
+      decretoColor = '#f59e0b' // amarillo
+    } else if (accion.area === 'humano') {
+      decretoColor = '#3b82f6' // azul
+    }
     
     return `
-      <div class="accion-maestra-card border-l-4 ${config.color} ${config.bg} ${config.pulse} fade-in-masonry" 
+      <div class="accion-maestra-card border-l-4 ${config.color} ${config.pulse} fade-in-masonry"
            style="animation-delay: ${index * 0.05}s">
         
         <!-- Header de la Acción -->
@@ -3706,8 +3716,6 @@ const Agenda = {
             <span class="text-lg ${config.pulse}">${config.icon}</span>
             <div class="text-xs text-slate-400">
               <span class="font-mono">#${(index + 1).toString().padStart(2, '0')}</span>
-              <span class="mx-1">•</span>
-              <span class="capitalize">${accion.area || 'sin área'}</span>
             </div>
           </div>
           <div class="text-xs text-slate-500">${accion.dias_desde_creacion}d</div>
@@ -3718,7 +3726,7 @@ const Agenda = {
           <h4 class="font-semibold text-white mb-1 line-clamp-2 hover:text-accent-green transition-colors cursor-pointer">
             ${accion.titulo}
           </h4>
-          <p class="text-sm text-accent-blue line-clamp-1">${accion.decreto_titulo}</p>
+          <p class="text-sm line-clamp-1" style="color: ${decretoColor};">${accion.decreto_titulo}</p>
         </div>
 
         <!-- Descripción -->
@@ -4570,4 +4578,7 @@ const Recordatorios = {
       ComandoEjecutivo.mostrarNotificación(mensaje, tipo)
     }
   }
-}
+}// Force upload 1760595266
+// Update $(date +%s)
+// Update $(date +%s)
+// Update $(date +%s)

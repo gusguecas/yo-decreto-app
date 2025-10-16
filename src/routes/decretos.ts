@@ -385,6 +385,24 @@ decretosRoutes.post('/:id/acciones', async (c) => {
   }
 })
 
+// Obtener todas las acciones de un decreto
+decretosRoutes.get('/:id/acciones', async (c) => {
+  try {
+    const decretoId = c.req.param('id')
+
+    const acciones = await c.env.DB.prepare(
+      'SELECT * FROM acciones WHERE decreto_id = ? ORDER BY created_at DESC'
+    ).bind(decretoId).all()
+
+    return c.json({
+      success: true,
+      data: acciones.results
+    })
+  } catch (error) {
+    return c.json({ success: false, error: 'Error al obtener acciones' }, 500)
+  }
+})
+
 // Obtener detalles de una acción específica
 decretosRoutes.get('/:decretoId/acciones/:accionId', async (c) => {
   try {
