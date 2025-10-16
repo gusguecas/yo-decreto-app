@@ -27,13 +27,14 @@ const Agenda = {
   async render() {
     const mainContent = document.getElementById('main-content')
     mainContent.innerHTML = UI.renderLoading('Cargando agenda...')
-    
+
     try {
       await this.loadAgendaData()
       mainContent.innerHTML = this.renderAgendaView()
       this.renderModals()
     } catch (error) {
-      mainContent.innerHTML = this.renderError()
+      console.error('Error al cargar agenda:', error)
+      mainContent.innerHTML = this.renderError(error.message)
     }
   },
 
@@ -1666,12 +1667,13 @@ const Agenda = {
     }
   },
 
-  renderError() {
+  renderError(message = '') {
     return `
       <div class="container mx-auto px-4 py-8 text-center">
         <div class="text-6xl mb-4">⚠️</div>
         <h2 class="text-2xl font-bold mb-4">Error al cargar agenda</h2>
         <p class="text-slate-400 mb-6">No se pudo cargar la información de la agenda.</p>
+        ${message ? `<p class="text-red-400 text-sm mb-4">Detalles: ${message}</p>` : ''}
         <button onclick="Agenda.render()" class="btn-primary px-6 py-2 rounded-lg">
           Reintentar
         </button>
