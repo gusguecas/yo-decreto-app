@@ -154,6 +154,391 @@ Tu misión es hacer que cada persona se sienta VISTA, ESCUCHADA, INSPIRADA, y co
 
 ¡Adelante, dear! 💫👑`
 
+// Definir las herramientas/funciones que Helene puede usar
+const HELENE_TOOLS = [
+  {
+    name: 'get_all_decretos',
+    description: 'Obtiene todos los decretos del usuario con información completa (título, descripción, categoría, estado, nivel de fe, días desde último primario, señales registradas)',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: []
+    }
+  },
+  {
+    name: 'get_decreto_details',
+    description: 'Obtiene detalles completos de un decreto específico incluyendo: tareas completadas, check-ins de fe, señales/sincronicidades, tiempo dedicado',
+    parameters: {
+      type: 'object',
+      properties: {
+        decreto_id: {
+          type: 'number',
+          description: 'ID del decreto'
+        }
+      },
+      required: ['decreto_id']
+    }
+  },
+  {
+    name: 'create_decreto',
+    description: 'Crea un nuevo decreto para el usuario',
+    parameters: {
+      type: 'object',
+      properties: {
+        titulo: {
+          type: 'string',
+          description: 'Título del decreto (ej: "Casa Nueva en la Playa")'
+        },
+        descripcion: {
+          type: 'string',
+          description: 'Descripción detallada y específica del decreto'
+        },
+        categoria: {
+          type: 'string',
+          enum: ['material', 'humano', 'empresarial'],
+          description: 'Categoría del decreto'
+        }
+      },
+      required: ['titulo', 'descripcion', 'categoria']
+    }
+  },
+  {
+    name: 'update_decreto',
+    description: 'Actualiza un decreto existente',
+    parameters: {
+      type: 'object',
+      properties: {
+        decreto_id: {
+          type: 'number',
+          description: 'ID del decreto a actualizar'
+        },
+        titulo: {
+          type: 'string',
+          description: 'Nuevo título (opcional)'
+        },
+        descripcion: {
+          type: 'string',
+          description: 'Nueva descripción (opcional)'
+        }
+      },
+      required: ['decreto_id']
+    }
+  },
+  {
+    name: 'delete_decreto',
+    description: 'Elimina un decreto',
+    parameters: {
+      type: 'object',
+      properties: {
+        decreto_id: {
+          type: 'number',
+          description: 'ID del decreto a eliminar'
+        }
+      },
+      required: ['decreto_id']
+    }
+  },
+  {
+    name: 'get_agenda_events',
+    description: 'Obtiene los eventos de la agenda del usuario en un rango de fechas',
+    parameters: {
+      type: 'object',
+      properties: {
+        start_date: {
+          type: 'string',
+          description: 'Fecha inicial en formato YYYY-MM-DD'
+        },
+        end_date: {
+          type: 'string',
+          description: 'Fecha final en formato YYYY-MM-DD'
+        }
+      },
+      required: ['start_date', 'end_date']
+    }
+  },
+  {
+    name: 'create_agenda_event',
+    description: 'Crea un evento en la agenda del usuario',
+    parameters: {
+      type: 'object',
+      properties: {
+        decreto_id: {
+          type: 'number',
+          description: 'ID del decreto relacionado (opcional)'
+        },
+        titulo: {
+          type: 'string',
+          description: 'Título del evento'
+        },
+        descripcion: {
+          type: 'string',
+          description: 'Descripción del evento'
+        },
+        fecha: {
+          type: 'string',
+          description: 'Fecha del evento en formato YYYY-MM-DD'
+        },
+        hora: {
+          type: 'string',
+          description: 'Hora del evento en formato HH:MM'
+        },
+        tipo: {
+          type: 'string',
+          enum: ['trabajo_decreto', 'reunion', 'deadline', 'otro'],
+          description: 'Tipo de evento'
+        }
+      },
+      required: ['titulo', 'fecha', 'hora', 'tipo']
+    }
+  },
+  {
+    name: 'delete_agenda_event',
+    description: 'Elimina un evento de la agenda',
+    parameters: {
+      type: 'object',
+      properties: {
+        event_id: {
+          type: 'number',
+          description: 'ID del evento a eliminar'
+        }
+      },
+      required: ['event_id']
+    }
+  },
+  {
+    name: 'register_faith_checkin',
+    description: 'Registra un check-in de nivel de fe para un decreto',
+    parameters: {
+      type: 'object',
+      properties: {
+        decreto_id: {
+          type: 'number',
+          description: 'ID del decreto'
+        },
+        faith_level: {
+          type: 'number',
+          description: 'Nivel de fe del 1 al 10'
+        },
+        notes: {
+          type: 'string',
+          description: 'Notas sobre el nivel de fe (opcional)'
+        }
+      },
+      required: ['decreto_id', 'faith_level']
+    }
+  },
+  {
+    name: 'record_signal',
+    description: 'Registra una señal, sincronicidad u oportunidad relacionada con un decreto',
+    parameters: {
+      type: 'object',
+      properties: {
+        decreto_id: {
+          type: 'number',
+          description: 'ID del decreto'
+        },
+        description: {
+          type: 'string',
+          description: 'Descripción de la señal o sincronicidad'
+        },
+        signal_type: {
+          type: 'string',
+          enum: ['señal', 'sincronicidad', 'oportunidad'],
+          description: 'Tipo de evento'
+        },
+        emotional_impact: {
+          type: 'number',
+          description: 'Impacto emocional del 1 al 10'
+        }
+      },
+      required: ['decreto_id', 'description', 'signal_type']
+    }
+  },
+  {
+    name: 'get_rutina_today',
+    description: 'Obtiene la rutina diaria del usuario incluyendo los 3 decretos primarios del día, tareas completadas, check-ins de fe pendientes',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: []
+    }
+  }
+]
+
+// Funciones que ejecutan las herramientas
+async function executeTool(toolName: string, args: any, db: D1Database, userId: string) {
+  const today = new Date().toISOString().split('T')[0]
+
+  switch (toolName) {
+    case 'get_all_decretos':
+      const decretos = await db.prepare(`
+        SELECT
+          d.*,
+          COALESCE(
+            julianday(?) - julianday(d.last_primary_date),
+            julianday(?) - julianday(d.created_at)
+          ) as days_since_primary,
+          COUNT(DISTINCT s.id) as total_signals
+        FROM decretos d
+        LEFT JOIN signals s ON d.id = s.decreto_id
+        WHERE d.user_id = ?
+        GROUP BY d.id
+        ORDER BY d.created_at DESC
+      `).bind(today, today, userId).all()
+      return decretos.results
+
+    case 'get_decreto_details':
+      const decreto = await db.prepare(`SELECT * FROM decretos WHERE id = ? AND user_id = ?`)
+        .bind(args.decreto_id, userId).first()
+
+      if (!decreto) return { error: 'Decreto no encontrado' }
+
+      const tasks = await db.prepare(`
+        SELECT * FROM daily_tasks
+        WHERE decreto_id = ? AND completed = 1
+        ORDER BY completed_at DESC LIMIT 10
+      `).bind(args.decreto_id).all()
+
+      const faithCheckins = await db.prepare(`
+        SELECT * FROM faith_checkins
+        WHERE decreto_id = ?
+        ORDER BY created_at DESC LIMIT 10
+      `).bind(args.decreto_id).all()
+
+      const signals = await db.prepare(`
+        SELECT * FROM signals
+        WHERE decreto_id = ?
+        ORDER BY created_at DESC LIMIT 10
+      `).bind(args.decreto_id).all()
+
+      return {
+        decreto,
+        tasks: tasks.results,
+        faithCheckins: faithCheckins.results,
+        signals: signals.results
+      }
+
+    case 'create_decreto':
+      const newDecreto = await db.prepare(`
+        INSERT INTO decretos (user_id, titulo, descripcion, categoria, estado, faith_level, created_at)
+        VALUES (?, ?, ?, ?, 'activo', 5, CURRENT_TIMESTAMP)
+        RETURNING *
+      `).bind(userId, args.titulo, args.descripcion, args.categoria).first()
+      return newDecreto
+
+    case 'update_decreto':
+      const updates = []
+      const bindings = []
+      if (args.titulo) {
+        updates.push('titulo = ?')
+        bindings.push(args.titulo)
+      }
+      if (args.descripcion) {
+        updates.push('descripcion = ?')
+        bindings.push(args.descripcion)
+      }
+      if (updates.length === 0) return { error: 'No hay campos para actualizar' }
+
+      bindings.push(args.decreto_id, userId)
+      await db.prepare(`
+        UPDATE decretos SET ${updates.join(', ')} WHERE id = ? AND user_id = ?
+      `).bind(...bindings).run()
+      return { success: true, message: 'Decreto actualizado' }
+
+    case 'delete_decreto':
+      await db.prepare(`DELETE FROM decretos WHERE id = ? AND user_id = ?`)
+        .bind(args.decreto_id, userId).run()
+      return { success: true, message: 'Decreto eliminado' }
+
+    case 'get_agenda_events':
+      const events = await db.prepare(`
+        SELECT ae.*, d.titulo as decreto_titulo
+        FROM agenda_events ae
+        LEFT JOIN decretos d ON ae.decreto_id = d.id
+        WHERE ae.user_id = ? AND ae.fecha BETWEEN ? AND ?
+        ORDER BY ae.fecha, ae.hora
+      `).bind(userId, args.start_date, args.end_date).all()
+      return events.results
+
+    case 'create_agenda_event':
+      const newEvent = await db.prepare(`
+        INSERT INTO agenda_events (user_id, decreto_id, titulo, descripcion, fecha, hora, tipo, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        RETURNING *
+      `).bind(
+        userId,
+        args.decreto_id || null,
+        args.titulo,
+        args.descripcion || '',
+        args.fecha,
+        args.hora,
+        args.tipo
+      ).first()
+      return newEvent
+
+    case 'delete_agenda_event':
+      await db.prepare(`DELETE FROM agenda_events WHERE id = ? AND user_id = ?`)
+        .bind(args.event_id, userId).run()
+      return { success: true, message: 'Evento eliminado' }
+
+    case 'register_faith_checkin':
+      const checkin = await db.prepare(`
+        INSERT INTO faith_checkins (user_id, decreto_id, faith_level, notes, check_in_time, created_at)
+        VALUES (?, ?, ?, ?, '10am', CURRENT_TIMESTAMP)
+        RETURNING *
+      `).bind(userId, args.decreto_id, args.faith_level, args.notes || '').first()
+
+      // Actualizar faith_level del decreto
+      await db.prepare(`UPDATE decretos SET faith_level = ? WHERE id = ?`)
+        .bind(args.faith_level, args.decreto_id).run()
+
+      return checkin
+
+    case 'record_signal':
+      const signal = await db.prepare(`
+        INSERT INTO signals (user_id, decreto_id, description, signal_type, emotional_impact, created_at)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        RETURNING *
+      `).bind(
+        userId,
+        args.decreto_id,
+        args.description,
+        args.signal_type,
+        args.emotional_impact || 5
+      ).first()
+      return signal
+
+    case 'get_rutina_today':
+      const rutina = await db.prepare(`
+        SELECT
+          dr.*,
+          dm.titulo as material_titulo,
+          dm.descripcion as material_description,
+          dh.titulo as humano_titulo,
+          dh.descripcion as humano_description,
+          de.titulo as empresarial_titulo,
+          de.descripcion as empresarial_description
+        FROM daily_rotation dr
+        LEFT JOIN decretos dm ON dr.decreto_material_id = dm.id
+        LEFT JOIN decretos dh ON dr.decreto_humano_id = dh.id
+        LEFT JOIN decretos de ON dr.decreto_empresarial_id = de.id
+        WHERE dr.user_id = ? AND dr.date = ?
+      `).bind(userId, today).first()
+
+      const completedTasks = await db.prepare(`
+        SELECT * FROM daily_tasks WHERE user_id = ? AND date = ?
+      `).bind(userId, today).all()
+
+      return {
+        rutina,
+        completedTasks: completedTasks.results
+      }
+
+    default:
+      return { error: 'Herramienta no encontrada' }
+  }
+}
+
 // Ruta para chatear con Helene
 chatbotRoutes.post('/chat', async (c) => {
   try {
@@ -165,26 +550,25 @@ chatbotRoutes.post('/chat', async (c) => {
 
     // Obtener información del usuario si está logueado (opcional)
     const userId = c.req.header('X-User-ID')
-    let userContext = ''
 
-    if (userId) {
-      // Obtener decretos activos del usuario para contexto personalizado
-      const decretos = await c.env.DB.prepare(`
-        SELECT titulo, categoria, descripcion
-        FROM decretos
-        WHERE user_id = ? AND estado = 'activo'
-        LIMIT 3
-      `).bind(userId).all()
-
-      if (decretos.results.length > 0) {
-        userContext = `\n\nDECRETOS ACTUALES DEL USUARIO:\n${decretos.results.map((d: any) =>
-          `- ${d.categoria}: ${d.titulo}`
-        ).join('\n')}\n\nUsa esta información para dar coaching personalizado y específico.`
-      }
+    if (!userId) {
+      return c.json({ success: false, error: 'Usuario no autenticado' }, 401)
     }
 
     // Construir el historial de conversación para Gemini
-    const systemPrompt = (HELENE_PROMPT || HELENE_PROMPT_FALLBACK) + userContext
+    const systemPrompt = `${HELENE_PROMPT || HELENE_PROMPT_FALLBACK}
+
+HERRAMIENTAS DISPONIBLES:
+Tienes acceso a herramientas para ayudar al usuario. Puedes leer sus decretos, crear nuevos, agregar eventos a la agenda, registrar señales, etc.
+
+IMPORTANTE:
+- Cuando el usuario te pida información sobre sus decretos, usa get_all_decretos o get_decreto_details
+- Si el usuario quiere crear un decreto, asegúrate de que sea ESPECÍFICO (método SPEC) y luego usa create_decreto
+- Si el usuario menciona una sincronicidad o señal, pregunta detalles y usa record_signal
+- Si el usuario quiere agregar algo a su agenda, usa create_agenda_event
+- Siempre da feedback al usuario sobre lo que hiciste
+
+Sé proactiva y usa las herramientas cuando sea apropiado para ayudar mejor al usuario.`
 
     const messages = [
       {
@@ -205,9 +589,8 @@ chatbotRoutes.post('/chat', async (c) => {
       }
     ]
 
-    console.log('🤖 Enviando mensaje a Gemini...')
+    console.log('🤖 Enviando mensaje a Gemini con function calling...')
 
-    // Llamar a Gemini usando la API de Google AI
     const GOOGLE_AI_KEY = (c.env as any).GEMINI_API_KEY || ''
 
     if (!GOOGLE_AI_KEY) {
@@ -217,78 +600,169 @@ chatbotRoutes.post('/chat', async (c) => {
       }, 500)
     }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_AI_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: messages.map(msg => ({
-            role: msg.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: msg.content }]
-          })),
-          generationConfig: {
-            temperature: 0.9,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
+    // Convertir herramientas al formato de Gemini
+    const geminiTools = [{
+      functionDeclarations: HELENE_TOOLS.map(tool => ({
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters
+      }))
+    }]
+
+    // Loop de function calling
+    let currentMessages = messages
+    let finalResponse = ''
+    let maxIterations = 5
+    let iteration = 0
+    const toolCalls: any[] = []
+
+    while (iteration < maxIterations) {
+      iteration++
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_AI_KEY}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-          safetySettings: [
-            {
-              category: 'HARM_CATEGORY_HARASSMENT',
-              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          body: JSON.stringify({
+            contents: currentMessages.map(msg => ({
+              role: msg.role === 'assistant' ? 'model' : 'user',
+              parts: [{ text: msg.content }]
+            })),
+            tools: geminiTools,
+            generationConfig: {
+              temperature: 0.9,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 2048,
             },
-            {
-              category: 'HARM_CATEGORY_HATE_SPEECH',
-              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-            },
-            {
-              category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-            },
-            {
-              category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-            }
-          ]
-        })
+            safetySettings: [
+              {
+                category: 'HARM_CATEGORY_HARASSMENT',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              },
+              {
+                category: 'HARM_CATEGORY_HATE_SPEECH',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              },
+              {
+                category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              },
+              {
+                category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+              }
+            ]
+          })
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        console.error('❌ Error de Gemini:', data)
+        return c.json({
+          success: false,
+          error: 'Error al procesar mensaje con IA',
+          details: data
+        }, 500)
       }
-    )
 
-    const data = await response.json()
+      const candidate = data.candidates[0]
+      const content = candidate.content
 
-    if (!response.ok) {
-      console.error('❌ Error de Gemini:', data)
-      return c.json({
-        success: false,
-        error: 'Error al procesar mensaje con IA',
-        details: data
-      }, 500)
+      // Verificar si hay function calls
+      const functionCalls = content.parts?.filter((part: any) => part.functionCall)
+
+      if (functionCalls && functionCalls.length > 0) {
+        console.log(`🔧 Helene quiere usar ${functionCalls.length} herramienta(s)`)
+
+        // Ejecutar cada function call
+        const toolResponses = []
+
+        for (const fc of functionCalls) {
+          const toolName = fc.functionCall.name
+          const toolArgs = fc.functionCall.args || {}
+
+          console.log(`   Ejecutando: ${toolName}`, toolArgs)
+
+          try {
+            const result = await executeTool(toolName, toolArgs, c.env.DB, userId)
+            toolResponses.push({
+              functionResponse: {
+                name: toolName,
+                response: result
+              }
+            })
+
+            toolCalls.push({
+              tool: toolName,
+              args: toolArgs,
+              result
+            })
+          } catch (error) {
+            console.error(`❌ Error ejecutando ${toolName}:`, error)
+            toolResponses.push({
+              functionResponse: {
+                name: toolName,
+                response: { error: error instanceof Error ? error.message : 'Error desconocido' }
+              }
+            })
+          }
+        }
+
+        // Agregar la respuesta con function calls al historial
+        currentMessages.push({
+          role: 'assistant',
+          content: JSON.stringify(content.parts)
+        })
+
+        // Agregar los resultados de las function calls
+        currentMessages.push({
+          role: 'user',
+          content: JSON.stringify(toolResponses)
+        })
+
+        // Continuar el loop para que Gemini genere una respuesta con los resultados
+        continue
+      }
+
+      // Si no hay function calls, extraer la respuesta de texto
+      const textPart = content.parts?.find((part: any) => part.text)
+      if (textPart) {
+        finalResponse = textPart.text
+        break
+      }
+
+      // Si llegamos aquí sin respuesta, algo salió mal
+      break
     }
 
-    const heleneResponse = data.candidates[0].content.parts[0].text
-
-    console.log('✅ Respuesta de Helene generada')
-
-    // Guardar conversación en BD si el usuario está logueado
-    if (userId) {
-      await c.env.DB.prepare(`
-        INSERT INTO chatbot_conversaciones (user_id, mensaje_usuario, respuesta_helene, created_at)
-        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-      `).bind(userId, message, heleneResponse).run()
+    if (!finalResponse) {
+      finalResponse = 'Lo siento dear, tuve un problema procesando tu solicitud. ¿Podrías intentar de nuevo?'
     }
+
+    console.log('✅ Respuesta de Helene generada con', toolCalls.length, 'acciones ejecutadas')
+
+    // Guardar conversación en BD
+    await c.env.DB.prepare(`
+      INSERT INTO chatbot_conversaciones (user_id, mensaje_usuario, respuesta_helene, created_at)
+      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+    `).bind(userId, message, finalResponse).run()
 
     return c.json({
       success: true,
       data: {
-        message: heleneResponse,
+        message: finalResponse,
         conversationHistory: [
           ...conversationHistory,
           { role: 'user', content: message },
-          { role: 'assistant', content: heleneResponse }
-        ]
+          { role: 'assistant', content: finalResponse }
+        ],
+        toolCalls // Incluir las acciones ejecutadas para debugging
       }
     })
 
