@@ -269,7 +269,10 @@ const Rutina = {
             ${isCompleted ? `
               <i class="fas fa-check-circle text-green-400 text-2xl"></i>
             ` : ''}
-            <button onclick="Rutina.openSwapDecretoModal('${decreto.id}', '${categoria}', '${Utils.escapeHtml(decreto.titulo)}')"
+            <button data-decreto-id="${decreto.id}"
+                    data-categoria="${categoria}"
+                    data-decreto-titulo="${Utils.escapeHtml(decreto.titulo)}"
+                    onclick="Rutina.openSwapDecretoModal(this.dataset.decretoId, this.dataset.categoria, this.dataset.decretoTitulo)"
                     class="text-xs px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
                     title="Cambiar por otro decreto">
               <i class="fas fa-exchange-alt mr-1"></i>
@@ -1091,7 +1094,10 @@ const Rutina = {
               const safeDesc = Utils.escapeHtml(decreto.descripcion || '')
               return `
               <div class="gradient-card p-4 rounded-lg hover:border-${info.color}-500 border-2 border-transparent transition-all cursor-pointer"
-                   onclick="Rutina.selectDecretoToSwap(${decreto.id}, '${decretoActualId}', '${categoria}')">
+                   data-nuevo-decreto-id="${decreto.id}"
+                   data-actual-decreto-id="${decretoActualId}"
+                   data-categoria="${categoria}"
+                   onclick="Rutina.selectDecretoToSwap(this.dataset.nuevoDecretoId, this.dataset.actualDecretoId, this.dataset.categoria)">
                 <div class="flex items-start justify-between">
                   <div class="flex items-center space-x-3 flex-1">
                     <span class="text-3xl">${info.emoji}</span>
