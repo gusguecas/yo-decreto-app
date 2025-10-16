@@ -40,7 +40,7 @@ const Agenda = {
   async loadAgendaData() {
     const [year, month] = this.data.currentMonth.split('-')
 
-    // Cargar datos en paralelo (AGREGANDO eventos de Google Calendar)
+    // Cargar datos en paralelo (AGREGANDO Google Calendar)
     const [calendario, timeline, metricas, enfoque, panoramica, googleEvents] = await Promise.all([
       API.agenda.getCalendario(year, month),
       API.agenda.getTimeline(this.data.selectedDate),
