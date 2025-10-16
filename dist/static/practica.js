@@ -47,19 +47,19 @@ const Practica = {
         console.log(`🗺️ Usando fecha simulada: ${fechaSimulada}`)
       }
 
-      console.log('✅ Rutinas cargadas:', rutinas.data.length, 'elementos')
+      console.log('✅ Rutinas cargadas:', rutinas?.data?.length || 0, 'elementos')
 
       console.log('🔄 Cargando afirmaciones...')
       const afirmaciones = await API.practica.getAfirmaciones()
-      console.log('✅ Afirmaciones cargadas:', afirmaciones.data.length, 'elementos')
+      console.log('✅ Afirmaciones cargadas:', afirmaciones?.data?.length || 0, 'elementos')
 
       console.log('🔄 Cargando progreso...')
       const progresoRutinas = await API.practica.getProgresoDia()
-      console.log('✅ Progreso cargado:', progresoRutinas.data.porcentaje_progreso + '%')
+      console.log('✅ Progreso cargado:', progresoRutinas?.data?.porcentaje_progreso || 0, '%')
 
-      this.data.rutinas = rutinas.data || []
-      this.data.afirmaciones = afirmaciones.data || []
-      this.data.progresoRutinas = progresoRutinas.data || {}
+      this.data.rutinas = rutinas?.data || []
+      this.data.afirmaciones = afirmaciones?.data || []
+      this.data.progresoRutinas = progresoRutinas?.data || {}
 
       // Cargar estadísticas del ritual
       console.log('🔄 Cargando estadísticas del ritual...')

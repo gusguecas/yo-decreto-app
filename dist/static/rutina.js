@@ -14,6 +14,12 @@ const Rutina = {
     try {
       // Cargar datos del día
       const response = await API.rutina.getToday()
+
+      // Validar que la respuesta tenga datos
+      if (!response?.data) {
+        throw new Error('No se recibieron datos de la rutina')
+      }
+
       this.data.todayData = response.data
 
       // Determinar check-in actual basado en la hora
@@ -27,12 +33,14 @@ const Rutina = {
 
     } catch (error) {
       console.error('Error al cargar rutina:', error)
+      const errorMessage = error.response?.data?.error || error.message || 'Error desconocido'
       mainContent.innerHTML = `
         <div class="container mx-auto px-4 py-8">
           <div class="text-center">
             <div class="text-6xl mb-4">⚠️</div>
             <h2 class="text-2xl font-bold mb-2">Error al cargar la rutina</h2>
-            <p class="text-slate-400 mb-4">Asegúrate de tener decretos activos en las 3 categorías</p>
+            <p class="text-slate-400 mb-4">${errorMessage}</p>
+            <p class="text-slate-500 text-sm mb-6">Asegúrate de tener decretos activos en las 3 categorías (Material, Humano, Empresarial)</p>
             <button onclick="Router.navigate('decretos')" class="btn-primary px-6 py-3 rounded-lg">
               Ir a Mis Decretos
             </button>
@@ -51,6 +59,9 @@ const Rutina = {
   },
 
   renderRutinaView() {
+    if (!this.data.todayData) {
+      throw new Error('No hay datos de rutina disponibles')
+    }
     const { date, dailyFocus, primary, secondary, routines, faithCheckins, meritCommitment, completedTasks } = this.data.todayData
 
     // Verificar si rutinas están completadas

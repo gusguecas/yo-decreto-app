@@ -11,23 +11,26 @@ const Decretos = {
   async render() {
     const mainContent = document.getElementById('main-content')
     mainContent.innerHTML = UI.renderLoading('Cargando decretos...')
-    
+
     try {
+      console.log('🔍 Cargando decretos...')
       await this.loadDecretos()
+      console.log('✅ Decretos cargados:', this.data.decretos.length)
       mainContent.innerHTML = this.renderDecretosView()
-      
+
       // Renderizar modales
       this.renderModals()
     } catch (error) {
-      mainContent.innerHTML = this.renderError()
+      console.error('❌ Error al renderizar decretos:', error)
+      mainContent.innerHTML = this.renderError(error.message || 'Error desconocido')
     }
   },
 
   async loadDecretos() {
     const response = await API.decretos.getAll()
-    this.data.decretos = response.data.decretos
-    this.data.contadores = response.data.contadores
-    this.data.porcentajes = response.data.porcentajes
+    this.data.decretos = response?.data?.decretos || []
+    this.data.contadores = response?.data?.contadores || { total: 0, activos: 0, completados: 0 }
+    this.data.porcentajes = response?.data?.porcentajes || { empresarial: 0, material: 0, humano: 0 }
   },
 
   renderDecretosView() {
@@ -1433,13 +1436,15 @@ const Decretos = {
 
   async openDetalleDecreto(decretoId) {
     try {
+      console.log('🔍 Abriendo detalle del decreto:', decretoId)
+
       // Cambiar la sección a detalle-decreto
       AppState.currentSection = 'detalle-decreto'
       AppState.selectedDecreto = decretoId
-      
+
       const mainContent = document.getElementById('main-content')
       if (!mainContent) {
-        console.error('No se encontró el elemento main-content')
+        console.error('❌ No se encontró el elemento main-content')
         // Si estamos en un entorno de test, redirigir a la aplicación principal
         if (window.location.pathname.includes('/static/test-')) {
           window.location.href = `/#decreto-${decretoId}`
@@ -1447,33 +1452,60 @@ const Decretos = {
         }
         return
       }
-      
+
       mainContent.innerHTML = UI.renderLoading('Cargando detalle del decreto...')
-      
+
       // Cargar datos del decreto
+      console.log('📡 Llamando API.decretos.get(' + decretoId + ')')
       const response = await API.decretos.get(decretoId)
-      console.log('Response from API:', response) // Debug log
-      
-      if (!response.data || !response.data.decreto) {
+      console.log('📦 Response completa:', response)
+      console.log('📦 Response type:', typeof response)
+      console.log('📦 Response keys:', Object.keys(response || {}))
+      console.log('📦 Response.success:', response?.success)
+      console.log('📦 Response.data:', response?.data)
+      console.log('📦 Response.data type:', typeof response?.data)
+      console.log('📦 Response.data keys:', Object.keys(response?.data || {}))
+      console.log('📦 Response.data.decreto:', response?.data?.decreto)
+
+      // Verificar estructura de respuesta
+      if (!response || typeof response !== 'object') {
+        throw new Error(`Respuesta inválida del servidor: ${typeof response}`)
+      }
+
+      if (!response.success) {
+        throw new Error(response.error || 'Error desconocido del servidor')
+      }
+
+      if (!response.data) {
+        throw new Error('La respuesta no contiene datos')
+      }
+
+      if (!response.data.decreto) {
+        console.error('❌ Estructura de response.data:', JSON.stringify(response.data, null, 2))
         throw new Error('No se encontraron datos del decreto')
       }
-      
+
       // Asignar el decreto con sus acciones y métricas
       this.data.selectedDecreto = {
         ...response.data.decreto,
         acciones: response.data.acciones || [],
         metricas: response.data.metricas || {}
       }
-      
+
+      console.log('✅ Decreto cargado, renderizando vista...')
+
       // Renderizar vista de detalle
       mainContent.innerHTML = this.renderDetalleDecreto()
-      
+
       // Renderizar modales específicos de detalle
       this.renderDetalleModals()
-      
+
+      console.log('✅ Detalle del decreto renderizado exitosamente')
+
     } catch (error) {
-      console.error('Error al cargar detalle del decreto:', error)
-      
+      console.error('❌ Error al cargar detalle del decreto:', error)
+      console.error('❌ Error stack:', error.stack)
+
       // Mostrar error específico
       const mainContent = document.getElementById('main-content')
       if (mainContent) {

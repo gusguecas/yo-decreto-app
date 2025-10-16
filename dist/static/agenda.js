@@ -33,21 +33,42 @@ const Agenda = {
 
   async loadAgendaData() {
     const [year, month] = this.data.currentMonth.split('-')
-    
-    // Cargar datos en paralelo
-    const [calendario, timeline, metricas, enfoque] = await Promise.all([
+
+    // Cargar datos en paralelo (AGREGANDO eventos de Google Calendar)
+    const [calendario, timeline, metricas, enfoque, googleEvents] = await Promise.all([
       API.agenda.getCalendario(year, month),
       API.agenda.getTimeline(this.data.selectedDate),
       API.agenda.getMetricasDia(this.data.selectedDate),
-      API.agenda.getEnfoque(this.data.selectedDate)
+      API.agenda.getEnfoque(this.data.selectedDate),
+      API.googleCalendar.getEvents({
+        startDate: this.data.selectedDate,
+        endDate: dayjs(this.data.selectedDate).add(1, 'day').format('YYYY-MM-DD')
+      }).catch(() => ({ success: false, data: [] }))
     ])
 
     this.data.eventos = calendario.data.estados
-    this.data.originalTimeline = timeline.data
-    this.data.timeline = [...timeline.data] // Copia para filtrar
+
+    // Formatear eventos de Google Calendar para que se vean como tareas locales
+    const googleEventsFormatted = (googleEvents.success && googleEvents.data) ?
+      googleEvents.data.map(evt => ({
+        id: `gcal_${evt.id}`,
+        titulo: `📅 ${evt.titulo}`,
+        descripcion: evt.descripcion || '',
+        fecha_evento: evt.fecha_inicio?.split('T')[0] || this.data.selectedDate,
+        hora_evento: evt.fecha_inicio?.split('T')[1]?.substring(0, 5) || null,
+        estado: 'pendiente',
+        prioridad: 'media',
+        tipo: 'google_calendar',
+        decreto_titulo: 'Google Calendar',
+        decreto_area: null
+      })) : []
+
+    // Combinar tareas locales + eventos de Google
+    this.data.originalTimeline = [...timeline.data, ...googleEventsFormatted]
+    this.data.timeline = [...this.data.originalTimeline] // Copia para filtrar
     this.data.metricas = metricas.data
     this.data.enfoque = enfoque.data
-    
+
     // Aplicar filtros después de cargar los datos
     this.aplicarFiltros()
   },

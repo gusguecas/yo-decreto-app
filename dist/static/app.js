@@ -291,7 +291,7 @@ const UI = {
   renderNavTabs() {
     const tabs = [
       { id: 'decretos', icon: 'fas fa-bullseye', label: 'Mis Decretos' },
-      { id: 'rutina', icon: 'fas fa-sun', label: 'Rutina Diaria' },
+      // { id: 'rutina', icon: 'fas fa-sun', label: 'Rutina Diaria' }, // Deshabilitado temporalmente - requiere debugging del backend
       { id: 'agenda', icon: 'fas fa-calendar-alt', label: 'Agenda Diaria' },
       { id: 'progreso', icon: 'fas fa-chart-line', label: 'Mi Progreso' },
       { id: 'practica', icon: 'fas fa-star', label: 'Mi Práctica' },
@@ -549,8 +549,18 @@ const Router = {
         ${UI.renderLoading('Inicializando aplicación...')}
       </main>
       ${this.renderFooter()}
+
+      <!-- Botón flotante de Helene -->
+      <button
+        id="helene-floating-btn"
+        onclick="Router.navigate('chatbot')"
+        class="fixed bottom-6 right-6 z-50 w-16 h-16 bg-gradient-to-r from-yellow-500 to-pink-500 hover:from-yellow-600 hover:to-pink-600 rounded-full shadow-2xl flex items-center justify-center transform hover:scale-110 transition-all duration-300 animate-pulse-slow"
+        title="Chat con Helene Hadsell"
+      >
+        <span class="text-3xl">👑</span>
+      </button>
     `
-    
+
     this.renderCurrentSection()
   },
 

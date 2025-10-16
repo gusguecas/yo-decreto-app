@@ -29,15 +29,15 @@ const Progreso = {
   async loadProgresoData() {
     const [metricas, porDecreto, timeline, decretos] = await Promise.all([
       API.progreso.getMetricas(),
-      API.progreso.getPorDecreto(), 
+      API.progreso.getPorDecreto(),
       API.progreso.getTimeline('mes'), // Última mes por defecto
       API.decretos.getAll() // Para obtener contadores de decretos
     ])
 
-    this.data.metricas = metricas.data
-    this.data.porDecreto = porDecreto.data
-    this.data.timeline = timeline.data
-    this.data.decretosContadores = decretos.data.contadores // Agregar contadores de decretos
+    this.data.metricas = metricas?.data || {}
+    this.data.porDecreto = porDecreto?.data || { totales_por_area: {} }
+    this.data.timeline = timeline?.data || []
+    this.data.decretosContadores = decretos?.data?.contadores || {} // Agregar contadores de decretos
   },
 
   renderProgresoView() {
