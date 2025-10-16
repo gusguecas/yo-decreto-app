@@ -2,7 +2,15 @@
 
 const Agenda = {
   data: {
-    selectedDate: dayjs().format('YYYY-MM-DD'),
+    selectedDate: (() => {
+      const today = new Date()
+      const year = today.getFullYear()
+      const month = String(today.getMonth() + 1).padStart(2, '0')
+      const day = String(today.getDate()).padStart(2, '0')
+      const formatted = `${year}-${month}-${day}`
+      console.log('📅 Fecha inicial calculada:', formatted, '| Hora local:', today.toLocaleString())
+      return formatted
+    })(),
     currentMonth: dayjs().format('YYYY-MM'),
     eventos: {},
     timeline: [],
@@ -41,6 +49,8 @@ const Agenda = {
   async loadAgendaData() {
     const [year, month] = this.data.currentMonth.split('-')
 
+    console.log('🔄 Cargando datos de agenda para fecha:', this.data.selectedDate)
+
     // Cargar datos en paralelo (AGREGANDO Google Calendar)
     const [calendario, timeline, metricas, enfoque, panoramica, googleEvents] = await Promise.all([
       API.agenda.getCalendario(year, month),
@@ -55,6 +65,9 @@ const Agenda = {
         endDate: dayjs(this.data.selectedDate).add(1, 'day').format('YYYY-MM-DD')
       }).catch(() => ({ success: false, data: [] }))
     ])
+
+    console.log('📊 Respuesta timeline:', timeline)
+    console.log('📅 Eventos timeline:', timeline.data)
 
     this.data.eventos = calendario.data.estados
 
@@ -1135,9 +1148,64 @@ const Agenda = {
 
   // Event handlers
   async selectDate(date) {
+    console.log('📅 Seleccionando fecha:', date)
     this.data.selectedDate = date
-    await this.loadAgendaData()
-    await this.render()
+
+    // Cargar solo los datos necesarios del día
+    const [timeline, metricas, enfoque, googleEvents] = await Promise.all([
+      API.agenda.getTimeline(this.data.selectedDate),
+      API.agenda.getMetricasDia(this.data.selectedDate),
+      API.agenda.getEnfoque(this.data.selectedDate),
+      API.googleCalendar.getEvents({
+        startDate: this.data.selectedDate,
+        endDate: dayjs(this.data.selectedDate).add(1, 'day').format('YYYY-MM-DD')
+      }).catch(() => ({ success: false, data: [] }))
+    ])
+
+    // Formatear eventos de Google Calendar
+    const googleEventsFormatted = (googleEvents.success && googleEvents.data) ?
+      googleEvents.data.map(evt => ({
+        id: `gcal_${evt.id}`,
+        titulo: `📅 ${evt.titulo}`,
+        descripcion: evt.descripcion || '',
+        fecha_evento: evt.fecha_inicio?.split('T')[0] || this.data.selectedDate,
+        hora_evento: evt.fecha_inicio?.split('T')[1]?.substring(0, 5) || null,
+        estado: 'pendiente',
+        prioridad: 'media',
+        tipo: 'google_calendar',
+        decreto_titulo: 'Google Calendar',
+        decreto_area: null
+      })) : []
+
+    // Actualizar datos
+    this.data.originalTimeline = [...timeline.data, ...googleEventsFormatted]
+    this.data.timeline = [...this.data.originalTimeline]
+    this.data.metricas = metricas.data
+    this.data.enfoque = enfoque.data
+
+    // Aplicar filtros
+    this.aplicarFiltros()
+
+    // Actualizar solo las secciones necesarias
+    const timelineContainer = document.querySelector('[data-section="timeline"]')
+    const panelControlContainer = document.querySelector('[data-section="panel-control"]')
+    const recordatoriosContainer = document.querySelector('[data-section="recordatorios"]')
+    const calendarioContainer = document.querySelector('[data-section="calendario"]')
+
+    if (timelineContainer) {
+      timelineContainer.outerHTML = this.renderTimelineCinematografico()
+    }
+    if (panelControlContainer) {
+      panelControlContainer.outerHTML = this.renderPanelControlFuturista()
+    }
+    if (recordatoriosContainer) {
+      recordatoriosContainer.outerHTML = this.renderRecordatoriosExpress()
+    }
+    if (calendarioContainer) {
+      calendarioContainer.outerHTML = this.renderCalendarioPremium()
+    }
+
+    console.log('✅ Vista actualizada para:', date)
   },
 
   async previousMonth() {
@@ -3076,9 +3144,9 @@ const Agenda = {
     const currentDate = dayjs(this.data.currentMonth)
     const today = dayjs()
     const selectedDate = dayjs(this.data.selectedDate)
-    
+
     return `
-      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; border: 2px solid #10b981 !important; display: flex !important; flex-direction: column !important;">
+      <div class="glassmorphism-card premium-shadow" data-section="calendario" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; border: 2px solid #10b981 !important; display: flex !important; flex-direction: column !important;">
         <!-- Header Elegante con Glassmorphism -->
         <div class="p-4 border-b border-white/10" style="flex-shrink: 0;">
           <div class="flex items-center justify-between mb-2">
@@ -3183,10 +3251,12 @@ const Agenda = {
         else if (dayState === 'vencido') ledIndicator = '<div class="led-indicator led-red"></div>'
       }
       
-      // Estilos especiales para el día de hoy
+      // Estilos especiales para el día seleccionado
       let dayStyle = 'min-height: 50px; display: flex; align-items: center; justify-content: center; position: relative;'
-      if (isToday && isCurrentMonth) {
+      if (isSelected && isCurrentMonth) {
         dayStyle += ' background: #10b981; color: white; font-weight: bold; border-radius: 8px;'
+      } else if (isToday && isCurrentMonth) {
+        dayStyle += ' border: 2px solid #10b981; color: #10b981; font-weight: bold; border-radius: 8px;'
       }
 
       calendarHTML += `
@@ -3209,9 +3279,9 @@ const Agenda = {
   renderTimelineCinematografico() {
     const timeline = this.data.timeline || []
     const hoyFormatted = dayjs(this.data.selectedDate).format('dddd, D [de] MMMM')
-    
+
     return `
-      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; border: 2px solid #10b981 !important;">
+      <div class="glassmorphism-card premium-shadow" data-section="timeline" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; border: 2px solid #10b981 !important;">
         <!-- Header Cinematográfico -->
         <div class="p-4 border-b border-white/10">
           <div class="flex items-center space-x-3 mb-2">
@@ -3389,10 +3459,10 @@ const Agenda = {
   renderPanelControlFuturista() {
     const { total, completadas, pendientes, progreso } = this.data.metricas || {}
     const filtroActual = this.data.panoramicaPendientes.filtroArea
-    
+
     return `
       <!-- 🎛️ PANEL PRINCIPAL CON ALTURA FIJA -->
-      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; border: 2px solid #10b981 !important;">
+      <div class="glassmorphism-card premium-shadow" data-section="panel-control" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; border: 2px solid #10b981 !important;">
           <div class="p-4">
             
             <!-- Header del Panel -->
@@ -4090,7 +4160,7 @@ const Agenda = {
   // 📝 RECORDATORIOS EXPRESS - Libreta Digital
   renderRecordatoriosExpress() {
     return `
-      <div class="glassmorphism-card premium-shadow" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; border: 2px solid #10b981 !important;">
+      <div class="glassmorphism-card premium-shadow" data-section="recordatorios" style="height: 480px !important; min-height: 480px !important; max-height: 480px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; border: 2px solid #10b981 !important;">
         <div class="p-4 flex-1 flex flex-col">
           
           <!-- 📝 Header -->
@@ -4584,3 +4654,8 @@ const Recordatorios = {
 // Update $(date +%s)
 // Update 1760597809
 // Update 1760598068
+// Update 1760598444
+// Update 1760598601
+// Update 1760598749
+// Update 1760598966
+// Update 1760599263
