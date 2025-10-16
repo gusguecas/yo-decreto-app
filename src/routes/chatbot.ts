@@ -601,14 +601,14 @@ Sé proactiva y usa las herramientas cuando sea apropiado para ayudar mejor al u
       }, 500)
     }
 
-    // Convertir herramientas al formato de Gemini
-    const geminiTools = [{
+    // Convertir herramientas al formato de Gemini (solo si está autenticado)
+    const geminiTools = isAuthenticated ? [{
       functionDeclarations: HELENE_TOOLS.map(tool => ({
         name: tool.name,
         description: tool.description,
         parameters: tool.parameters
       }))
-    }]
+    }] : undefined
 
     // Loop de function calling
     let currentMessages = messages
@@ -620,6 +620,43 @@ Sé proactiva y usa las herramientas cuando sea apropiado para ayudar mejor al u
     while (iteration < maxIterations) {
       iteration++
 
+      // Preparar el body de la request
+      const requestBody: any = {
+        contents: currentMessages.map(msg => ({
+          role: msg.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: msg.content }]
+        })),
+        generationConfig: {
+          temperature: 0.9,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        },
+        safetySettings: [
+          {
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          }
+        ]
+      }
+
+      // Solo agregar tools si el usuario está autenticado
+      if (geminiTools) {
+        requestBody.tools = geminiTools
+      }
+
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_AI_KEY}`,
         {
@@ -627,37 +664,7 @@ Sé proactiva y usa las herramientas cuando sea apropiado para ayudar mejor al u
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            contents: currentMessages.map(msg => ({
-              role: msg.role === 'assistant' ? 'model' : 'user',
-              parts: [{ text: msg.content }]
-            })),
-            tools: geminiTools,
-            generationConfig: {
-              temperature: 0.9,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 2048,
-            },
-            safetySettings: [
-              {
-                category: 'HARM_CATEGORY_HARASSMENT',
-                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-              },
-              {
-                category: 'HARM_CATEGORY_HATE_SPEECH',
-                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-              },
-              {
-                category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-              },
-              {
-                category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-              }
-            ]
-          })
+          body: JSON.stringify(requestBody)
         }
       )
 
