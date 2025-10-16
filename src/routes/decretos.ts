@@ -379,9 +379,9 @@ decretosRoutes.post('/:id/acciones', async (c) => {
         subtareas_creadas: subtareasCreadas
       }
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating action:', error)
-    return c.json({ success: false, error: `Error al crear acción: ${error.message}` }, 500)
+    return c.json({ success: false, error: `Error al crear acción: ${error?.message || 'Error desconocido'}` }, 500)
   }
 })
 
