@@ -1086,15 +1086,18 @@ const Rutina = {
           </div>
 
           <div class="space-y-3 max-h-96 overflow-y-auto">
-            ${decretos.map(decreto => `
+            ${decretos.map(decreto => {
+              const safeTitle = Utils.escapeHtml(decreto.titulo || '')
+              const safeDesc = Utils.escapeHtml(decreto.descripcion || '')
+              return `
               <div class="gradient-card p-4 rounded-lg hover:border-${info.color}-500 border-2 border-transparent transition-all cursor-pointer"
                    onclick="Rutina.selectDecretoToSwap(${decreto.id}, ${decretoActualId}, '${categoria}')">
                 <div class="flex items-start justify-between">
                   <div class="flex items-center space-x-3 flex-1">
                     <span class="text-3xl">${info.emoji}</span>
                     <div class="flex-1">
-                      <h4 class="font-bold">${decreto.titulo}</h4>
-                      ${decreto.descripcion ? `<p class="text-sm text-slate-400 mt-1">${decreto.descripcion}</p>` : ''}
+                      <h4 class="font-bold">${safeTitle}</h4>
+                      ${decreto.descripcion ? `<p class="text-sm text-slate-400 mt-1">${safeDesc}</p>` : ''}
                       <div class="text-xs text-slate-500 mt-2">
                         🔄 Último primario: hace ${Math.floor(decreto.days_since_primary)} día${Math.floor(decreto.days_since_primary) !== 1 ? 's' : ''}
                       </div>
@@ -1105,7 +1108,7 @@ const Rutina = {
                   </button>
                 </div>
               </div>
-            `).join('')}
+            `}).join('')}
           </div>
 
           <button onclick="Modal.close('swapDecretoModal')" class="w-full btn-secondary px-4 py-2 rounded-lg">
