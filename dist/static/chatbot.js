@@ -368,9 +368,9 @@ const Chatbot = {
     }
   },
 
-  toggleVoiceRecording() {
+  async toggleVoiceRecording() {
     if (!this.data.recognition) {
-      Utils.showToast('Reconocimiento de voz no disponible', 'error')
+      Utils.showToast('Reconocimiento de voz no disponible en este navegador', 'error')
       return
     }
 
@@ -379,14 +379,33 @@ const Chatbot = {
       this.data.recognition.stop()
       this.stopRecording()
     } else {
-      // Iniciar grabación
+      // Verificar y solicitar permisos de micrófono primero
       try {
+        // Intentar obtener permisos explícitamente
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+
+        // Si se obtuvo el permiso, detener el stream (solo lo necesitábamos para verificar permisos)
+        stream.getTracks().forEach(track => track.stop())
+
+        // Ahora iniciar el reconocimiento de voz
         this.data.recognition.start()
         this.startRecording()
         Utils.showToast('🎤 Escuchando... Habla ahora', 'info')
       } catch (error) {
-        console.error('Error al iniciar reconocimiento:', error)
-        Utils.showToast('Error al iniciar micrófono', 'error')
+        console.error('Error al acceder al micrófono:', error)
+
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+          Utils.showToast('⚠️ Permiso de micrófono denegado. Por favor, permite el acceso al micrófono en la configuración de tu navegador.', 'error')
+
+          // Mostrar instrucciones adicionales
+          setTimeout(() => {
+            Utils.showToast('💡 En Chrome: Haz clic en el candado 🔒 junto a la URL y permite el micrófono', 'info')
+          }, 3000)
+        } else if (error.name === 'NotFoundError') {
+          Utils.showToast('❌ No se encontró ningún micrófono conectado', 'error')
+        } else {
+          Utils.showToast('Error al iniciar micrófono: ' + error.message, 'error')
+        }
       }
     }
   },
