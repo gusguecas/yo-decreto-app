@@ -98,6 +98,11 @@ const API = {
       ...options
     }
 
+    // Agregar X-User-ID si el usuario está autenticado
+    if (Auth.currentUser && Auth.currentUser.id) {
+      config.headers['X-User-ID'] = Auth.currentUser.id.toString()
+    }
+
     try {
       AppState.loading = true
       const response = await axios(url, config)
