@@ -2734,10 +2734,10 @@ const Agenda = {
   openSeguimientoModal(tareaId) {
     try {
       console.log('📊 Abriendo modal de seguimiento para tarea:', tareaId)
-      
+
       // Buscar la tarea en los datos actuales
       const tarea = this.data.timeline?.find(t => t.id === tareaId)
-      
+
       if (tarea && tarea.accion_id) {
         // Si tiene accion_id, abrir el modal de seguimiento de decretos
         if (typeof openSeguimiento === 'function') {
@@ -2752,6 +2752,102 @@ const Agenda = {
     } catch (error) {
       console.error('❌ Error abriendo seguimiento:', error)
       showNotification('❌ Error abriendo seguimiento', 'error')
+    }
+  },
+
+  async cambiarEstadoTarea(tareaId) {
+    try {
+      const tarea = this.data.timeline?.find(t => t.id === tareaId)
+      if (!tarea) {
+        Utils.showToast('❌ Tarea no encontrada', 'error')
+        return
+      }
+
+      if (tarea.estado === 'completada') {
+        // Si está completada, marcar como pendiente
+        await this.marcarPendiente(tareaId)
+      } else {
+        // Si está pendiente o en progreso, completar
+        await this.completarTarea(tareaId)
+      }
+    } catch (error) {
+      console.error('❌ Error al cambiar estado:', error)
+      Utils.showToast('❌ Error al cambiar estado de tarea', 'error')
+    }
+  },
+
+  confirmarBorrarTarea(tareaId) {
+    const tarea = this.data.timeline?.find(t => t.id === tareaId)
+    if (!tarea) return
+
+    if (confirm(`¿Estás seguro de que quieres borrar la tarea "${tarea.titulo}"?`)) {
+      this.eliminarTarea(tareaId)
+    }
+  },
+
+  // Funciones para acciones en Panorámica
+  openSeguimientoModalAccion(accionId) {
+    try {
+      console.log('📊 Abriendo modal de seguimiento para acción:', accionId)
+
+      if (typeof Decretos !== 'undefined' && typeof Decretos.openSeguimientoModal === 'function') {
+        Decretos.openSeguimientoModal(accionId)
+      } else {
+        console.warn('Función Decretos.openSeguimientoModal no disponible')
+        Utils.showToast('⚠️ Función de seguimiento no disponible', 'warning')
+      }
+    } catch (error) {
+      console.error('❌ Error abriendo seguimiento:', error)
+      Utils.showToast('❌ Error abriendo seguimiento', 'error')
+    }
+  },
+
+  async cambiarEstadoAccion(accionId) {
+    try {
+      const accion = this.data.panoramicaPendientes.acciones?.find(a => a.id === accionId)
+      if (!accion) {
+        Utils.showToast('❌ Acción no encontrada', 'error')
+        return
+      }
+
+      if (typeof Decretos !== 'undefined' && typeof Decretos.cambiarEstadoAccion === 'function') {
+        await Decretos.cambiarEstadoAccion(accionId)
+        // Recargar panorámica
+        await this.loadPanoramicaPendientes()
+        this.render()
+      } else {
+        console.warn('Función Decretos.cambiarEstadoAccion no disponible')
+        Utils.showToast('⚠️ Función no disponible', 'warning')
+      }
+    } catch (error) {
+      console.error('❌ Error al cambiar estado:', error)
+      Utils.showToast('❌ Error al cambiar estado de acción', 'error')
+    }
+  },
+
+  confirmarBorrarAccion(accionId) {
+    const accion = this.data.panoramicaPendientes.acciones?.find(a => a.id === accionId)
+    if (!accion) return
+
+    if (confirm(`¿Estás seguro de que quieres borrar la acción "${accion.titulo}"?`)) {
+      this.borrarAccion(accionId)
+    }
+  },
+
+  async borrarAccion(accionId) {
+    try {
+      if (typeof Decretos !== 'undefined' && typeof Decretos.borrarAccion === 'function') {
+        await Decretos.borrarAccion(accionId)
+        // Recargar panorámica
+        await this.loadPanoramicaPendientes()
+        this.render()
+      } else {
+        console.warn('Función Decretos.borrarAccion no disponible')
+        Utils.showToast('⚠️ Función no disponible', 'warning')
+      }
+    } catch (error) {
+      console.error('❌ Error al borrar acción:', error)
+      Utils.showToast('❌ Error al borrar acción', 'error')
     }
   },
 
@@ -3383,7 +3479,7 @@ const Agenda = {
 
         <!-- Card de Tarea -->
         <div class="timeline-card" data-evento-id="${tarea.id}"
-             style="border-left: ${bordeGrosor} solid ${areaConfig.color}; position: relative; background: transparent !important;">
+             style="border-left: ${bordeGrosor} solid ${areaConfig.color}; position: relative; background: transparent !important; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 16px; margin-bottom: 16px;">
 
           <!-- Badge de PRIMARIA (solo si es primaria) -->
           ${esPrimaria ? `
@@ -3400,7 +3496,7 @@ const Agenda = {
             </div>
 
             <!-- Contenido -->
-            <div class="flex-1 min-w-0" style="padding-top: ${esPrimaria ? '24px' : '0'};">
+            <div class="flex-1 min-w-0">
               <!-- Hora -->
               <div class="text-sm font-mono font-bold mb-1" style="color: ${areaConfig.color};">
                 ${horaFormateada}
@@ -3425,31 +3521,34 @@ const Agenda = {
                 <p class="text-sm text-slate-500 line-clamp-2">${tarea.descripcion}</p>
               ` : ''}
             </div>
+          </div>
 
-            <!-- Actions Flotantes -->
-            <div class="timeline-actions">
-              <button
-                onclick="Agenda.completarTarea('${tarea.id}')"
-                class="timeline-action-btn ${tarea.estado === 'completada' ? 'action-completed' : 'action-complete'}"
-                title="${tarea.estado === 'completada' ? 'Marcar pendiente' : 'Completar tarea'}"
-              >
-                <i class="fas fa-check text-xs"></i>
-              </button>
-              <button
-                onclick="Agenda.openEditTareaModal('${tarea.id}')"
-                class="timeline-action-btn action-edit"
-                title="Editar tarea"
-              >
-                <i class="fas fa-edit text-xs"></i>
-              </button>
-              <button
-                onclick="Agenda.deleteTarea('${tarea.id}')"
-                class="timeline-action-btn action-delete"
-                title="Eliminar tarea"
-              >
-                <i class="fas fa-trash text-xs"></i>
-              </button>
-            </div>
+          <!-- Actions Flotantes - Movidos debajo del badge cuando es primaria -->
+          <div class="flex justify-end space-x-2 mt-2 pr-2">
+            <button
+              onclick="Agenda.openSeguimientoModal('${tarea.id}')"
+              class="group relative bg-gradient-to-r from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 border border-green-400/50 text-green-300 hover:text-green-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-green-500/20"
+              title="Seguimiento"
+            >
+              <i class="fas fa-lock text-sm"></i>
+              <div class="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+            <button
+              onclick="Agenda.cambiarEstadoTarea('${tarea.id}')"
+              class="group relative bg-gradient-to-r from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30 border border-purple-400/50 text-purple-300 hover:text-purple-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
+              title="${tarea.estado === 'completada' ? 'Marcar pendiente' : 'Completar tarea'}"
+            >
+              <i class="fas fa-${tarea.estado === 'completada' ? 'undo' : 'check'} text-sm"></i>
+              <div class="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+            <button
+              onclick="Agenda.confirmarBorrarTarea('${tarea.id}')"
+              class="group relative bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-400/50 text-red-300 hover:text-red-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/20"
+              title="Borrar"
+            >
+              <i class="fas fa-trash text-sm"></i>
+              <div class="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
           </div>
         </div>
       </div>
@@ -3778,7 +3877,7 @@ const Agenda = {
     
     return `
       <div class="accion-maestra-card ${config.pulse} fade-in-masonry"
-           style="animation-delay: ${index * 0.05}s">
+           style="animation-delay: ${index * 0.05}s; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 16px; margin-bottom: 16px;">
         
         <!-- Header de la Acción -->
         <div class="flex items-start justify-between mb-3">
@@ -3825,29 +3924,30 @@ const Agenda = {
         </div>
 
         <!-- Acciones -->
-        <div class="flex space-x-2">
-          ${accion.evento_agenda_id ? `
-            <button 
-              onclick="Agenda.verEnTimeline('${accion.evento_agenda_id}')"
-              class="accion-btn accion-btn-blue"
-              title="Ver en timeline"
-            >
-              <i class="fas fa-calendar-alt text-xs"></i>
-            </button>
-          ` : ''}
-          <button 
-            onclick="Decretos.openAccionModal('${accion.decreto_id}', '${accion.id}')"
-            class="accion-btn accion-btn-green"
-            title="Ver detalles"
+        <div class="flex justify-end space-x-2 mt-2 pr-2">
+          <button
+            onclick="Agenda.openSeguimientoModalAccion('${accion.id}')"
+            class="group relative bg-gradient-to-r from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 border border-green-400/50 text-green-300 hover:text-green-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-green-500/20"
+            title="Seguimiento"
           >
-            <i class="fas fa-eye text-xs"></i>
+            <i class="fas fa-lock text-sm"></i>
+            <div class="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </button>
-          <button 
-            onclick="Agenda.programarAccion('${accion.id}')"
-            class="accion-btn accion-btn-orange"
-            title="Programar"
+          <button
+            onclick="Agenda.cambiarEstadoAccion('${accion.id}')"
+            class="group relative bg-gradient-to-r from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30 border border-purple-400/50 text-purple-300 hover:text-purple-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
+            title="${accion.estado === 'completada' ? 'Marcar pendiente' : 'Completar'}"
           >
-            <i class="fas fa-plus text-xs"></i>
+            <i class="fas fa-${accion.estado === 'completada' ? 'undo' : 'check'} text-sm"></i>
+            <div class="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </button>
+          <button
+            onclick="Agenda.confirmarBorrarAccion('${accion.id}')"
+            class="group relative bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-400/50 text-red-300 hover:text-red-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/20"
+            title="Borrar"
+          >
+            <i class="fas fa-trash text-sm"></i>
+            <div class="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </button>
         </div>
 
@@ -4659,3 +4759,11 @@ const Recordatorios = {
 // Update 1760598749
 // Update 1760598966
 // Update 1760599263
+// Update 1760599977
+// Update 1760600194
+// Update 1760600331
+// Update 1760600669
+// Update 1760600915
+// Update 1760601230
+// Update 1760601554
+// Update 1760601778
