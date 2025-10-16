@@ -644,17 +644,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof window.dayjs_plugin_isSameOrBefore !== 'undefined') {
       dayjs.extend(window.dayjs_plugin_isSameOrBefore)
     }
-    
-    // Cargar configuración inicial
-    const config = await API.config.get()
-    AppState.user = config.data
-    
+
+    // Cargar configuración inicial (opcional - no bloquea la app si falla)
+    try {
+      const config = await API.config.get()
+      AppState.user = config.data
+    } catch (configError) {
+      console.warn('No se pudo cargar configuración del usuario, continuando con valores por defecto:', configError)
+      AppState.user = {
+        id: Auth.currentUser?.id || 2,
+        name: Auth.currentUser?.name || 'Usuario',
+        email: Auth.currentUser?.email || 'test@test.com'
+      }
+    }
+
     // Inicializar router
     Router.init()
-    
+
     Utils.showToast('¡Aplicación cargada exitosamente!', 'success')
   } catch (error) {
-    console.error('Error al inicializar:', error)
+    console.error('Error crítico al inicializar:', error)
     document.getElementById('app').innerHTML = `
       <div class="min-h-screen bg-slate-900 flex items-center justify-center">
         <div class="text-center">
