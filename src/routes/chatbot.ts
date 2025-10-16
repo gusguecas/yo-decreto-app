@@ -549,14 +549,14 @@ chatbotRoutes.post('/chat', async (c) => {
     }
 
     // Obtener información del usuario si está logueado (opcional)
-    const userId = c.req.header('X-User-ID')
-
-    if (!userId) {
-      return c.json({ success: false, error: 'Usuario no autenticado' }, 401)
-    }
+    const userId = c.req.header('X-User-ID') || 'demo-user'
+    const isAuthenticated = c.req.header('X-User-ID') !== undefined
 
     // Construir el historial de conversación para Gemini
-    const systemPrompt = `${HELENE_PROMPT || HELENE_PROMPT_FALLBACK}
+    let systemPrompt = HELENE_PROMPT || HELENE_PROMPT_FALLBACK
+
+    if (isAuthenticated) {
+      systemPrompt += `
 
 HERRAMIENTAS DISPONIBLES:
 Tienes acceso a herramientas para ayudar al usuario. Puedes leer sus decretos, crear nuevos, agregar eventos a la agenda, registrar señales, etc.
@@ -569,6 +569,7 @@ IMPORTANTE:
 - Siempre da feedback al usuario sobre lo que hiciste
 
 Sé proactiva y usa las herramientas cuando sea apropiado para ayudar mejor al usuario.`
+    }
 
     const messages = [
       {
