@@ -249,6 +249,9 @@ const Rutina = {
     }
     const color = categoryColors[categoria]
 
+    // Días desde último primario
+    const daysSincePrimary = decreto.days_since_primary || 0
+
     return `
       <div class="gradient-card rounded-xl p-6 border-2 ${isCompleted ? 'border-green-500' : `border-${color}-500`}">
         <div class="flex items-start justify-between mb-4">
@@ -257,11 +260,22 @@ const Rutina = {
             <div>
               <div class="text-xs text-slate-400 uppercase tracking-wide">${label}</div>
               <h3 class="text-lg font-bold">${decreto.titulo}</h3>
+              <div class="text-xs text-slate-500 mt-1">
+                ${daysSincePrimary === 0 ? '🆕 Primera vez como primario' : `🔄 Último primario: hace ${daysSincePrimary} día${daysSincePrimary !== 1 ? 's' : ''}`}
+              </div>
             </div>
           </div>
-          ${isCompleted ? `
-            <i class="fas fa-check-circle text-green-400 text-2xl"></i>
-          ` : ''}
+          <div class="flex flex-col items-end space-y-2">
+            ${isCompleted ? `
+              <i class="fas fa-check-circle text-green-400 text-2xl"></i>
+            ` : ''}
+            <button onclick="Rutina.openSwapDecretoModal('${decreto.id}', '${categoria}', '${Utils.escapeHtml(decreto.titulo)}')"
+                    class="text-xs px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                    title="Cambiar por otro decreto">
+              <i class="fas fa-exchange-alt mr-1"></i>
+              Cambiar
+            </button>
+          </div>
         </div>
 
         ${decreto.description ? `
@@ -1036,5 +1050,103 @@ const Rutina = {
     const modalHtml = UI.renderModal('taskDetailsModal', 'Detalles de Tarea Completada', html, 'md')
     modalsContainer.innerHTML = modalHtml
     Modal.open('taskDetailsModal')
+  },
+
+  async openSwapDecretoModal(decretoActualId, categoria, decretoActualTitulo) {
+    try {
+      // Obtener decretos de la misma categoría
+      const response = await API.rutina.getDecretosByArea(categoria)
+
+      if (!response.success) {
+        Utils.showToast('Error al cargar decretos alternativos', 'error')
+        return
+      }
+
+      const decretos = response.data.decretos.filter(d => d.id !== parseInt(decretoActualId))
+
+      if (decretos.length === 0) {
+        Utils.showToast('No hay otros decretos en esta categoría para intercambiar', 'info')
+        return
+      }
+
+      const categoryInfo = {
+        material: { emoji: '🏆', color: 'yellow', label: 'Material' },
+        humano: { emoji: '❤️', color: 'pink', label: 'Humano' },
+        empresarial: { emoji: '💼', color: 'blue', label: 'Empresarial' }
+      }
+      const info = categoryInfo[categoria]
+
+      const html = `
+        <div class="space-y-4">
+          <div class="bg-blue-900/30 border border-blue-500/50 p-4 rounded-lg">
+            <p class="text-sm text-blue-200">
+              <strong>Decreto actual:</strong> ${decretoActualTitulo}<br>
+              Selecciona un decreto alternativo de la categoría <strong>${info.label}</strong> para trabajar hoy.
+            </p>
+          </div>
+
+          <div class="space-y-3 max-h-96 overflow-y-auto">
+            ${decretos.map(decreto => `
+              <div class="gradient-card p-4 rounded-lg hover:border-${info.color}-500 border-2 border-transparent transition-all cursor-pointer"
+                   onclick="Rutina.selectDecretoToSwap(${decreto.id}, '${decretoActualId}', '${categoria}')">
+                <div class="flex items-start justify-between">
+                  <div class="flex items-center space-x-3 flex-1">
+                    <span class="text-3xl">${info.emoji}</span>
+                    <div class="flex-1">
+                      <h4 class="font-bold">${decreto.titulo}</h4>
+                      ${decreto.descripcion ? `<p class="text-sm text-slate-400 mt-1">${decreto.descripcion}</p>` : ''}
+                      <div class="text-xs text-slate-500 mt-2">
+                        🔄 Último primario: hace ${Math.floor(decreto.days_since_primary)} día${Math.floor(decreto.days_since_primary) !== 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </div>
+                  <button class="btn-primary px-4 py-2 rounded-lg text-sm">
+                    Seleccionar
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <button onclick="Modal.close('swapDecretoModal')" class="w-full btn-secondary px-4 py-2 rounded-lg">
+            Cancelar
+          </button>
+        </div>
+      `
+
+      const modalsContainer = document.getElementById('modals') || document.body
+      const modalHtml = UI.renderModal('swapDecretoModal', `Cambiar Decreto ${info.label}`, html, 'lg')
+      modalsContainer.innerHTML = modalHtml
+      Modal.open('swapDecretoModal')
+
+    } catch (error) {
+      console.error('Error al abrir modal de cambio:', error)
+      Utils.showToast('Error al cargar opciones de cambio', 'error')
+    }
+  },
+
+  async selectDecretoToSwap(nuevoDecretoId, decretoActualId, categoria) {
+    try {
+      const confirmed = confirm('¿Estás seguro de que quieres cambiar el decreto primario del día?')
+      if (!confirmed) return
+
+      const response = await API.rutina.swapPrimary({
+        decretoActualId: parseInt(decretoActualId),
+        nuevoDecretoId: parseInt(nuevoDecretoId),
+        categoria
+      })
+
+      if (response.success) {
+        Modal.close('swapDecretoModal')
+        Utils.showToast('✅ Decreto primario intercambiado exitosamente', 'success')
+        this.render() // Recargar vista
+      } else {
+        Utils.showToast('❌ Error al intercambiar decreto', 'error')
+      }
+
+    } catch (error) {
+      console.error('Error al intercambiar decreto:', error)
+      Utils.showToast('❌ Error al intercambiar decreto primario', 'error')
+    }
   }
 }

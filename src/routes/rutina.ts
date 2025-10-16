@@ -112,25 +112,37 @@ rutinaRoutes.get('/today', async (c) => {
         `).bind(today, decreto.id).run()
       }
 
-      // Obtener la rotación recién creada
+      // Obtener la rotación recién creada con días desde último primario
       rotation = await db.prepare(`
         SELECT
           dr.*,
           dm.titulo as material_titulo,
           dm.descripcion as material_description,
           dm.faith_level as material_faith,
+          COALESCE(
+            julianday(?) - julianday(dm.last_primary_date),
+            julianday(?) - julianday(dm.created_at)
+          ) as material_days_since_primary,
           dh.titulo as humano_titulo,
           dh.descripcion as humano_description,
           dh.faith_level as humano_faith,
+          COALESCE(
+            julianday(?) - julianday(dh.last_primary_date),
+            julianday(?) - julianday(dh.created_at)
+          ) as humano_days_since_primary,
           de.titulo as empresarial_titulo,
           de.descripcion as empresarial_description,
-          de.faith_level as empresarial_faith
+          de.faith_level as empresarial_faith,
+          COALESCE(
+            julianday(?) - julianday(de.last_primary_date),
+            julianday(?) - julianday(de.created_at)
+          ) as empresarial_days_since_primary
         FROM daily_rotation dr
         LEFT JOIN decretos dm ON dr.decreto_material_id = dm.id
         LEFT JOIN decretos dh ON dr.decreto_humano_id = dh.id
         LEFT JOIN decretos de ON dr.decreto_empresarial_id = de.id
         WHERE dr.user_id = ? AND dr.date = ?
-      `).bind(userId, today).first()
+      `).bind(today, today, today, today, today, today, userId, today).first()
     }
 
     // Obtener decretos secundarios (todos los demás)
@@ -201,19 +213,22 @@ rutinaRoutes.get('/today', async (c) => {
             id: rotation.decreto_material_id,
             titulo: rotation.material_titulo,
             description: rotation.material_description,
-            faith_level: rotation.material_faith
+            faith_level: rotation.material_faith,
+            days_since_primary: Math.floor(rotation.material_days_since_primary || 0)
           },
           humano: {
             id: rotation.decreto_humano_id,
             titulo: rotation.humano_titulo,
             description: rotation.humano_description,
-            faith_level: rotation.humano_faith
+            faith_level: rotation.humano_faith,
+            days_since_primary: Math.floor(rotation.humano_days_since_primary || 0)
           },
           empresarial: {
             id: rotation.decreto_empresarial_id,
             titulo: rotation.empresarial_titulo,
             description: rotation.empresarial_description,
-            faith_level: rotation.empresarial_faith
+            faith_level: rotation.empresarial_faith,
+            days_since_primary: Math.floor(rotation.empresarial_days_since_primary || 0)
           }
         },
         secondary: secondaryDecretos.results,
@@ -509,6 +524,129 @@ rutinaRoutes.post('/signal', async (c) => {
     return c.json({
       success: false,
       error: error.message || 'Error al registrar señal'
+    }, 500)
+  }
+})
+
+/**
+ * POST /api/rutina/swap-primary
+ * Intercambia un decreto primario del día por otro de la misma categoría
+ */
+rutinaRoutes.post('/swap-primary', async (c) => {
+  try {
+    const userId = c.req.header('X-User-ID') || 'demo-user'
+    const db = c.env.DB
+    const { decretoActualId, nuevoDecretoId, categoria } = await c.req.json()
+
+    const today = new Date().toISOString().split('T')[0]
+
+    // Validar que ambos decretos existan y sean de la misma categoría
+    const decretoActual = await db.prepare(`
+      SELECT * FROM decretos WHERE id = ?
+    `).bind(decretoActualId).first()
+
+    const nuevoDecreto = await db.prepare(`
+      SELECT * FROM decretos WHERE id = ?
+    `).bind(nuevoDecretoId).first()
+
+    if (!decretoActual || !nuevoDecreto) {
+      return c.json({
+        success: false,
+        error: 'Uno o ambos decretos no existen'
+      }, 400)
+    }
+
+    const decretoActualCategoria = decretoActual.categoria || decretoActual.area
+    const nuevoDecretoCategoria = nuevoDecreto.categoria || nuevoDecreto.area
+
+    if (decretoActualCategoria !== categoria || nuevoDecretoCategoria !== categoria) {
+      return c.json({
+        success: false,
+        error: 'Los decretos deben ser de la misma categoría'
+      }, 400)
+    }
+
+    // Actualizar la rotación del día
+    const columnMap = {
+      'material': 'decreto_material_id',
+      'humano': 'decreto_humano_id',
+      'empresarial': 'decreto_empresarial_id'
+    }
+
+    const column = columnMap[categoria]
+    if (!column) {
+      return c.json({
+        success: false,
+        error: 'Categoría inválida'
+      }, 400)
+    }
+
+    await db.prepare(`
+      UPDATE daily_rotation
+      SET ${column} = ?
+      WHERE user_id = ? AND date = ?
+    `).bind(nuevoDecretoId, userId, today).run()
+
+    // Actualizar last_primary_date del nuevo decreto
+    await db.prepare(`
+      UPDATE decretos SET last_primary_date = ? WHERE id = ?
+    `).bind(today, nuevoDecretoId).run()
+
+    return c.json({
+      success: true,
+      message: 'Decreto primario intercambiado exitosamente',
+      data: {
+        categoriaActualizada: categoria,
+        nuevoDecretoId: nuevoDecretoId
+      }
+    })
+
+  } catch (error) {
+    console.error('Error al intercambiar decreto primario:', error)
+    return c.json({
+      success: false,
+      error: error.message || 'Error al intercambiar decreto primario'
+    }, 500)
+  }
+})
+
+/**
+ * GET /api/rutina/decretos-by-area/:area
+ * Obtiene todos los decretos de un área/categoría específica con días desde último primario
+ */
+rutinaRoutes.get('/decretos-by-area/:area', async (c) => {
+  try {
+    const userId = c.req.header('X-User-ID') || 'demo-user'
+    const db = c.env.DB
+    const area = c.req.param('area')
+
+    const today = new Date().toISOString().split('T')[0]
+
+    const decretos = await db.prepare(`
+      SELECT
+        d.*,
+        COALESCE(
+          julianday(?) - julianday(d.last_primary_date),
+          julianday(?) - julianday(d.created_at)
+        ) as days_since_primary
+      FROM decretos d
+      WHERE COALESCE(d.categoria, d.area) = ?
+      ORDER BY days_since_primary DESC
+    `).bind(today, today, area).all()
+
+    return c.json({
+      success: true,
+      data: {
+        area,
+        decretos: decretos.results
+      }
+    })
+
+  } catch (error) {
+    console.error('Error al obtener decretos por área:', error)
+    return c.json({
+      success: false,
+      error: error.message || 'Error al obtener decretos'
     }, 500)
   }
 })
