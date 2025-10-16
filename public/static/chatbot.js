@@ -3,7 +3,9 @@
 const Chatbot = {
   data: {
     conversationHistory: [],
-    isTyping: false
+    isTyping: false,
+    isRecording: false,
+    recognition: null
   },
 
   async render() {
@@ -12,6 +14,9 @@ const Chatbot = {
 
     // Event listeners
     this.setupEventListeners()
+
+    // Inicializar reconocimiento de voz
+    this.initVoiceRecognition()
 
     // Mensaje de bienvenida
     this.addMessage('assistant', '¡Hola dear! 👑 Soy Helene Hadsell, conocida como "La Reina de los Concursos". Durante más de 30 años gané más de 5,000 concursos usando mi método SPEC. ¿Qué quieres manifestar en tu vida hoy?')
@@ -47,10 +52,20 @@ const Chatbot = {
               <input
                 type="text"
                 id="chatInput"
-                placeholder="Escribe tu pregunta o cuéntame qué quieres manifestar..."
+                placeholder="Escribe o habla tu pregunta..."
                 class="flex-1 form-input px-4 py-3 bg-slate-700 text-white rounded-lg border border-slate-600 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/50 transition-all"
                 autocomplete="off"
               />
+              <button
+                type="button"
+                id="micButton"
+                onclick="Chatbot.toggleVoiceRecording()"
+                class="px-4 py-3 rounded-lg flex items-center space-x-2 shadow-lg transition-all transform hover:scale-105"
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"
+                title="Hablar con Helene"
+              >
+                <i class="fas fa-microphone" id="micIcon"></i>
+              </button>
               <button
                 type="submit"
                 id="sendButton"
@@ -281,6 +296,126 @@ const Chatbot = {
       this.addMessage('assistant', '¡Hola dear! 👑 Soy Helene Hadsell. ¿En qué puedo ayudarte hoy?')
 
       Utils.showToast('Conversación limpiada', 'success')
+    }
+  },
+
+  // === RECONOCIMIENTO DE VOZ ===
+
+  initVoiceRecognition() {
+    // Verificar si el navegador soporta Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+
+    if (!SpeechRecognition) {
+      console.warn('El navegador no soporta reconocimiento de voz')
+      const micButton = document.getElementById('micButton')
+      if (micButton) {
+        micButton.disabled = true
+        micButton.title = 'Tu navegador no soporta reconocimiento de voz'
+        micButton.style.opacity = '0.5'
+      }
+      return
+    }
+
+    // Crear instancia de reconocimiento
+    this.data.recognition = new SpeechRecognition()
+    this.data.recognition.lang = 'es-ES' // Español
+    this.data.recognition.continuous = false // Detener después de una frase
+    this.data.recognition.interimResults = false // Solo resultados finales
+
+    // Evento cuando se recibe un resultado
+    this.data.recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      console.log('🎤 Texto reconocido:', transcript)
+
+      // Insertar el texto en el input
+      const input = document.getElementById('chatInput')
+      if (input) {
+        input.value = transcript
+      }
+
+      // Enviar automáticamente
+      this.sendMessage(transcript)
+
+      // Resetear estado
+      this.stopRecording()
+    }
+
+    // Evento cuando hay un error
+    this.data.recognition.onerror = (event) => {
+      console.error('Error de reconocimiento de voz:', event.error)
+      this.stopRecording()
+
+      let errorMessage = 'Error al reconocer voz'
+      switch (event.error) {
+        case 'no-speech':
+          errorMessage = 'No se detectó ninguna voz'
+          break
+        case 'audio-capture':
+          errorMessage = 'No se pudo acceder al micrófono'
+          break
+        case 'not-allowed':
+          errorMessage = 'Permiso de micrófono denegado'
+          break
+      }
+
+      Utils.showToast(errorMessage, 'error')
+    }
+
+    // Evento cuando termina
+    this.data.recognition.onend = () => {
+      console.log('🎤 Reconocimiento de voz finalizado')
+      this.stopRecording()
+    }
+  },
+
+  toggleVoiceRecording() {
+    if (!this.data.recognition) {
+      Utils.showToast('Reconocimiento de voz no disponible', 'error')
+      return
+    }
+
+    if (this.data.isRecording) {
+      // Detener grabación
+      this.data.recognition.stop()
+      this.stopRecording()
+    } else {
+      // Iniciar grabación
+      try {
+        this.data.recognition.start()
+        this.startRecording()
+        Utils.showToast('🎤 Escuchando... Habla ahora', 'info')
+      } catch (error) {
+        console.error('Error al iniciar reconocimiento:', error)
+        Utils.showToast('Error al iniciar micrófono', 'error')
+      }
+    }
+  },
+
+  startRecording() {
+    this.data.isRecording = true
+    const micButton = document.getElementById('micButton')
+    const micIcon = document.getElementById('micIcon')
+
+    if (micButton && micIcon) {
+      // Cambiar estilo a "grabando"
+      micButton.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+      micButton.classList.add('animate-pulse')
+      micIcon.classList.remove('fa-microphone')
+      micIcon.classList.add('fa-stop')
+    }
+  },
+
+  stopRecording() {
+    this.data.isRecording = false
+    const micButton = document.getElementById('micButton')
+    const micIcon = document.getElementById('micIcon')
+
+    if (micButton && micIcon) {
+      // Restaurar estilo normal
+      micButton.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      micButton.classList.remove('animate-pulse')
+      micIcon.classList.remove('fa-stop')
+      micIcon.classList.add('fa-microphone')
     }
   }
 }
