@@ -3553,7 +3553,7 @@ const Agenda = {
         <div class="p-6">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Columna Empresarial -->
-            <div class="space-y-4">
+            <div class="space-y-4 border-2 border-green-500/30 rounded-lg p-4">
               <div class="flex items-center space-x-3 mb-4">
                 <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                   <i class="fas fa-briefcase text-white"></i>
@@ -3570,7 +3570,7 @@ const Agenda = {
             </div>
 
             <!-- Columna Material -->
-            <div class="space-y-4">
+            <div class="space-y-4 border-2 border-green-500/30 rounded-lg p-4">
               <div class="flex items-center space-x-3 mb-4">
                 <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
                   <i class="fas fa-coins text-white"></i>
@@ -3587,7 +3587,7 @@ const Agenda = {
             </div>
 
             <!-- Columna Humana -->
-            <div class="space-y-4">
+            <div class="space-y-4 border-2 border-green-500/30 rounded-lg p-4">
               <div class="flex items-center space-x-3 mb-4">
                 <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
                   <i class="fas fa-heart text-white"></i>
@@ -3707,7 +3707,7 @@ const Agenda = {
     }
     
     return `
-      <div class="accion-maestra-card border-l-4 ${config.color} ${config.pulse} fade-in-masonry"
+      <div class="accion-maestra-card ${config.pulse} fade-in-masonry"
            style="animation-delay: ${index * 0.05}s">
         
         <!-- Header de la Acción -->
