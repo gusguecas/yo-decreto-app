@@ -54,6 +54,7 @@ const Agenda = {
     const [year, month] = this.data.currentMonth.split('-')
 
     console.log('🔄 Cargando datos de agenda para fecha:', this.data.selectedDate)
+    console.log('🆕 VERSION DEBUG 1.0.2 - Cargando Rutina Diaria...')
 
     // Cargar datos en paralelo (AGREGANDO Google Calendar Y Rutina Diaria)
     const [calendario, timeline, metricas, enfoque, panoramica, googleEvents, rutinaData] = await Promise.all([
@@ -74,6 +75,8 @@ const Agenda = {
 
     console.log('📊 Respuesta timeline:', timeline)
     console.log('📅 Eventos timeline:', timeline.data)
+
+    console.log('✅ Promise.all completado. Procesando rutinaData...')
 
     this.data.eventos = calendario.data.estados
 
