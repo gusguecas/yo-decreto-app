@@ -19,6 +19,8 @@ const Agenda = {
     enfoque: null,
     // 🎯 Vista activa: 'actual' o 'propuesta'
     vistaActiva: 'actual',
+    // 🎯 NUEVO: 3 Decretos primarios del día desde Rutina Diaria
+    decretosDelDia: null, // { empresarial: {...}, humano: {...}, material: {...} }
     // 🎯 NUEVO: Datos para panorámica de pendientes
     panoramicaPendientes: {
       acciones: [],
@@ -53,8 +55,8 @@ const Agenda = {
 
     console.log('🔄 Cargando datos de agenda para fecha:', this.data.selectedDate)
 
-    // Cargar datos en paralelo (AGREGANDO Google Calendar)
-    const [calendario, timeline, metricas, enfoque, panoramica, googleEvents] = await Promise.all([
+    // Cargar datos en paralelo (AGREGANDO Google Calendar Y Rutina Diaria)
+    const [calendario, timeline, metricas, enfoque, panoramica, googleEvents, rutinaData] = await Promise.all([
       API.agenda.getCalendario(year, month),
       API.agenda.getTimeline(this.data.selectedDate),
       API.agenda.getMetricasDia(this.data.selectedDate),
@@ -65,7 +67,9 @@ const Agenda = {
       API.googleCalendar.getEvents({
         startDate: this.data.selectedDate,
         endDate: dayjs(this.data.selectedDate).add(1, 'day').format('YYYY-MM-DD')
-      }).catch(() => ({ success: false, data: [] }))
+      }).catch(() => ({ success: false, data: [] })),
+      // 🎯 NUEVO: Cargar 3 decretos primarios del día desde Rutina Diaria
+      API.rutina.getToday().catch(() => ({ success: false, data: null }))
     ])
 
     console.log('📊 Respuesta timeline:', timeline)
@@ -104,6 +108,19 @@ const Agenda = {
       })
     } else {
       console.error('❌ Error al cargar panorámica:', panoramica)
+    }
+
+    // 🎯 NUEVO: Almacenar datos de Rutina Diaria (3 decretos primarios del día)
+    if (rutinaData.success && rutinaData.data) {
+      this.data.decretosDelDia = rutinaData.data.primary || {}
+      console.log('🎯 Decretos del día cargados:', {
+        empresarial: this.data.decretosDelDia.empresarial?.titulo,
+        humano: this.data.decretosDelDia.humano?.titulo,
+        material: this.data.decretosDelDia.material?.titulo
+      })
+    } else {
+      this.data.decretosDelDia = null
+      console.warn('⚠️ No se pudieron cargar los decretos del día desde Rutina')
     }
 
     // Aplicar filtros después de cargar los datos
@@ -4562,48 +4579,137 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
   // =====================================================
 
   renderEnfoqueDiaDestacado() {
-    const enfoque = this.data.enfoque
+    const decretos = this.data.decretosDelDia
+
+    // Si no hay decretos del día, mostrar mensaje
+    if (!decretos) {
+      return `
+        <div class="bg-gradient-to-r from-red-900/40 to-orange-900/40 border-2 border-red-500 rounded-xl p-6 shadow-2xl">
+          <div class="flex items-center space-x-3 mb-4">
+            <span class="text-4xl">⚠️</span>
+            <div>
+              <h2 class="text-2xl font-bold text-white">No se encontraron decretos del día</h2>
+              <p class="text-red-300 text-sm">Ve a "Rutina Diaria" para generar tus 3 decretos del día</p>
+            </div>
+          </div>
+          <button
+            onclick="Router.navigate('rutina')"
+            class="btn-primary px-6 py-3 rounded-lg bg-red-600 hover:bg-red-700"
+          >
+            Ir a Rutina Diaria
+          </button>
+        </div>
+      `
+    }
+
     return `
       <div class="bg-gradient-to-r from-green-900/40 to-purple-900/40 border-2 border-accent-green rounded-xl p-6 shadow-2xl">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-6">
           <div class="flex items-center space-x-3">
             <span class="text-4xl">🎯</span>
             <div>
-              <h2 class="text-2xl font-bold text-white">Mi Enfoque del Día</h2>
+              <h2 class="text-2xl font-bold text-white">Mis 3 Enfoques del Día</h2>
               <p class="text-accent-green text-sm font-semibold">"Lo que nombro, lo reclamo"</p>
             </div>
           </div>
           <button
-            onclick="Agenda.openSelectorEnfoque()"
-            class="btn-primary px-4 py-2 rounded-lg text-sm"
+            onclick="Router.navigate('rutina')"
+            class="text-xs px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-lg transition-all"
           >
-            ${enfoque ? 'Cambiar Enfoque' : 'Seleccionar Enfoque'}
+            Cambiar en Rutina
           </button>
         </div>
 
-        ${enfoque ? `
-          <div class="bg-slate-800/60 rounded-lg p-5 border border-accent-green/30">
-            <h3 class="text-xl font-bold text-white mb-2">${enfoque.titulo}</h3>
-            <div class="flex items-center space-x-4 text-sm text-slate-300 mb-3">
-              <span>📊 ${enfoque.decreto_titulo}</span>
-              <span>⏰ ${enfoque.duracion_minutos || 60} min</span>
-              <span class="px-2 py-1 rounded ${enfoque.prioridad === 'alta' ? 'bg-red-600' : 'bg-yellow-600'} text-white text-xs">
-                🔥 ${enfoque.prioridad === 'alta' ? 'ALTA' : enfoque.prioridad === 'media' ? 'MEDIA' : 'BAJA'}
-              </span>
+        <!-- Grid de 3 decretos -->
+        <div class="grid grid-cols-3 gap-4">
+          <!-- 💼 EMPRESARIAL -->
+          <div class="bg-slate-800/80 rounded-lg p-4 border-l-4 border-blue-500">
+            <div class="flex items-center space-x-2 mb-3">
+              <span class="text-3xl">💼</span>
+              <div>
+                <h3 class="font-bold text-white text-sm">EMPRESARIAL</h3>
+                <p class="text-xs text-slate-400">Construcción Estratégica</p>
+              </div>
             </div>
-            <button
-              onclick="Agenda.completarEnfoque()"
-              class="w-full bg-accent-green hover:bg-green-600 text-black font-bold py-3 rounded-lg transition-all text-lg"
-            >
-              ✅ COMPLETAR MI ENFOQUE DEL DÍA
-            </button>
+            ${decretos.empresarial ? `
+              <h4 class="text-sm font-semibold text-white mb-2">${decretos.empresarial.titulo}</h4>
+              <div class="flex items-center justify-between text-xs text-slate-300 mb-3">
+                <span>⏰ ${decretos.empresarial.duracion_minutos || 30} min</span>
+                <span class="px-2 py-1 bg-blue-600 rounded">Estratégico</span>
+              </div>
+              <button
+                onclick="Agenda.completarDecretoDelDia('${decretos.empresarial.id}', 'empresarial')"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-all text-xs"
+              >
+                ✅ Completar
+              </button>
+            ` : `
+              <p class="text-xs text-slate-500 italic">No asignado</p>
+            `}
           </div>
-        ` : `
-          <div class="bg-slate-800/60 rounded-lg p-8 text-center border border-slate-600">
-            <p class="text-slate-400 text-lg mb-3">No has seleccionado tu enfoque del día</p>
-            <p class="text-slate-500 text-sm">Selecciona LA tarea más importante que debes completar hoy</p>
+
+          <!-- ❤️ HUMANO -->
+          <div class="bg-slate-800/80 rounded-lg p-4 border-l-4 border-pink-500">
+            <div class="flex items-center space-x-2 mb-3">
+              <span class="text-3xl">❤️</span>
+              <div>
+                <h3 class="font-bold text-white text-sm">HUMANO</h3>
+                <p class="text-xs text-slate-400">Relaciones & Bienestar</p>
+              </div>
+            </div>
+            ${decretos.humano ? `
+              <h4 class="text-sm font-semibold text-white mb-2">${decretos.humano.titulo}</h4>
+              <div class="flex items-center justify-between text-xs text-slate-300 mb-3">
+                <span>⏰ ${decretos.humano.duracion_minutos || 30} min</span>
+                <span class="px-2 py-1 bg-pink-600 rounded">Personal</span>
+              </div>
+              <button
+                onclick="Agenda.completarDecretoDelDia('${decretos.humano.id}', 'humano')"
+                class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 rounded-lg transition-all text-xs"
+              >
+                ✅ Completar
+              </button>
+            ` : `
+              <p class="text-xs text-slate-500 italic">No asignado</p>
+            `}
           </div>
-        `}
+
+          <!-- 💎 MATERIAL -->
+          <div class="bg-slate-800/80 rounded-lg p-4 border-l-4 border-yellow-500">
+            <div class="flex items-center space-x-2 mb-3">
+              <span class="text-3xl">💎</span>
+              <div>
+                <h3 class="font-bold text-white text-sm">MATERIAL</h3>
+                <p class="text-xs text-slate-400">Abundancia & Recursos</p>
+              </div>
+            </div>
+            ${decretos.material ? `
+              <h4 class="text-sm font-semibold text-white mb-2">${decretos.material.titulo}</h4>
+              <div class="flex items-center justify-between text-xs text-slate-300 mb-3">
+                <span>⏰ ${decretos.material.duracion_minutos || 30} min</span>
+                <span class="px-2 py-1 bg-yellow-600 rounded">Recursos</span>
+              </div>
+              <button
+                onclick="Agenda.completarDecretoDelDia('${decretos.material.id}', 'material')"
+                class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 rounded-lg transition-all text-xs"
+              >
+                ✅ Completar
+              </button>
+            ` : `
+              <p class="text-xs text-slate-500 italic">No asignado</p>
+            `}
+          </div>
+        </div>
+
+        <!-- Botón de Auto-agendar -->
+        <div class="mt-4 text-center">
+          <button
+            onclick="Agenda.autoAgendarDecretosDelDia()"
+            class="px-6 py-3 bg-gradient-to-r from-green-600 to-purple-600 hover:from-green-700 hover:to-purple-700 text-white font-bold rounded-lg transition-all shadow-lg"
+          >
+            🤖 Auto-agendar los 3 decretos en espacios libres
+          </button>
+        </div>
       </div>
     `
   },
@@ -5233,6 +5339,102 @@ const Recordatorios = {
     // Reutilizar la función de ComandoEjecutivo
     if (typeof ComandoEjecutivo !== 'undefined') {
       ComandoEjecutivo.mostrarNotificación(mensaje, tipo)
+    }
+  },
+
+  // ===================================================================
+  // 🎯 NUEVAS FUNCIONES PARA VISTA PROPUESTA CON DECRETOS DEL DÍA
+  // ===================================================================
+
+  /**
+   * Auto-agenda los 3 decretos del día desde Rutina Diaria
+   * Respeta Google Calendar y bloquea 2-4pm para comida
+   */
+  async autoAgendarDecretosDelDia() {
+    console.log('🤖 Auto-agendando los 3 decretos del día')
+
+    if (!this.data.decretosDelDia) {
+      Utils.showToast('⚠️ Primero ve a Rutina Diaria para generar tus decretos del día', 'warning')
+      return
+    }
+
+    try {
+      const confirmar = confirm(
+        '🤖 Auto-agendar mis 3 decretos del día\n\n' +
+        'Esto agendará automáticamente tus 3 decretos (Empresarial, Humano, Material) en espacios libres.\n\n' +
+        '✅ Respeta eventos de Google Calendar\n' +
+        '✅ Bloquea 2-4pm para comida\n\n' +
+        '¿Deseas continuar?'
+      )
+
+      if (!confirmar) return
+
+      Utils.showToast('🤖 Analizando espacios libres...', 'info')
+
+      const fecha = this.data.selectedDate || dayjs().format('YYYY-MM-DD')
+
+      // Llamar al endpoint con los 3 decretos del día
+      const result = await API.agenda.autoSchedule({
+        fecha: fecha,
+        horaInicio: '08:00',
+        horaFin: '20:00',
+        bloqueoComida: true, // 🍽️ Bloquear 2-4pm
+        decretosPrioritarios: [
+          this.data.decretosDelDia.empresarial?.id,
+          this.data.decretosDelDia.humano?.id,
+          this.data.decretosDelDia.material?.id
+        ].filter(Boolean),
+        exportToGoogle: confirm(
+          '📅 ¿Exportar a Google Calendar?\n\nCreará 3 eventos automáticamente.'
+        )
+      })
+
+      if (result.success) {
+        const data = result.data
+        Utils.showToast(
+          `✅ ${data.accionesAgendadas} decretos agendados!\n` +
+          `${data.accionesExportadas > 0 ? `📅 ${data.accionesExportadas} exportados a Google Calendar` : ''}`,
+          'success'
+        )
+
+        // Recargar la vista
+        await this.loadAgendaData()
+        const mainContent = document.getElementById('main-content')
+        mainContent.innerHTML = this.renderAgendaView()
+      } else {
+        Utils.showToast(`❌ Error: ${result.error}`, 'error')
+      }
+    } catch (error) {
+      console.error('❌ Error:', error)
+      Utils.showToast('❌ Error al auto-agendar decretos del día', 'error')
+    }
+  },
+
+  /**
+   * Completa un decreto del día desde la Vista Propuesta
+   */
+  async completarDecretoDelDia(decretoId, area) {
+    console.log('✅ Completando decreto del día:', { decretoId, area })
+
+    try {
+      // Marcar como completado en Rutina Diaria
+      await API.rutina.completeTask({
+        decretoId: decretoId,
+        taskType: 'primary',
+        minutesSpent: 30,
+        notes: `Completado desde Agenda (Vista Propuesta) - Área: ${area}`
+      })
+
+      Utils.showToast(`✅ Decreto ${area} completado!`, 'success')
+
+      // Recargar datos
+      await this.loadAgendaData()
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderAgendaView()
+
+    } catch (error) {
+      console.error('❌ Error al completar decreto:', error)
+      Utils.showToast('❌ Error al completar decreto del día', 'error')
     }
   }
 }// Force upload 1760595266

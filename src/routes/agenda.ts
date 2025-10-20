@@ -716,21 +716,22 @@ function determinarUrgencia(accion: any): string {
  */
 agendaRoutes.post('/auto-schedule', async (c) => {
   try {
-    const { fecha, horaInicio, horaFin, exportToGoogle } = await c.req.json()
+    const { fecha, horaInicio, horaFin, exportToGoogle, bloqueoComida, decretosPrioritarios } = await c.req.json()
     const userId = 'demo-user'
 
-    console.log('🤖 Iniciando auto-scheduling para:', { fecha, horaInicio, horaFin })
+    console.log('🤖 Iniciando auto-scheduling para:', { fecha, horaInicio, horaFin, bloqueoComida, decretosPrioritarios })
 
     // 1. Obtener eventos de Google Calendar
     const eventosGoogle = await obtenerEventosGoogleCalendar(c, userId, fecha)
     console.log(`📅 Eventos de Google Calendar: ${eventosGoogle.length}`)
 
-    // 2. Detectar espacios libres
+    // 2. Detectar espacios libres (con bloqueo de comida si está habilitado)
     const espaciosLibres = detectarEspaciosLibres(
       eventosGoogle,
       fecha,
       horaInicio || '08:00',
-      horaFin || '20:00'
+      horaFin || '20:00',
+      bloqueoComida || false // 🍽️ Si es true, bloquea 2-4pm para comida
     )
     console.log(`🆓 Espacios libres detectados: ${espaciosLibres.length}`)
 
@@ -911,7 +912,8 @@ function detectarEspaciosLibres(
   eventos: any[],
   fecha: string,
   horaInicio: string,
-  horaFin: string
+  horaFin: string,
+  bloqueoComida: boolean = false
 ): EspacioLibre[] {
   const espacios: EspacioLibre[] = []
 
@@ -935,6 +937,17 @@ function detectarEspaciosLibres(
       })
     }))
     .sort((a, b) => convertirHoraAMinutos(a.inicio) - convertirHoraAMinutos(b.inicio))
+
+  // 🍽️ Si bloqueoComida está activo, agregar evento ficticio de 2-4pm
+  if (bloqueoComida) {
+    eventosOrdenados.push({
+      inicio: '14:00',
+      fin: '16:00'
+    })
+    // Re-ordenar después de agregar el bloqueo
+    eventosOrdenados.sort((a, b) => convertirHoraAMinutos(a.inicio) - convertirHoraAMinutos(b.inicio))
+    console.log('🍽️ Bloqueo de comida 2-4pm agregado')
+  }
 
   // Si no hay eventos, todo el día es espacio libre
   if (eventosOrdenados.length === 0) {
