@@ -1,4 +1,5 @@
 // Módulo de Agenda
+// CACHE BUST: 2025-10-20-13:05:00
 
 const Agenda = {
   data: {
@@ -54,7 +55,7 @@ const Agenda = {
     const [year, month] = this.data.currentMonth.split('-')
 
     console.log('🔄 Cargando datos de agenda para fecha:', this.data.selectedDate)
-    console.log('🆕 VERSION DEBUG 1.0.2 - Cargando Rutina Diaria...')
+    console.log('🆕🆕🆕 VERSION DEBUG 1.0.3 - FORCE CACHE BUST - Cargando Rutina Diaria...')
 
     // Cargar datos en paralelo (AGREGANDO Google Calendar Y Rutina Diaria)
     const [calendario, timeline, metricas, enfoque, panoramica, googleEvents, rutinaData] = await Promise.all([
