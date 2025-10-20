@@ -4,50 +4,7 @@ type Bindings = {
   DB: D1Database;
 }
 
-// Función auxiliar para sincronizar acciones con agenda - LÓGICA SIMPLE CORRECTA
-async function sincronizarAccionConAgenda(
-  db: D1Database, 
-  accionId: string, 
-  titulo: string, 
-  queHacer: string, 
-  comoHacerlo: string | null, 
-  tipo: string, 
-  proximaRevision: string | null
-) {
-  try {
-    console.log('📅 Sincronizando con agenda:', { accionId, titulo, proximaRevision })
-    
-    if (proximaRevision) {
-      // LÓGICA SIMPLE: Separar fecha y hora correctamente
-      const fechaParte = proximaRevision.split('T')[0]
-      const horaParte = proximaRevision.split('T')[1] || '09:00'
-      
-      console.log('📅 Creando evento agenda:', { fechaParte, horaParte })
-      
-      // Crear evento en agenda_eventos con campos CORRECTOS
-      const result = await db.prepare(`
-        INSERT INTO agenda_eventos (
-          accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad, estado,
-          created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `).bind(
-        accionId,
-        `[Decreto] ${titulo}`,
-        `${queHacer}${comoHacerlo ? ' - ' + comoHacerlo : ''}`,
-        fechaParte,
-        horaParte,
-        'media' // Prioridad por defecto para decretos
-      ).run()
-      
-      console.log('✅ Evento agenda creado:', result.meta.last_row_id)
-    } else {
-      console.log('⏭️ Sin fecha programada, no se crea evento agenda')
-    }
-  } catch (error) {
-    console.error('❌ Error al sincronizar con agenda:', error)
-    // No fallar la creación de la acción por esto
-  }
-}
+// Ya no necesitamos sincronizar con agenda_eventos, todo está en acciones
 
 export const decretosRoutes = new Hono<{ Bindings: Bindings }>()
 
@@ -236,69 +193,62 @@ decretosRoutes.post('/:id/acciones', async (c) => {
       subtareasData: requestData.subtareas
     })
     
-    const { 
-      titulo, 
-      que_hacer, 
-      como_hacerlo, 
-      resultados, 
-      tareas_pendientes, 
-      tipo, 
-      proxima_revision, 
+    const {
+      titulo,
+      que_hacer,
+      como_hacerlo,
+      resultados,
+      tareas_pendientes,
+      tipo,
+      proxima_revision,
       calificacion,
+      fecha_evento,
+      hora_evento,
+      prioridad,
+      duracion_minutos,
+      repetir_dias,
+      es_enfoque_dia,
       subtareas = [] // Sub-tareas simples
     } = requestData
-    
+
     if (!titulo || !que_hacer) {
       return c.json({ success: false, error: 'Campos requeridos: titulo, que_hacer' }, 400)
     }
 
     // Generar ID único para la acción principal
     const accionId = crypto.randomUUID().replace(/-/g, '').substring(0, 32)
-    
-    // Crear la acción principal
+
+    // Determinar fecha y hora del evento
+    // Prioridad: campos directos > proxima_revision > valores por defecto
+    let fechaParte = fecha_evento
+    let horaParte = hora_evento
+
+    if (!fechaParte && proxima_revision) {
+      fechaParte = proxima_revision.split('T')[0]
+    }
+    if (!horaParte && proxima_revision) {
+      horaParte = proxima_revision.split('T')[1] || '09:00'
+    }
+
+    // Crear la acción principal con todos los campos nuevos
     await c.env.DB.prepare(`
       INSERT INTO acciones (
-        id, decreto_id, titulo, que_hacer, como_hacerlo, resultados, 
-        tareas_pendientes, tipo, proxima_revision, calificacion, origen
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'manual')
+        id, decreto_id, titulo, que_hacer, como_hacerlo, resultados,
+        tareas_pendientes, tipo, proxima_revision, calificacion, origen,
+        fecha_evento, hora_evento, prioridad, duracion_minutos, repetir_dias, es_enfoque_dia
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'manual', ?, ?, ?, ?, ?, ?)
     `).bind(
       accionId, decretoId, titulo, que_hacer, como_hacerlo || '', resultados || '',
       JSON.stringify(tareas_pendientes || []), tipo || 'secundaria',
-      proxima_revision || null, calificacion || null
+      proxima_revision || null, calificacion || null,
+      fechaParte, horaParte,
+      prioridad || 'media',
+      duracion_minutos || 15,
+      repetir_dias || 'todos',
+      es_enfoque_dia ? 1 : 0
     ).run()
 
-    console.log('✅ Acción creada:', accionId)
-
-    // FORZAR CREACIÓN EN AGENDA - SIEMPRE, SIN EXCUSAS
-    if (proxima_revision) {
-      console.log('🔥 FORZANDO creación en agenda para:', { accionId, titulo, proxima_revision })
-      
-      const fechaParte = proxima_revision.split('T')[0]
-      const horaParte = proxima_revision.split('T')[1] || '09:00'
-      
-      try {
-        const agendaResult = await c.env.DB.prepare(`
-          INSERT INTO agenda_eventos (
-            accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad, estado,
-            created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        `).bind(
-          accionId,
-          `[Decreto] ${titulo}`,
-          `${que_hacer}${como_hacerlo ? ' - ' + como_hacerlo : ''}`,
-          fechaParte,
-          horaParte,
-          'media' // Prioridad por defecto para decretos
-        ).run()
-        
-        console.log('🚀 AGENDA EVENTO CREADO EXITOSAMENTE:', agendaResult.meta.last_row_id)
-      } catch (agendaError) {
-        console.error('💥 ERROR CREANDO AGENDA EVENTO:', agendaError)
-        // PERO NO FALLAR - la acción ya está creada
-      }
-    } else {
-      console.log('⚠️ NO HAY FECHA DE REVISIÓN - NO SE CREA EVENTO AGENDA')
-    }
+    console.log('✅ Acción creada con fecha/hora:', { accionId, fechaParte, horaParte })
 
     // Crear sub-tareas si las hay
     let subtareasCreadas = 0
@@ -348,12 +298,7 @@ decretosRoutes.post('/:id/acciones', async (c) => {
             changes: subtareaResult.changes
           })
           
-          // Sincronizar sub-tarea con agenda si tiene fecha
-          if (fechaSubtarea) {
-            await sincronizarAccionConAgenda(c.env.DB, subtareaId, `[Sub] ${subtarea.titulo}`, 
-              subtarea.que_hacer, subtarea.como_hacerlo, 'secundaria', fechaSubtarea)
-            console.log(`✅ Sub-tarea ${i + 1} sincronizada con agenda`)
-          }
+          // Las subtareas ya tienen fecha_evento/hora_evento en la tabla acciones
           
           subtareasCreadas++
         } else {
@@ -490,29 +435,7 @@ decretosRoutes.put('/:decretoId/acciones/:accionId', async (c) => {
       decretoId
     ).run()
 
-    // Si hay evento de agenda asociado, actualizarlo también
-    const agendaEvent = await c.env.DB.prepare(
-      'SELECT id FROM agenda_eventos WHERE accion_id = ?'
-    ).bind(accionId).first()
-
-    if (agendaEvent && proxima_revision) {
-      const fechaParte = proxima_revision.split('T')[0]
-      const horaParte = proxima_revision.split('T')[1] || '09:00'
-      
-      await c.env.DB.prepare(`
-        UPDATE agenda_eventos SET 
-          titulo = ?,
-          fecha_evento = ?,
-          hora_evento = ?,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE accion_id = ?
-      `).bind(
-        `[Decreto] ${titulo}`,
-        fechaParte,
-        horaParte,
-        accionId
-      ).run()
-    }
+    // Los campos fecha/hora ya están actualizados en la tabla acciones
 
     return c.json({ success: true })
   } catch (error) {
@@ -529,11 +452,6 @@ decretosRoutes.put('/:decretoId/acciones/:accionId/completar', async (c) => {
       'UPDATE acciones SET estado = "completada", fecha_cierre = date("now"), updated_at = CURRENT_TIMESTAMP WHERE id = ?'
     ).bind(accionId).run()
 
-    // Marcar evento de agenda como completado
-    await c.env.DB.prepare(
-      'UPDATE agenda_eventos SET estado = "completada", updated_at = CURRENT_TIMESTAMP WHERE accion_id = ?'
-    ).bind(accionId).run()
-
     return c.json({ success: true })
   } catch (error) {
     return c.json({ success: false, error: 'Error al completar acción' }, 500)
@@ -547,11 +465,6 @@ decretosRoutes.put('/:decretoId/acciones/:accionId/pendiente', async (c) => {
     
     await c.env.DB.prepare(
       'UPDATE acciones SET estado = "pendiente", fecha_cierre = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
-    ).bind(accionId).run()
-
-    // Marcar evento de agenda como pendiente
-    await c.env.DB.prepare(
-      'UPDATE agenda_eventos SET estado = "pendiente", updated_at = CURRENT_TIMESTAMP WHERE accion_id = ?'
     ).bind(accionId).run()
 
     return c.json({ success: true })
@@ -672,48 +585,7 @@ decretosRoutes.post('/:decretoId/acciones/:accionId/seguimientos', async (c) => 
             // Sincronizar con agenda automáticamente
             let agendaEventId = null
             
-            // Para tareas secundarias (diarias) SIEMPRE crear evento en agenda
-            if (tipo === 'secundaria') {
-              const fechaEvento = fechaRevision ? fechaRevision.split('T')[0] : new Date().toISOString().split('T')[0]
-              const horaEvento = fechaRevision ? fechaRevision.split('T')[1] : '09:00'
-              
-              const agendaResult = await c.env.DB.prepare(`
-                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
-                VALUES (?, ?, ?, ?, ?, ?)
-              `).bind(
-                resultNuevaAccion.meta.last_row_id,
-                textoTarea,
-                `[Auto-generada] ${textoTarea}`,
-                fechaEvento,
-                horaEvento,
-                'media' // Prioridad por defecto
-              ).run()
-              
-              agendaEventId = agendaResult.meta.last_row_id
-            }
-            // Para tareas primarias solo si hay fecha específica
-            else if (tipo === 'primaria' && fechaRevision) {
-              const agendaResult = await c.env.DB.prepare(`
-                INSERT INTO agenda_eventos (accion_id, titulo, descripcion, fecha_evento, hora_evento, prioridad)
-                VALUES (?, ?, ?, date(?), time(?), ?)
-              `).bind(
-                resultNuevaAccion.meta.last_row_id,
-                `[Semanal] ${textoTarea}`,
-                `Tarea generada desde seguimiento`,
-                fechaRevision.split('T')[0],
-                fechaRevision.split('T')[1],
-                'media' // Prioridad por defecto
-              ).run()
-              
-              agendaEventId = agendaResult.meta.last_row_id
-            }
-            
-            // Actualizar la acción con el agenda_event_id
-            if (agendaEventId) {
-              await c.env.DB.prepare(`
-                UPDATE acciones SET agenda_event_id = ? WHERE id = ?
-              `).bind(agendaEventId, resultNuevaAccion.meta.last_row_id).run()
-            }
+            // La acción ya tiene fecha_evento y hora_evento en la tabla acciones
 
             nuevasTareas++
           }
@@ -859,16 +731,7 @@ async function crearTareasDerivadas(
       derivada.dias_offset || 0
     ).run()
 
-    // Sincronizar con agenda
-    await sincronizarAccionConAgenda(
-      db, 
-      accionDerivadaId, 
-      `[Derivada] ${derivada.titulo}`, 
-      derivada.que_hacer, 
-      derivada.como_hacerlo,
-      derivada.tipo || 'secundaria', 
-      fechaDerivada
-    )
+    // La acción derivada ya tiene fecha_evento/hora_evento en la tabla acciones
 
     // Crear sub-derivadas si las hay (solo hasta nivel 2)
     if (tieneSubderivadas && nivelActual < 2) {

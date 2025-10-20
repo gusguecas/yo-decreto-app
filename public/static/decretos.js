@@ -302,12 +302,12 @@ const Decretos = {
         </div>
         
         <!-- Botón acción diaria -->
-        <button 
-          onclick="event.stopPropagation(); Decretos.openCreateAccionModal('${decreto.id}')"
+        <button
+          onclick="event.stopPropagation(); Decretos.openUniversalAccionModal('${decreto.id}')"
           class="w-full btn-${area === 'empresarial' ? 'primary' : area === 'material' ? 'warning' : 'info'} py-2 rounded-lg text-sm font-medium"
         >
           <i class="fas fa-plus mr-2"></i>
-          Acción Diaria
+          Nueva Acción
         </button>
       </div>
     `
@@ -547,195 +547,304 @@ const Decretos = {
     modalsContainer.innerHTML = `
       ${this.renderCreateDecretoModal()}
       ${this.renderEditDecretoModal()}
-      ${this.renderCreateAccionModal()}
+      ${this.renderUniversalAccionModal()}
       ${this.renderSeguimientoModal()}
       ${this.renderDetalleAccionModal()}
       ${this.renderEditAccionModal()}
     `
   },
 
-  renderCreateAccionModal() {
-    return UI.renderModal('createAccionModal', '➕ Nueva Acción', `
-      <form id="createAccionForm" onsubmit="Decretos.handleCreateAccion(event)">
-        <input type="hidden" name="decreto_id" id="accionDecretoId">
-        
+  // ===== MODAL UNIVERSAL PARA ACCIONES =====
+  renderUniversalAccionModal() {
+    return UI.renderModal('universalAccionModal', '➕ Nueva Acción', `
+      <form id="universalAccionForm" onsubmit="Decretos.handleUniversalAccionSubmit(event)">
+        <input type="hidden" name="decreto_id" id="universalDecretoId">
+
         <div class="space-y-6">
+          <!-- Título de la acción -->
           <div>
-            <label class="block text-sm font-medium mb-2">Título de la acción *</label>
-            <input 
-              type="text" 
-              name="titulo" 
-              required 
-              class="form-input w-full px-4 py-2"
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              Título de la acción *
+            </label>
+            <input
+              type="text"
+              name="titulo"
+              required
+              class="form-input w-full px-4 py-3 text-base"
               placeholder="Ej: Hacer ejercicio matutino"
             >
           </div>
-          
+
+          <!-- Qué se debe hacer -->
           <div>
-            <label class="block text-sm font-medium mb-2">Qué se debe hacer *</label>
-            <textarea 
-              name="que_hacer" 
-              required 
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              Qué se debe hacer *
+            </label>
+            <textarea
+              name="que_hacer"
+              required
               rows="3"
-              class="form-textarea w-full px-4 py-2"
+              class="form-textarea w-full px-4 py-3 text-base"
               placeholder="Describe específicamente qué hay que hacer..."
             ></textarea>
           </div>
-          
-          <div>
-            <label class="block text-sm font-medium mb-2">Cómo hacerlo</label>
-            <textarea 
-              name="como_hacerlo"
-              rows="3"
-              class="form-textarea w-full px-4 py-2"
-              placeholder="Metodología, pasos, recursos necesarios..."
-            ></textarea>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium mb-2">Resultados esperados</label>
-            <textarea 
-              name="resultados"
-              rows="2"
-              class="form-textarea w-full px-4 py-2"
-              placeholder="Qué resultados esperas obtener..."
-            ></textarea>
-          </div>
-          
+
+          <!-- Fecha y Hora de la acción -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-2">Tipo de acción</label>
-              <select name="tipo" class="form-select w-full px-4 py-2">
-                <option value="secundaria">Secundaria (diaria)</option>
-                <option value="primaria">Primaria (semanal)</option>
-              </select>
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                📅 Fecha *
+              </label>
+              <input
+                type="date"
+                name="fecha_evento"
+                required
+                class="form-input w-full px-4 py-3 text-base"
+              >
             </div>
-            
             <div>
-              <label class="block text-sm font-medium mb-2">Próxima revisión</label>
-              <input 
-                type="datetime-local" 
-                name="proxima_revision"
-                class="form-input w-full px-4 py-2"
-                min="2024-09-01T00:00"
-                onchange="console.log('📅 FECHA CAMBIADA:', this.value, 'Fecha objeto:', new Date(this.value))"
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                🕐 Hora *
+              </label>
+              <input
+                type="time"
+                name="hora_evento"
+                required
+                class="form-input w-full px-4 py-3 text-base"
+                value="09:00"
               >
             </div>
           </div>
-          
-          <div>
-            <label class="block text-sm font-medium mb-2">Calificación del progreso (1-10)</label>
-            <input 
-              type="range" 
-              name="calificacion" 
-              min="1" 
-              max="10" 
-              value="5"
-              class="w-full"
-              oninput="this.nextElementSibling.textContent = this.value"
-            >
-            <div class="text-center mt-2 font-semibold">5</div>
+
+          <!-- Tipo y Duración -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                Tipo de acción
+              </label>
+              <select name="tipo" class="form-select w-full px-4 py-3 text-base">
+                <option value="secundaria">Secundaria (diaria - 10-15 min)</option>
+                <option value="primaria">Primaria (semanal - más tiempo)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                ⏱️ Duración (minutos)
+              </label>
+              <input
+                type="number"
+                name="duracion_minutos"
+                min="5"
+                max="480"
+                value="15"
+                class="form-input w-full px-4 py-3 text-base"
+              >
+            </div>
           </div>
-          
+
+          <!-- Prioridad y Repetir -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                Prioridad
+              </label>
+              <select name="prioridad" class="form-select w-full px-4 py-3 text-base">
+                <option value="baja">🟢 Baja</option>
+                <option value="media" selected>🟡 Media</option>
+                <option value="alta">🔴 Alta</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                🔄 Repetir
+              </label>
+              <select name="repetir_dias" class="form-select w-full px-4 py-3 text-base">
+                <option value="todos">Todos los días</option>
+                <option value="lun,mar,mie,jue,vie">Lunes a Viernes</option>
+                <option value="lun">Solo Lunes</option>
+                <option value="mar">Solo Martes</option>
+                <option value="mie">Solo Miércoles</option>
+                <option value="jue">Solo Jueves</option>
+                <option value="vie">Solo Viernes</option>
+                <option value="sab">Solo Sábado</option>
+                <option value="dom">Solo Domingo</option>
+                <option value="una_vez">Solo una vez</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Es enfoque del día -->
+          <div class="flex items-center justify-between bg-slate-800 p-4 rounded-lg">
+            <label class="text-sm font-medium text-slate-300 flex items-center">
+              <i class="fas fa-star mr-2 text-yellow-400"></i>
+              ¿Es el enfoque del día? (acción primaria)
+            </label>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="es_enfoque_dia" class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
+            </label>
+          </div>
+
+          <!-- Cómo hacerlo (opcional) -->
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              Cómo hacerlo (opcional)
+            </label>
+            <textarea
+              name="como_hacerlo"
+              rows="2"
+              class="form-textarea w-full px-4 py-3 text-base"
+              placeholder="Metodología, pasos, recursos necesarios..."
+            ></textarea>
+          </div>
+
+          <!-- Resultados esperados (opcional) -->
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              Resultados esperados (opcional)
+            </label>
+            <textarea
+              name="resultados"
+              rows="2"
+              class="form-textarea w-full px-4 py-3 text-base"
+              placeholder="Qué resultados esperas obtener..."
+            ></textarea>
+          </div>
+
+          <!-- Calificación del progreso -->
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-3">
+              Calificación del progreso (1-10)
+            </label>
+            <div class="relative">
+              <input
+                type="range"
+                name="calificacion"
+                min="1"
+                max="10"
+                value="5"
+                class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
+                oninput="document.getElementById('universalCalificacionValue').textContent = this.value"
+              >
+              <div class="flex justify-between text-xs text-slate-400 mt-1">
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+                <span>4</span>
+                <span>5</span>
+                <span>6</span>
+                <span>7</span>
+                <span>8</span>
+                <span>9</span>
+                <span>10</span>
+              </div>
+            </div>
+            <div class="text-center mt-2">
+              <span id="universalCalificacionValue" class="text-2xl font-bold text-white">5</span>
+            </div>
+          </div>
+
           <!-- Sección de Sub-tareas -->
           <div class="border-t border-slate-700 pt-6">
             <div class="flex items-center justify-between mb-4">
-              <label class="block text-sm font-medium text-slate-300">
-                <i class="fas fa-tasks mr-2 text-accent-purple"></i>
+              <label class="text-sm font-medium text-slate-300 flex items-center">
+                <i class="fas fa-list mr-2 text-accent-purple"></i>
                 ¿Esta tarea tiene sub-tareas?
               </label>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="tieneSubtareas" onchange="Decretos.toggleSubtareas(this.checked)" class="sr-only peer">
+                <input type="checkbox" id="universalTieneSubtareas" onchange="Decretos.toggleUniversalSubtareas(this.checked)" class="sr-only peer">
                 <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
               </label>
             </div>
-            
-            <div id="subtareasContainer" class="hidden bg-slate-800 p-4 rounded-lg">
+
+            <div id="universalSubtareasContainer" class="hidden bg-slate-800 p-4 rounded-lg space-y-3">
               <h4 class="text-sm font-medium text-white mb-3">
                 <i class="fas fa-list mr-2 text-accent-green"></i>
                 Sub-tareas (máximo 3)
               </h4>
-              
+
               <!-- Sub-tarea 1 -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label class="block text-xs font-medium text-slate-300 mb-1">Sub-tarea 1</label>
-                  <input 
-                    type="text" 
-                    name="subtarea_1_titulo" 
+                  <input
+                    type="text"
+                    name="subtarea_1_titulo"
                     class="form-input w-full px-3 py-2 text-sm"
                     placeholder="Título de la primera sub-tarea"
                   >
                 </div>
                 <div>
                   <label class="block text-xs font-medium text-slate-300 mb-1">Fecha</label>
-                  <input 
-                    type="date" 
-                    name="subtarea_1_fecha" 
+                  <input
+                    type="date"
+                    name="subtarea_1_fecha"
                     class="form-input w-full px-3 py-2 text-sm"
                   >
                 </div>
               </div>
-              
+
               <!-- Sub-tarea 2 -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label class="block text-xs font-medium text-slate-300 mb-1">Sub-tarea 2</label>
-                  <input 
-                    type="text" 
-                    name="subtarea_2_titulo" 
+                  <input
+                    type="text"
+                    name="subtarea_2_titulo"
                     class="form-input w-full px-3 py-2 text-sm"
                     placeholder="Título de la segunda sub-tarea"
                   >
                 </div>
                 <div>
                   <label class="block text-xs font-medium text-slate-300 mb-1">Fecha</label>
-                  <input 
-                    type="date" 
-                    name="subtarea_2_fecha" 
+                  <input
+                    type="date"
+                    name="subtarea_2_fecha"
                     class="form-input w-full px-3 py-2 text-sm"
                   >
                 </div>
               </div>
-              
+
               <!-- Sub-tarea 3 -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label class="block text-xs font-medium text-slate-300 mb-1">Sub-tarea 3</label>
-                  <input 
-                    type="text" 
-                    name="subtarea_3_titulo" 
+                  <input
+                    type="text"
+                    name="subtarea_3_titulo"
                     class="form-input w-full px-3 py-2 text-sm"
                     placeholder="Título de la tercera sub-tarea"
                   >
                 </div>
                 <div>
                   <label class="block text-xs font-medium text-slate-300 mb-1">Fecha</label>
-                  <input 
-                    type="date" 
-                    name="subtarea_3_fecha" 
+                  <input
+                    type="date"
+                    name="subtarea_3_fecha"
                     class="form-input w-full px-3 py-2 text-sm"
                   >
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <div class="flex justify-end space-x-4 mt-8">
-          <button 
-            type="button" 
-            onclick="Modal.close('createAccionModal')"
-            class="px-6 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors"
-          >
-            Cancelar
-          </button>
-          <button 
-            type="submit"
-            class="btn-primary px-6 py-2 rounded-lg"
-          >
-            💾 Guardar Acción
-          </button>
+
+          <!-- Botones -->
+          <div class="flex space-x-3 pt-6">
+            <button
+              type="button"
+              onclick="Modal.close('universalAccionModal')"
+              class="flex-1 px-6 py-3 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors text-white"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="btn-primary flex-1 py-3 rounded-lg font-medium"
+            >
+              <i class="fas fa-save mr-2"></i>
+              Guardar Acción
+            </button>
+          </div>
         </div>
       </form>
     `)
@@ -968,52 +1077,198 @@ const Decretos = {
     }, 100)
   },
 
-  openCreateAccionModal(decretoId) {
-    console.log('📝 Abriendo modal de crear acción para decreto:', decretoId)
-    
+  // ===== FUNCIONES PARA MODAL UNIVERSAL =====
+  openUniversalAccionModal(decretoId) {
+    // Si no se proporciona decreto ID, usar el primero disponible por defecto
+    if (!decretoId) {
+      console.log('⚠️ No se proporcionó decreto ID, usando decreto por defecto')
+      // Usar el primer decreto activo o el primero en general
+      const primerDecreto = this.data.decretos?.[0]
+      if (primerDecreto) {
+        decretoId = primerDecreto.id
+      } else {
+        Utils.showToast('Error: No hay decretos disponibles. Crea un decreto primero.', 'error')
+        return
+      }
+    }
+
+    console.log('📝 Abriendo modal universal para decreto:', decretoId)
+
     // Cerrar cualquier otro modal que pueda estar abierto
+    Modal.close('createAccionModal')
     Modal.close('createAccionDetalleModal')
-    
+
     // Limpiar flags de procesamiento anteriores
     this._processingForm = null
     this._lastFormHash = null
-    
-    document.getElementById('accionDecretoId').value = decretoId
-    Modal.open('createAccionModal')
-    
-    // 🔧 ARREGLO: Limpiar todos los campos del formulario después de abrir modal
+
+    // Establecer decreto ID
+    document.getElementById('universalDecretoId').value = decretoId
+
+    // Establecer fecha actual por defecto
+    const today = new Date().toISOString().split('T')[0]
     setTimeout(() => {
-      const form = document.getElementById('createAccionForm')
+      const form = document.getElementById('universalAccionForm')
       if (form) {
-        // Limpiar todos los campos excepto el decreto_id
-        const inputs = form.querySelectorAll('input:not([name="decreto_id"]), textarea, select')
-        inputs.forEach(input => {
-          if (input.type === 'datetime-local') {
-            // 🔧 ARREGLO: Configurar fecha/hora por defecto en lugar de limpiar
-            const tomorrow = new Date()
-            tomorrow.setDate(tomorrow.getDate() + 1)
-            tomorrow.setHours(9, 0, 0, 0) // 9:00 AM
-            input.value = tomorrow.toISOString().slice(0, 16) // Formato YYYY-MM-DDTHH:MM
-            console.log('🔧 Configurando fecha por defecto:', input.name, input.value)
-          } else if (input.type === 'date') {
-            const tomorrow = new Date()
-            tomorrow.setDate(tomorrow.getDate() + 1)
-            input.value = tomorrow.toISOString().slice(0, 10) // Formato YYYY-MM-DD
-          } else if (input.type === 'time') {
-            input.value = '09:00' // 9:00 AM por defecto
-          } else if (input.type === 'range') {
-            input.value = '5' // Valor por defecto para calificación
-          } else if (input.type === 'checkbox') {
-            input.checked = false
-          } else if (input.tagName === 'SELECT') {
-            input.selectedIndex = 0
-          } else {
-            input.value = '' // Limpiar otros campos
-          }
-        })
-        console.log('✅ Formulario de acción limpiado')
+        form.reset()
+        const fechaInput = form.querySelector('[name="fecha_evento"]')
+        if (fechaInput) fechaInput.value = today
+
+        // Resetear el checkbox de subtareas
+        const subtareasCheckbox = document.getElementById('universalTieneSubtareas')
+        if (subtareasCheckbox) {
+          subtareasCheckbox.checked = false
+          this.toggleUniversalSubtareas(false)
+        }
       }
     }, 100)
+
+    Modal.open('universalAccionModal')
+  },
+
+  toggleUniversalSubtareas(checked) {
+    const container = document.getElementById('universalSubtareasContainer')
+    if (container) {
+      container.classList.toggle('hidden', !checked)
+    }
+  },
+
+  procesarUniversalSubtareas() {
+    const subtareas = []
+
+    for (let i = 1; i <= 3; i++) {
+      const titulo = document.querySelector(`[name="subtarea_${i}_titulo"]`)?.value
+      const fecha = document.querySelector(`[name="subtarea_${i}_fecha"]`)?.value
+
+      if (titulo && titulo.trim()) {
+        subtareas.push({
+          titulo: titulo.trim(),
+          que_hacer: titulo.trim(),
+          fecha_programada: fecha || null
+        })
+      }
+    }
+
+    return subtareas
+  },
+
+  async handleUniversalAccionSubmit(event) {
+    event.preventDefault()
+    event.stopImmediatePropagation()
+
+    const formElement = event.target
+    const formId = formElement?.id || 'sin-id'
+
+    console.log('=== INICIO handleUniversalAccionSubmit ===', {
+      formId,
+      processingFlag: this._processingForm
+    })
+
+    // VALIDAR QUE ES EL FORMULARIO CORRECTO
+    if (formId !== 'universalAccionForm') {
+      console.log('❌ FORMULARIO INCORRECTO - Esperado: universalAccionForm, Recibido:', formId)
+      return
+    }
+
+    // SISTEMA ANTI-DUPLICACIÓN
+    const submitButton = formElement.querySelector('button[type="submit"]')
+    const specificProcessingKey = `universalAccion_${formId}`
+
+    if (this._processingForm === specificProcessingKey) {
+      console.log('❌ DUPLICADO DETECTADO - Ya procesando formulario:', specificProcessingKey)
+      return
+    }
+
+    if (submitButton && submitButton.disabled) {
+      console.log('❌ DUPLICADO DETECTADO - Botón deshabilitado')
+      return
+    }
+
+    const formData = new FormData(formElement)
+    const data = Object.fromEntries(formData.entries())
+
+    // Validación de decreto_id
+    const decretoId = data.decreto_id
+    if (!decretoId) {
+      Utils.showToast('Error: No se encontró el ID del decreto', 'error')
+      return
+    }
+
+    const dataHash = `${formId}_${JSON.stringify(data)}`
+
+    if (this._lastFormHash === dataHash && (Date.now() - this._lastFormTime) < 3000) {
+      console.log('❌ DUPLICADO DETECTADO - Mismo contenido en menos de 3 segundos')
+      return
+    }
+
+    this._processingForm = specificProcessingKey
+    this._lastFormHash = dataHash
+    this._lastFormTime = Date.now()
+
+    if (submitButton) {
+      submitButton.disabled = true
+      submitButton.innerHTML = '⏳ Guardando...'
+    }
+
+    try {
+      // Procesar checkbox es_enfoque_dia
+      data.es_enfoque_dia = formElement.querySelector('[name="es_enfoque_dia"]').checked
+
+      // Procesar sub-tareas si existen
+      const tieneSubtareas = document.getElementById('universalTieneSubtareas')?.checked
+      if (tieneSubtareas) {
+        data.subtareas = this.procesarUniversalSubtareas()
+        console.log('Sub-tareas procesadas:', data.subtareas)
+      }
+
+      console.log('Enviando datos al API:', {
+        decretoId,
+        hasSubtareas: Boolean(data.subtareas?.length),
+        subtareaCount: data.subtareas?.length || 0,
+        fecha_evento: data.fecha_evento,
+        hora_evento: data.hora_evento,
+        es_enfoque_dia: data.es_enfoque_dia
+      })
+
+      const response = await API.decretos.createAccion(decretoId, data)
+      console.log('✅ Respuesta exitosa del API:', response)
+
+      Modal.close('universalAccionModal')
+
+      // Mostrar mensaje personalizado
+      if (response.data?.subtareas_creadas > 0) {
+        Utils.showToast(`✅ Acción creada con ${response.data.subtareas_creadas} sub-tarea(s)`, 'success')
+      } else {
+        Utils.showToast('✅ Acción creada exitosamente', 'success')
+      }
+
+      // Recargar vista de detalle si estamos en ella
+      if (this.data.selectedDecreto) {
+        await this.openDetalleDecreto(decretoId)
+      }
+
+      console.log('=== PROCESO COMPLETADO EXITOSAMENTE ===')
+
+    } catch (error) {
+      console.error('❌ ERROR EN PROCESO:', {
+        formId,
+        error: error.message,
+        stack: error.stack
+      })
+      Utils.showToast('Error al crear acción', 'error')
+    } finally {
+      // Limpiar flags y restaurar estado SIEMPRE
+      console.log('🧹 Limpiando flags y restaurando estado')
+      this._processingForm = null
+      this._lastFormHash = null
+
+      if (submitButton) {
+        submitButton.disabled = false
+        submitButton.innerHTML = '<i class="fas fa-save mr-2"></i>Guardar Acción'
+      }
+
+      console.log('=== FIN handleUniversalAccionSubmit ===')
+    }
   },
 
   async handleCreateDecreto(event) {
@@ -1101,286 +1356,6 @@ const Decretos = {
       }
     } catch (error) {
       Utils.showToast('Error al actualizar decreto', 'error')
-    }
-  },
-
-  async handleCreateAccion(event) {
-    const timestamp = new Date().toISOString()
-    const formElement = event.target
-    const formId = formElement?.id || 'sin-id'
-    
-    console.log('=== INICIO handleCreateAccion ===', {
-      timestamp,
-      formId,
-      processingFlag: this._processingForm,
-      modalVisible: document.getElementById('createAccionModal')?.style?.display !== 'none'
-    })
-    
-    event.preventDefault()
-    event.stopImmediatePropagation()
-    
-    // VALIDAR QUE ES EL FORMULARIO CORRECTO
-    if (formId !== 'createAccionForm') {
-      console.log('❌ FORMULARIO INCORRECTO - Esperado: createAccionForm, Recibido:', formId)
-      return
-    }
-    
-    // SISTEMA ANTI-DUPLICACIÓN ROBUSTO
-    const submitButton = formElement.querySelector('button[type="submit"]')
-    
-    // 1. Verificar si ya está procesando ESTE formulario específico
-    const specificProcessingKey = `createAccion_${formId}`
-    if (this._processingForm === specificProcessingKey) {
-      console.log('❌ DUPLICADO DETECTADO - Ya procesando formulario específico:', specificProcessingKey)
-      return
-    }
-    
-    // 2. Verificar botón deshabilitado
-    if (submitButton && submitButton.disabled) {
-      console.log('❌ DUPLICADO DETECTADO - Botón deshabilitado')
-      return
-    }
-    
-    // 3. Crear hash único del formulario para detectar envíos duplicados
-    const formData = new FormData(formElement)
-    const data = Object.fromEntries(formData.entries())
-    
-
-    
-    const dataHash = `${formId}_${JSON.stringify(data)}`
-    
-    if (this._lastFormHash === dataHash && (Date.now() - this._lastFormTime) < 3000) {
-      console.log('❌ DUPLICADO DETECTADO - Mismo contenido en menos de 3 segundos')
-      return
-    }
-    
-    // 4. Establecer flags de control ANTES de cualquier operación async
-    this._processingForm = specificProcessingKey
-    this._lastFormHash = dataHash
-    this._lastFormTime = Date.now()
-    
-    if (submitButton) {
-      submitButton.disabled = true
-      submitButton.innerHTML = '⏳ Guardando...'
-    }
-    
-    console.log('✅ INICIANDO PROCESO ÚNICO:', {
-      formId,
-      dataHash: dataHash.substring(0, 50) + '...',
-      decretoId: data.decreto_id
-    })
-    
-    try {
-      const decretoId = data.decreto_id
-      
-      // Procesar sub-tareas si existen
-      const tieneSubtareas = document.getElementById('tieneSubtareas')?.checked
-      console.log('¿Tiene sub-tareas?', tieneSubtareas)
-      
-      if (tieneSubtareas) {
-        data.subtareas = this.procesarSubtareas()
-        console.log('Sub-tareas procesadas:', data.subtareas)
-      } else {
-        console.log('No hay sub-tareas para procesar')
-      }
-      
-      console.log('Enviando datos al API:', {
-        decretoId,
-        hasSubtareas: Boolean(data.subtareas?.length),
-        subtareaCount: data.subtareas?.length || 0,
-        '📅 PROXIMA_REVISION_ENVIADA': data.proxima_revision
-      })
-      
-      const response = await API.decretos.createAccion(decretoId, data)
-      console.log('✅ Respuesta exitosa del API:', {
-        success: response.success,
-        actionId: response.id,
-        subtareasCreadas: response.data?.subtareas_creadas || 0
-      })
-      
-      Modal.close('createAccionModal')
-      
-      // Mostrar mensaje personalizado según si se crearon sub-tareas
-      if (response.data?.subtareas_creadas > 0) {
-        Utils.showToast(`✅ Acción creada con ${response.data.subtareas_creadas} sub-tarea(s) automáticamente`, 'success')
-      } else {
-        Utils.showToast('✅ Acción creada exitosamente', 'success')
-      }
-      
-      // Recargar vista de detalle si estamos en ella
-      if (this.data.selectedDecreto) {
-        await this.openDetalleDecreto(decretoId)
-      }
-      
-      console.log('=== PROCESO COMPLETADO EXITOSAMENTE ===')
-      
-    } catch (error) {
-      console.error('❌ ERROR EN PROCESO:', {
-        formId,
-        error: error.message,
-        stack: error.stack
-      })
-      Utils.showToast('Error al crear acción', 'error')
-    } finally {
-      // Limpiar flags y restaurar estado SIEMPRE
-      console.log('🧹 Limpiando flags y restaurando estado para formulario:', formId)
-      this._processingForm = null
-      this._lastFormHash = null
-      
-      if (submitButton) {
-        submitButton.disabled = false
-        submitButton.innerHTML = '💾 Guardar Acción'
-      }
-      
-      console.log('=== FIN handleCreateAccion ===', { formId, timestamp })
-    }
-  },
-
-  async handleCreateAccionDetalle(event) {
-    const timestamp = new Date().toISOString()
-    const formElement = event.target
-    const formId = formElement?.id || 'sin-id'
-    
-    console.log('=== INICIO handleCreateAccionDetalle ===', {
-      timestamp,
-      formId,
-      processingFlag: this._processingForm
-    })
-    
-    event.preventDefault()
-    event.stopImmediatePropagation()
-    
-    // VALIDAR QUE ES EL FORMULARIO CORRECTO
-    if (formId !== 'createAccionDetalleForm') {
-      console.log('❌ FORMULARIO INCORRECTO - Esperado: createAccionDetalleForm, Recibido:', formId)
-      return
-    }
-    
-    const decretoId = formElement.dataset.decretoId
-    if (!decretoId) {
-      Utils.showToast('Error: No se encontró el ID del decreto', 'error')
-      return
-    }
-    
-    // SISTEMA ANTI-DUPLICACIÓN
-    const submitButton = formElement.querySelector('button[type="submit"]')
-    const specificProcessingKey = `createAccionDetalle_${formId}`
-    
-    if (this._processingForm === specificProcessingKey) {
-      console.log('❌ DUPLICADO DETECTADO - Ya procesando formulario detalle:', specificProcessingKey)
-      return
-    }
-    
-    if (submitButton && submitButton.disabled) {
-      console.log('❌ DUPLICADO DETECTADO - Botón deshabilitado')
-      return
-    }
-    
-    const formData = new FormData(formElement)
-    const data = Object.fromEntries(formData.entries())
-    
-    // 🔴 VALIDACIÓN OBLIGATORIA: Tipo de Decreto
-    if (!data.decreto_tipo || data.decreto_tipo.trim() === '') {
-      Utils.showToast('⚠️ Debes seleccionar el tipo de decreto (Empresarial, Humano o Material)', 'error')
-      
-      // Resetear el procesamiento
-      this._processingForm = null
-      if (submitButton) {
-        submitButton.disabled = false
-        submitButton.innerHTML = '💾 Guardar Acción'
-      }
-      
-      // Resaltar el campo faltante
-      const decretoSelect = document.getElementById('decretoTipoSelect')
-      if (decretoSelect) {
-        decretoSelect.focus()
-        decretoSelect.classList.add('border-red-500', 'bg-red-900/20')
-        setTimeout(() => {
-          decretoSelect.classList.remove('border-red-500', 'bg-red-900/20')
-        }, 3000)
-      }
-      
-      return
-    }
-    
-    const dataHash = `${formId}_${JSON.stringify(data)}`
-    
-    if (this._lastFormHash === dataHash && (Date.now() - this._lastFormTime) < 3000) {
-      console.log('❌ DUPLICADO DETECTADO - Mismo contenido en menos de 3 segundos')
-      return
-    }
-    
-    this._processingForm = specificProcessingKey
-    this._lastFormHash = dataHash
-    this._lastFormTime = Date.now()
-    
-    if (submitButton) {
-      submitButton.disabled = true
-      submitButton.innerHTML = '⏳ Guardando...'
-    }
-    
-
-    
-    // Procesar sub-tareas si existen
-    const tieneSubtareasDetalle = document.getElementById('tieneSubtareasDetalle')?.checked
-    console.log('¿Tiene sub-tareas (detalle)?', tieneSubtareasDetalle)
-    
-    if (tieneSubtareasDetalle) {
-      data.subtareas = this.procesarSubtareasDetalle()
-      console.log('Sub-tareas detalle procesadas:', data.subtareas)
-    } else {
-      console.log('No hay sub-tareas detalle para procesar')
-    }
-    
-    try {
-      console.log('Enviando datos del formulario detalle al API:', {
-        decretoId,
-        hasSubtareas: Boolean(data.subtareas?.length),
-        subtareaCount: data.subtareas?.length || 0
-      })
-      
-      const response = await API.decretos.createAccion(decretoId, data)
-      console.log('✅ Respuesta exitosa del API detalle:', {
-        success: response.success,
-        actionId: response.id,
-        subtareasCreadas: response.data?.subtareas_creadas || 0
-      })
-      
-      Modal.close('createAccionDetalleModal')
-      
-      // Mostrar mensaje personalizado según si se crearon sub-tareas
-      if (response.data?.subtareas_creadas > 0) {
-        Utils.showToast(`✅ Acción creada con ${response.data.subtareas_creadas} sub-tarea(s) automáticamente`, 'success')
-      } else {
-        Utils.showToast('✅ Acción creada exitosamente', 'success')
-      }
-      
-      // Recargar vista de detalle si estamos en ella
-      if (this.data.selectedDecreto) {
-        await this.openDetalleDecreto(decretoId)
-      }
-      
-      console.log('=== PROCESO DETALLE COMPLETADO EXITOSAMENTE ===')
-      
-    } catch (error) {
-      console.error('❌ ERROR EN PROCESO DETALLE:', {
-        formId,
-        error: error.message,
-        stack: error.stack
-      })
-      Utils.showToast('Error al crear acción', 'error')
-    } finally {
-      // Limpiar flags y restaurar estado SIEMPRE
-      console.log('🧹 Limpiando flags y restaurando estado para formulario detalle:', formId)
-      this._processingForm = null
-      this._lastFormHash = null
-      
-      if (submitButton) {
-        submitButton.disabled = false
-        submitButton.innerHTML = '💾 Guardar Acción'
-      }
-      
-      console.log('=== FIN handleCreateAccionDetalle ===', { formId, timestamp })
     }
   },
 
@@ -1762,8 +1737,8 @@ const Decretos = {
             <i class="fas fa-tasks mr-2"></i>
             Mis Acciones
           </h3>
-          <button 
-            onclick="Decretos.openCreateAccionDetalleModal('${decreto.id}')"
+          <button
+            onclick="Decretos.openUniversalAccionModal('${decreto.id}')"
             class="btn-primary px-4 py-2 rounded-lg text-sm"
           >
             <i class="fas fa-plus mr-1"></i>
@@ -2067,7 +2042,6 @@ const Decretos = {
     
     // Agregar modales específicos para la vista de detalle
     document.body.insertAdjacentHTML('beforeend', this.renderSeguimientoModal())
-    document.body.insertAdjacentHTML('beforeend', this.renderCreateAccionDetalleModal())
     
     console.log('Modales de detalle renderizados') // Debug log
   },
@@ -2196,251 +2170,6 @@ Preparar presentación para próxima reunión"
     `)
   },
 
-  renderCreateAccionDetalleModal() {
-    return UI.renderModal('createAccionDetalleModal', '➕ Nueva Acción', `
-      <form id="createAccionDetalleForm" onsubmit="Decretos.handleCreateAccionDetalle(event)" class="space-y-6">
-        
-        <!-- Título de la acción -->
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">
-            Título de la acción *
-          </label>
-          <input 
-            type="text" 
-            name="titulo" 
-            class="form-input w-full px-4 py-3 text-base" 
-            placeholder="Ej: Hacer ejercicio matutino"
-            required
-          >
-        </div>
-
-        <!-- Tipo de Decreto (OBLIGATORIO) -->
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">
-            <span class="text-accent-red">*</span> Tipo de Decreto (Obligatorio)
-          </label>
-          <select 
-            name="decreto_tipo" 
-            id="decretoTipoSelect"
-            class="form-select w-full px-4 py-3 text-base border-2 border-accent-red/50 focus:border-accent-red"
-            required
-            onchange="Decretos.updateDecretoSelect(this.value)"
-          >
-            <option value="">🔸 Selecciona el tipo de decreto</option>
-            <option value="Empresarial">🏢 Empresarial - Negocios y trabajo</option>
-            <option value="Humano">👤 Humano - Personal y relaciones</option>
-            <option value="Material">💎 Material - Finanzas y bienes</option>
-          </select>
-          <div class="text-xs text-accent-red mt-1">
-            ⚠️ Debes seleccionar un tipo antes de guardar
-          </div>
-        </div>
-
-        <!-- Qué se debe hacer -->
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">
-            Qué se debe hacer *
-          </label>
-          <textarea 
-            name="que_hacer" 
-            class="form-textarea w-full h-24 px-4 py-3 text-base" 
-            placeholder="Describe específicamente qué hay que hacer..."
-            required
-          ></textarea>
-        </div>
-
-        <!-- Cómo hacerlo -->
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">
-            Cómo hacerlo
-          </label>
-          <textarea 
-            name="como_hacerlo" 
-            class="form-textarea w-full h-24 px-4 py-3 text-base" 
-            placeholder="Metodología, pasos, recursos necesarios..."
-          ></textarea>
-        </div>
-
-        <!-- Resultados esperados -->
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">
-            Resultados esperados
-          </label>
-          <textarea 
-            name="resultados_esperados" 
-            class="form-textarea w-full h-20 px-4 py-3 text-base" 
-            placeholder="Qué resultados esperas obtener..."
-          ></textarea>
-        </div>
-
-        <!-- Tipo de acción y Próxima revisión en la misma fila -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Tipo de acción -->
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">
-              Tipo de acción
-            </label>
-            <select name="tipo" class="form-select w-full px-4 py-3 text-base">
-              <option value="secundaria">Secundaria (diaria)</option>
-              <option value="primaria">Primaria (semanal)</option>
-            </select>
-          </div>
-
-          <!-- Próxima revisión -->
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">
-              Próxima revisión
-            </label>
-            <input 
-              type="datetime-local" 
-              name="proxima_revision" 
-              class="form-input w-full px-4 py-3 text-base"
-              placeholder="Selecciona fecha y hora (opcional)"
-            >
-            <div class="text-xs text-slate-400 mt-1">
-              💡 Puedes usar fechas pasadas para registrar tareas olvidadas
-            </div>
-          </div>
-        </div>
-
-        <!-- Calificación del progreso -->
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-3">
-            Calificación del progreso (1-10)
-          </label>
-          <div class="relative">
-            <input 
-              type="range" 
-              name="calificacion" 
-              min="1" 
-              max="10" 
-              value="5" 
-              class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
-              oninput="document.getElementById('calificacionValue').textContent = this.value"
-            >
-            <div class="flex justify-between text-xs text-slate-400 mt-1">
-              <span>1</span>
-              <span>2</span>
-              <span>3</span>
-              <span>4</span>
-              <span>5</span>
-              <span>6</span>
-              <span>7</span>
-              <span>8</span>
-              <span>9</span>
-              <span>10</span>
-            </div>
-          </div>
-          <div class="text-center mt-2">
-            <span id="calificacionValue" class="text-2xl font-bold text-white">5</span>
-          </div>
-        </div>
-
-        <!-- Sección de Tareas Derivadas -->
-        <div class="border-t border-slate-700 pt-6">
-          <!-- ¿Tiene sub-tareas? -->
-          <div class="flex items-center justify-between mb-4">
-            <label class="text-sm font-medium text-slate-300 flex items-center">
-              <i class="fas fa-list mr-2 text-accent-purple"></i>
-              ¿Esta tarea tiene sub-tareas?
-            </label>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="tieneSubtareasDetalle" onchange="Decretos.toggleSubtareasDetalle(this.checked)" class="sr-only peer">
-              <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-            </label>
-          </div>
-
-          <div id="subtareasDetalleContainer" class="hidden bg-slate-800 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-white mb-3">
-              <i class="fas fa-list mr-2 text-accent-green"></i>
-              Sub-tareas (máximo 3)
-            </h4>
-            
-            <!-- Sub-tarea 1 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-              <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Sub-tarea 1</label>
-                <input 
-                  type="text" 
-                  name="subtarea_detalle_1_titulo" 
-                  class="form-input w-full px-3 py-2 text-sm"
-                  placeholder="Título de la primera sub-tarea"
-                >
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Fecha</label>
-                <input 
-                  type="date" 
-                  name="subtarea_detalle_1_fecha" 
-                  class="form-input w-full px-3 py-2 text-sm"
-                >
-              </div>
-            </div>
-            
-            <!-- Sub-tarea 2 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-              <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Sub-tarea 2</label>
-                <input 
-                  type="text" 
-                  name="subtarea_detalle_2_titulo" 
-                  class="form-input w-full px-3 py-2 text-sm"
-                  placeholder="Título de la segunda sub-tarea"
-                >
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Fecha</label>
-                <input 
-                  type="date" 
-                  name="subtarea_detalle_2_fecha" 
-                  class="form-input w-full px-3 py-2 text-sm"
-                >
-              </div>
-            </div>
-            
-            <!-- Sub-tarea 3 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Sub-tarea 3</label>
-                <input 
-                  type="text" 
-                  name="subtarea_detalle_3_titulo" 
-                  class="form-input w-full px-3 py-2 text-sm"
-                  placeholder="Título de la tercera sub-tarea"
-                >
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Fecha</label>
-                <input 
-                  type="date" 
-                  name="subtarea_detalle_3_fecha" 
-                  class="form-input w-full px-3 py-2 text-sm"
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Botones -->
-        <div class="flex space-x-3 pt-6">
-          <button 
-            type="button" 
-            onclick="Modal.close('createAccionDetalleModal')" 
-            class="flex-1 px-6 py-3 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors text-white"
-          >
-            Cancelar
-          </button>
-          <button 
-            type="submit" 
-            class="btn-primary flex-1 py-3 rounded-lg font-medium"
-          >
-            <i class="fas fa-save mr-2"></i>
-            Guardar Acción
-          </button>
-        </div>
-      </form>
-    `)
-  },
 
   // Funciones para manejar eventos de la vista de detalle
 
@@ -2884,7 +2613,7 @@ Preparar presentación para próxima reunión"
   agregarSugerenciaAAcciones(decretoId, sugerenciaId) {
     // Por ahora abre el modal de crear acción
     // En el futuro se puede pre-llenar con la sugerencia
-    this.openCreateAccionModal(decretoId)
+    this.openUniversalAccionModal(decretoId)
   },
 
   generarMasSugerencias(decretoId) {
@@ -2892,56 +2621,6 @@ Preparar presentación para próxima reunión"
     // TODO: Implementar generación dinámica de sugerencias
   },
 
-  openCreateAccionDetalleModal(decretoId) {
-    // Si no se proporciona decreto ID, usar el primero disponible por defecto
-    if (!decretoId) {
-      console.log('⚠️ No se proporcionó decreto ID, usando decreto por defecto')
-      decretoId = 'decreto_1' // Usar primer decreto como fallback
-    }
-    
-    console.log('📋 Abriendo modal crear acción para decreto:', decretoId)
-    
-    // Configurar el formulario con el decreto ID
-    setTimeout(() => {
-      const form = document.getElementById('createAccionDetalleForm')
-      if (form) {
-        form.dataset.decretoId = decretoId
-        console.log('✅ Decreto ID configurado:', decretoId)
-        
-        // 🔧 ARREGLO: Limpiar todos los campos del formulario
-        const inputs = form.querySelectorAll('input:not([name="decreto_id"]), textarea, select')
-        inputs.forEach(input => {
-          if (input.type === 'datetime-local') {
-            // 🔧 ARREGLO: Configurar fecha/hora por defecto en lugar de limpiar
-            const tomorrow = new Date()
-            tomorrow.setDate(tomorrow.getDate() + 1)
-            tomorrow.setHours(9, 0, 0, 0) // 9:00 AM
-            input.value = tomorrow.toISOString().slice(0, 16) // Formato YYYY-MM-DDTHH:MM
-            console.log('🔧 Configurando fecha por defecto:', input.name, input.value)
-          } else if (input.type === 'date') {
-            const tomorrow = new Date()
-            tomorrow.setDate(tomorrow.getDate() + 1)
-            input.value = tomorrow.toISOString().slice(0, 10) // Formato YYYY-MM-DD
-          } else if (input.type === 'time') {
-            input.value = '09:00' // 9:00 AM por defecto
-          } else if (input.type === 'range') {
-            input.value = '5' // Valor por defecto para calificación
-          } else if (input.type === 'checkbox') {
-            input.checked = false
-          } else if (input.tagName === 'SELECT') {
-            input.selectedIndex = 0
-          } else {
-            input.value = '' // Limpiar otros campos
-          }
-        })
-        console.log('✅ Formulario de acción detalle limpiado')
-      } else {
-        console.error('❌ No se encontró el formulario createAccionDetalleForm')
-      }
-    }, 100)
-    
-    Modal.open('createAccionDetalleModal')
-  },
 
   // ===== FUNCIONES PARA TAREAS DERIVADAS =====
 
@@ -3713,105 +3392,6 @@ Preparar presentación para próxima reunión"
   },
 
   // Función simple para manejar sub-tareas
-  toggleSubtareas(enabled) {
-    const container = document.getElementById('subtareasContainer')
-    if (container) {
-      container.classList.toggle('hidden', !enabled)
-    }
-  },
-
-  procesarSubtareas() {
-    console.log('🔍 Procesando sub-tareas...')
-    const subtareas = []
-    
-    for (let i = 1; i <= 3; i++) {
-      const tituloElement = document.querySelector(`[name="subtarea_${i}_titulo"]`)
-      const fechaElement = document.querySelector(`[name="subtarea_${i}_fecha"]`)
-      
-      const titulo = tituloElement?.value?.trim()
-      const fecha = fechaElement?.value
-      
-      console.log(`Sub-tarea ${i}:`, {
-        tituloElement: !!tituloElement,
-        fechaElement: !!fechaElement,
-        titulo,
-        fecha,
-        tituloLength: titulo?.length || 0
-      })
-      
-      if (titulo) {
-        const subtarea = {
-          titulo: titulo,
-          que_hacer: titulo, // Usar el título como descripción
-          como_hacerlo: '',
-          fecha_programada: fecha || null
-        }
-        
-        subtareas.push(subtarea)
-        console.log(`✅ Sub-tarea ${i} añadida:`, subtarea)
-      } else {
-        console.log(`⏭️ Sub-tarea ${i} vacía, saltando`)
-      }
-    }
-    
-    console.log('📋 Sub-tareas procesadas total:', {
-      cantidad: subtareas.length,
-      subtareas: subtareas
-    })
-    
-    return subtareas
-  },
-
-  // Funciones para el modal de detalle
-  toggleSubtareasDetalle(enabled) {
-    const container = document.getElementById('subtareasDetalleContainer')
-    if (container) {
-      container.classList.toggle('hidden', !enabled)
-    }
-  },
-
-  procesarSubtareasDetalle() {
-    console.log('🔍 Procesando sub-tareas detalle...')
-    const subtareas = []
-    
-    for (let i = 1; i <= 3; i++) {
-      const tituloElement = document.querySelector(`[name="subtarea_detalle_${i}_titulo"]`)
-      const fechaElement = document.querySelector(`[name="subtarea_detalle_${i}_fecha"]`)
-      
-      const titulo = tituloElement?.value?.trim()
-      const fecha = fechaElement?.value
-      
-      console.log(`Sub-tarea detalle ${i}:`, {
-        tituloElement: !!tituloElement,
-        fechaElement: !!fechaElement,
-        titulo,
-        fecha,
-        tituloLength: titulo?.length || 0
-      })
-      
-      if (titulo) {
-        const subtarea = {
-          titulo: titulo,
-          que_hacer: titulo, // Usar el título como descripción
-          como_hacerlo: '',
-          fecha_programada: fecha || null
-        }
-        
-        subtareas.push(subtarea)
-        console.log(`✅ Sub-tarea detalle ${i} añadida:`, subtarea)
-      } else {
-        console.log(`⏭️ Sub-tarea detalle ${i} vacía, saltando`)
-      }
-    }
-    
-    console.log('📋 Sub-tareas detalle procesadas total:', {
-      cantidad: subtareas.length,
-      subtareas: subtareas
-    })
-    
-    return subtareas
-  },
-
   // 🎯 NUEVA FUNCIÓN: Manejar selección de tipo de decreto
   updateDecretoSelect(tipoSeleccionado) {
     console.log('🔄 Tipo de decreto seleccionado:', tipoSeleccionado)

@@ -17,6 +17,8 @@ const Agenda = {
     originalTimeline: [], // Timeline sin filtrar
     metricas: {},
     enfoque: null,
+    // 🎯 Vista activa: 'actual' o 'propuesta'
+    vistaActiva: 'actual',
     // 🎯 NUEVO: Datos para panorámica de pendientes
     panoramicaPendientes: {
       acciones: [],
@@ -111,7 +113,7 @@ const Agenda = {
   renderAgendaView() {
     return `
       <div class="w-full px-6 py-8">
-        <!-- Header moderno -->
+        <!-- Header moderno con toggle de vistas -->
         <div class="flex items-center justify-between mb-8">
           <div>
             <h1 class="text-4xl font-bold mb-2 flex items-center">
@@ -120,7 +122,31 @@ const Agenda = {
             </h1>
             <p class="text-slate-300">Organiza y prioriza tus tareas diarias</p>
           </div>
+
+          <!-- 🎯 Toggle de Vistas -->
+          <div class="flex items-center bg-slate-800 rounded-lg p-1">
+            <button
+              onclick="Agenda.cambiarVista('actual')"
+              class="px-4 py-2 rounded-md transition-all ${this.data.vistaActiva === 'actual' ? 'bg-accent-green text-black font-semibold' : 'text-slate-300 hover:text-white'}"
+            >
+              Vista Actual
+            </button>
+            <button
+              onclick="Agenda.cambiarVista('propuesta')"
+              class="px-4 py-2 rounded-md transition-all ${this.data.vistaActiva === 'propuesta' ? 'bg-accent-purple text-white font-semibold' : 'text-slate-300 hover:text-white'}"
+            >
+              Vista Propuesta ✨
+            </button>
+          </div>
         </div>
+
+        ${this.data.vistaActiva === 'actual' ? this.renderAgendaActual() : this.renderAgendaPropuesta()}
+      </div>
+    `
+  },
+
+  renderAgendaActual() {
+    return `
 
         <!-- Enfoque del día -->
         ${this.renderEnfoqueDia()}
@@ -204,15 +230,82 @@ const Agenda = {
 
         <!-- Botón crear acción -->
         <div class="fixed bottom-6 right-6 z-50">
-          <button 
-            onclick="Decretos.openCreateAccionDetalleModal()"
+          <button
+            onclick="Decretos.openUniversalAccionModal()"
             class="bg-accent-green hover:bg-green-600 text-black w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-xl font-bold transform hover:scale-110 transition-all duration-200 border-2 border-green-400"
+          >
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+    `
+  },
+
+  renderAgendaPropuesta() {
+    return `
+      <!-- 🎯 VISTA PROPUESTA: "Name It & Claim It" -->
+      <div class="space-y-6">
+
+        <!-- Enfoque del día DESTACADO -->
+        ${this.renderEnfoqueDiaDestacado()}
+
+        <!-- Grid de 3 columnas: Timeline | Primarias | Secundarias -->
+        <div class="grid grid-cols-12 gap-6">
+
+          <!-- COLUMNA 1: Timeline del día (40% = 5 cols) -->
+          <div class="col-span-5">
+            ${this.renderTimelinePropuesto()}
+          </div>
+
+          <!-- COLUMNA 2: Acciones Primarias (30% = 3.5 cols) -->
+          <div class="col-span-3">
+            ${this.renderAccionesPrimarias()}
+          </div>
+
+          <!-- COLUMNA 3: Acciones Secundarias (30% = 3.5 cols) -->
+          <div class="col-span-4">
+            ${this.renderAccionesSecundarias()}
+          </div>
+
+        </div>
+
+        <!-- Progreso del día -->
+        ${this.renderProgresoDia()}
+
+        <!-- Botón crear acción -->
+        <div class="fixed bottom-6 right-6 z-50">
+          <button
+            onclick="Decretos.openUniversalAccionModal()"
+            class="bg-accent-purple hover:bg-purple-600 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-xl font-bold transform hover:scale-110 transition-all duration-200 border-2 border-purple-400"
           >
             <i class="fas fa-plus"></i>
           </button>
         </div>
       </div>
     `
+  },
+
+  // Función para cambiar entre vistas
+  async cambiarVista(vista) {
+    this.data.vistaActiva = vista
+    const mainContent = document.getElementById('main-content')
+    mainContent.innerHTML = this.renderAgendaView()
+
+    // Si cambia a vista propuesta, preguntar si quiere auto-agendar
+    if (vista === 'propuesta') {
+      setTimeout(async () => {
+        const quiereAutoAgendar = confirm(
+          '🤖 Auto-Agendar mi día\n\n' +
+          '¿Quieres que organice automáticamente tus acciones en los espacios libres de tu calendario?\n\n' +
+          '✅ Respetará tus eventos de Google Calendar\n' +
+          '✅ Priorizará tu enfoque del día\n' +
+          '✅ Distribuirá primarias y secundarias'
+        )
+
+        if (quiereAutoAgendar) {
+          await this.autoAgendarDia()
+        }
+      }, 500)
+    }
   },
 
   renderEnfoqueDia() {
@@ -829,7 +922,6 @@ const Agenda = {
       ${this.renderDetalleTareaModal()}
       ${this.renderEditTareaModal()}
       ${this.renderSeguimientoModal()}
-      ${Decretos.renderCreateAccionDetalleModal()}
     `
   },
 
@@ -2916,14 +3008,21 @@ const Agenda = {
             Ordenado cronológicamente: más antigua → más reciente
           </div>
           <div class="flex space-x-2">
-            <button 
+            <button
+              onclick="Agenda.autoAgendarDia()"
+              class="btn-success px-3 py-2 text-sm rounded-lg bg-green-600 hover:bg-green-700"
+              title="Auto-agenda acciones en espacios libres de tu Google Calendar"
+            >
+              <i class="fas fa-magic mr-2"></i>Auto-agendar mi día
+            </button>
+            <button
               onclick="Agenda.exportarPendientes()"
               class="btn-secondary px-3 py-2 text-sm rounded-lg"
             >
               <i class="fas fa-download mr-2"></i>Exportar
             </button>
-            <button 
-              onclick="Decretos.openCreateAccionDetalleModal()"
+            <button
+              onclick="Decretos.openUniversalAccionModal()"
               class="btn-primary px-3 py-2 text-sm rounded-lg"
             >
               <i class="fas fa-plus mr-2"></i>Nueva Acción
@@ -3234,8 +3333,72 @@ const Agenda = {
     }
   },
 
+  // 🤖 ============ AUTO-SCHEDULING ============
+
+  async autoAgendarDia() {
+    console.log('🤖 Iniciando auto-scheduling')
+
+    try {
+      // Mostrar confirmación con opciones
+      const confirmar = confirm(
+        '🤖 Auto-agendar mi día\n\n' +
+        'Esto analizará tu Google Calendar y agendará automáticamente tus acciones pendientes en los espacios libres.\n\n' +
+        '¿Deseas continuar?'
+      )
+
+      if (!confirmar) {
+        return
+      }
+
+      // Mostrar loading
+      Utils.showToast('🤖 Analizando tu calendario...', 'info')
+
+      const fecha = this.data.selectedDate || dayjs().format('YYYY-MM-DD')
+
+      // Llamar al endpoint
+      const result = await API.agenda.autoSchedule({
+        fecha: fecha,
+        horaInicio: '08:00',
+        horaFin: '20:00',
+        exportToGoogle: confirm(
+          '📅 ¿Deseas exportar las acciones agendadas a Google Calendar?\n\n' +
+          'Esto creará eventos automáticamente en tu calendario.'
+        )
+      })
+
+      if (result.success) {
+        const data = result.data
+
+        // Mostrar resultado
+        const mensaje = `
+✅ Auto-scheduling completado!
+
+📊 Resultados:
+• ${data.accionesAgendadas} acciones agendadas
+• ${data.accionesNoAgendadas} acciones sin espacio
+• ${data.espaciosLibresEncontrados} espacios libres encontrados
+${data.accionesExportadas > 0 ? `• ${data.accionesExportadas} acciones exportadas a Google Calendar` : ''}
+
+${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + data.detalles.map(a => `• ${a.titulo} - ${a.hora}`).join('\n') : ''}
+        `.trim()
+
+        Utils.showToast(mensaje, 'success')
+
+        // Recargar la vista
+        await this.loadAgendaData(fecha)
+
+      } else {
+        Utils.showToast(`❌ Error: ${result.error}`, 'error')
+      }
+
+    } catch (error) {
+      console.error('❌ Error en auto-scheduling:', error)
+      Utils.showToast('❌ Error al auto-agendar. Verifica tu conexión con Google Calendar.', 'error')
+    }
+  },
+
   // 🎨 ============ COMPONENTES DE DISEÑO PREMIUM ============
-  
+
   renderCalendarioPremium() {
     const currentDate = dayjs(this.data.currentMonth)
     const today = dayjs()
@@ -3410,12 +3573,12 @@ const Agenda = {
 
         <!-- Footer con Actions -->
         <div class="p-3 border-t border-white/10">
-          <button 
-            onclick="Decretos.openCreateAccionDetalleModal()"
+          <button
+            onclick="Decretos.openUniversalAccionModal()"
             class="w-full premium-btn-primary"
           >
             <i class="fas fa-plus mr-2"></i>
-            Agregar Tarea
+            Nueva Acción
           </button>
         </div>
       </div>
@@ -4392,6 +4555,330 @@ const Agenda = {
   contarPendientes() {
     const recordatorios = this.obtenerRecordatorios()
     return recordatorios.filter(r => !r.completado).length
+  },
+
+  // =====================================================
+  // 🎯 FUNCIONES RENDER PARA VISTA PROPUESTA
+  // =====================================================
+
+  renderEnfoqueDiaDestacado() {
+    const enfoque = this.data.enfoque
+    return `
+      <div class="bg-gradient-to-r from-green-900/40 to-purple-900/40 border-2 border-accent-green rounded-xl p-6 shadow-2xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-3">
+            <span class="text-4xl">🎯</span>
+            <div>
+              <h2 class="text-2xl font-bold text-white">Mi Enfoque del Día</h2>
+              <p class="text-accent-green text-sm font-semibold">"Lo que nombro, lo reclamo"</p>
+            </div>
+          </div>
+          <button
+            onclick="Agenda.openSelectorEnfoque()"
+            class="btn-primary px-4 py-2 rounded-lg text-sm"
+          >
+            ${enfoque ? 'Cambiar Enfoque' : 'Seleccionar Enfoque'}
+          </button>
+        </div>
+
+        ${enfoque ? `
+          <div class="bg-slate-800/60 rounded-lg p-5 border border-accent-green/30">
+            <h3 class="text-xl font-bold text-white mb-2">${enfoque.titulo}</h3>
+            <div class="flex items-center space-x-4 text-sm text-slate-300 mb-3">
+              <span>📊 ${enfoque.decreto_titulo}</span>
+              <span>⏰ ${enfoque.duracion_minutos || 60} min</span>
+              <span class="px-2 py-1 rounded ${enfoque.prioridad === 'alta' ? 'bg-red-600' : 'bg-yellow-600'} text-white text-xs">
+                🔥 ${enfoque.prioridad === 'alta' ? 'ALTA' : enfoque.prioridad === 'media' ? 'MEDIA' : 'BAJA'}
+              </span>
+            </div>
+            <button
+              onclick="Agenda.completarEnfoque()"
+              class="w-full bg-accent-green hover:bg-green-600 text-black font-bold py-3 rounded-lg transition-all text-lg"
+            >
+              ✅ COMPLETAR MI ENFOQUE DEL DÍA
+            </button>
+          </div>
+        ` : `
+          <div class="bg-slate-800/60 rounded-lg p-8 text-center border border-slate-600">
+            <p class="text-slate-400 text-lg mb-3">No has seleccionado tu enfoque del día</p>
+            <p class="text-slate-500 text-sm">Selecciona LA tarea más importante que debes completar hoy</p>
+          </div>
+        `}
+      </div>
+    `
+  },
+
+  renderTimelinePropuesto() {
+    const timeline = this.data.timeline || []
+    const fecha = dayjs(this.data.selectedDate)
+
+    // Separar eventos por tipo
+    const eventosGoogle = timeline.filter(t => t.tipo === 'google_calendar')
+    const tareasAgendadas = timeline.filter(t => t.tipo !== 'google_calendar' && t.hora_evento)
+    const enfoque = this.data.enfoque
+
+    // Crear timeline de 6am a 10pm
+    const horas = []
+    for (let h = 6; h <= 22; h++) {
+      horas.push(`${String(h).padStart(2, '0')}:00`)
+    }
+
+    return `
+      <div class="gradient-card p-5 rounded-xl h-full">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold flex items-center">
+            <span class="mr-2">⏰</span>
+            MI DÍA
+          </h3>
+          <button
+            onclick="Agenda.autoAgendarDia()"
+            class="text-xs px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-lg transition-all"
+          >
+            🤖 Auto-agendar
+          </button>
+        </div>
+
+        <div class="space-y-2 overflow-y-auto" style="max-height: 600px;">
+          ${horas.map(hora => {
+            // Buscar eventos en esta hora
+            const eventosEnHora = [
+              ...eventosGoogle.filter(e => e.hora_evento?.startsWith(hora.substring(0, 2))),
+              ...tareasAgendadas.filter(e => e.hora_evento?.startsWith(hora.substring(0, 2)))
+            ]
+
+            const esEnfoque = enfoque && enfoque.hora_evento?.startsWith(hora.substring(0, 2))
+
+            return `
+              <div class="border-l-2 ${eventosEnHora.length > 0 || esEnfoque ? 'border-accent-green' : 'border-slate-700'} pl-3 py-2">
+                <div class="text-xs font-mono text-slate-400 mb-1">${hora}</div>
+                ${esEnfoque ? `
+                  <div class="bg-green-900/40 border border-accent-green rounded p-2 mb-1">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <div class="text-sm font-bold text-white">🎯 ${enfoque.titulo}</div>
+                        <div class="text-xs text-accent-green">${enfoque.duracion_minutos || 60} min</div>
+                      </div>
+                      <input type="checkbox" class="w-4 h-4" />
+                    </div>
+                  </div>
+                ` : ''}
+                ${eventosEnHora.map(evento => `
+                  <div class="bg-slate-800 rounded p-2 mb-1 ${evento.tipo === 'google_calendar' ? 'border-l-2 border-blue-400' : ''}">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <div class="text-sm ${evento.tipo === 'google_calendar' ? 'text-blue-300' : 'text-white'}">${evento.titulo}</div>
+                        <div class="text-xs text-slate-400">${evento.decreto_titulo || ''}</div>
+                      </div>
+                      ${evento.tipo !== 'google_calendar' ? '<input type="checkbox" class="w-4 h-4" />' : ''}
+                    </div>
+                  </div>
+                `).join('')}
+                ${eventosEnHora.length === 0 && !esEnfoque ? `
+                  <div class="text-xs text-slate-600 italic">Espacio libre</div>
+                ` : ''}
+              </div>
+            `
+          }).join('')}
+        </div>
+      </div>
+    `
+  },
+
+  renderAccionesPrimarias() {
+    const primarias = this.data.timeline.filter(t =>
+      t.tipo === 'primaria' &&
+      t.estado === 'pendiente' &&
+      !t.hora_evento  // Solo las que NO están agendadas
+    )
+
+    return `
+      <div class="gradient-card p-5 rounded-xl h-full">
+        <div class="mb-4">
+          <h3 class="text-lg font-bold flex items-center">
+            <span class="mr-2">📌</span>
+            ACCIONES PRIMARIAS
+          </h3>
+          <p class="text-xs text-slate-400">Construcción Estratégica (Semanales)</p>
+          <div class="text-xs text-accent-purple mt-1">
+            ${primarias.length} pendientes
+          </div>
+        </div>
+
+        <div class="space-y-3 overflow-y-auto" style="max-height: 550px;">
+          ${primarias.length === 0 ? `
+            <div class="text-center py-8 text-slate-500">
+              <p class="text-sm">No hay acciones primarias pendientes</p>
+              <button
+                onclick="Decretos.openUniversalAccionModal()"
+                class="mt-3 text-xs px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded transition-all"
+              >
+                + Crear Acción Primaria
+              </button>
+            </div>
+          ` : primarias.map(accion => `
+            <div class="bg-slate-800 rounded-lg p-3 border-l-4 ${
+              accion.prioridad === 'alta' ? 'border-red-500' :
+              accion.prioridad === 'media' ? 'border-yellow-500' :
+              'border-green-500'
+            }">
+              <div class="flex items-start justify-between mb-2">
+                <div class="flex-1">
+                  <h4 class="text-sm font-semibold text-white">${accion.titulo}</h4>
+                  <div class="text-xs text-slate-400 mt-1">
+                    ${accion.decreto_area ? this.getAreaIcon(accion.decreto_area) : ''} ${accion.decreto_titulo || 'Sin decreto'}
+                  </div>
+                </div>
+                <span class="text-xs px-2 py-1 rounded ${
+                  accion.prioridad === 'alta' ? 'bg-red-600' :
+                  accion.prioridad === 'media' ? 'bg-yellow-600' :
+                  'bg-green-600'
+                } text-white">
+                  ${accion.prioridad === 'alta' ? '🔥' : accion.prioridad === 'media' ? '⚡' : '✓'}
+                </span>
+              </div>
+              <div class="text-xs text-slate-500">
+                ⏰ ${accion.duracion_minutos || 60} min
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `
+  },
+
+  renderAccionesSecundarias() {
+    const secundarias = this.data.timeline.filter(t =>
+      t.tipo === 'secundaria' &&
+      t.estado === 'pendiente'
+    )
+
+    const completadas = secundarias.filter(s => s.estado === 'completada').length
+    const total = secundarias.length
+
+    return `
+      <div class="gradient-card p-5 rounded-xl h-full">
+        <div class="mb-4">
+          <h3 class="text-lg font-bold flex items-center">
+            <span class="mr-2">✅</span>
+            ACCIONES SECUNDARIAS
+          </h3>
+          <p class="text-xs text-slate-400">Disciplina Diaria (Hábitos)</p>
+          <div class="text-xs text-accent-green mt-1">
+            ${completadas}/${total} completadas
+          </div>
+        </div>
+
+        <div class="space-y-2 overflow-y-auto" style="max-height: 550px;">
+          ${secundarias.length === 0 ? `
+            <div class="text-center py-8 text-slate-500">
+              <p class="text-sm">No hay acciones secundarias pendientes</p>
+              <button
+                onclick="Decretos.openUniversalAccionModal()"
+                class="mt-3 text-xs px-3 py-1 bg-green-600 hover:bg-green-700 rounded transition-all"
+              >
+                + Crear Acción Secundaria
+              </button>
+            </div>
+          ` : secundarias.map(accion => `
+            <div class="bg-slate-800 rounded-lg p-2 flex items-center space-x-3 hover:bg-slate-700 transition-colors">
+              <input
+                type="checkbox"
+                ${accion.estado === 'completada' ? 'checked' : ''}
+                onclick="Agenda.toggleAccion('${accion.id}')"
+                class="w-4 h-4 rounded"
+              />
+              <div class="flex-1">
+                <div class="text-sm ${accion.estado === 'completada' ? 'line-through text-slate-500' : 'text-white'}">
+                  ${accion.titulo}
+                </div>
+                <div class="text-xs text-slate-500">
+                  ${accion.duracion_minutos ? `⏰ ${accion.duracion_minutos} min` : ''}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `
+  },
+
+  renderProgresoDia() {
+    const enfoque = this.data.enfoque
+    const primarias = this.data.timeline.filter(t => t.tipo === 'primaria')
+    const secundarias = this.data.timeline.filter(t => t.tipo === 'secundaria')
+
+    const primariasCompletadas = primarias.filter(p => p.estado === 'completada').length
+    const secundariasCompletadas = secundarias.filter(s => s.estado === 'completada').length
+
+    const progresoEnfoque = enfoque && enfoque.estado === 'completada' ? 100 : 0
+    const progresoPrimarias = primarias.length > 0 ? (primariasCompletadas / primarias.length * 100) : 0
+    const progresoSecundarias = secundarias.length > 0 ? (secundariasCompletadas / secundarias.length * 100) : 0
+
+    return `
+      <div class="gradient-card p-6 rounded-xl">
+        <h3 class="text-xl font-bold mb-4">📊 MI PROGRESO HOY</h3>
+
+        <div class="space-y-4">
+          <!-- Enfoque -->
+          <div>
+            <div class="flex justify-between text-sm mb-2">
+              <span class="text-white">🎯 Enfoque del Día</span>
+              <span class="text-accent-green font-bold">${progresoEnfoque}%</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+              <div
+                class="bg-gradient-to-r from-green-500 to-green-400 h-full transition-all duration-500"
+                style="width: ${progresoEnfoque}%"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Primarias -->
+          <div>
+            <div class="flex justify-between text-sm mb-2">
+              <span class="text-white">📌 Primarias</span>
+              <span class="text-accent-purple font-bold">${Math.round(progresoPrimarias)}% (${primariasCompletadas}/${primarias.length})</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+              <div
+                class="bg-gradient-to-r from-purple-500 to-purple-400 h-full transition-all duration-500"
+                style="width: ${progresoPrimarias}%"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Secundarias -->
+          <div>
+            <div class="flex justify-between text-sm mb-2">
+              <span class="text-white">✅ Secundarias</span>
+              <span class="text-accent-blue font-bold">${Math.round(progresoSecundarias)}% (${secundariasCompletadas}/${secundarias.length})</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+              <div
+                class="bg-gradient-to-r from-blue-500 to-blue-400 h-full transition-all duration-500"
+                style="width: ${progresoSecundarias}%"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        ${progresoEnfoque === 100 ? `
+          <div class="mt-4 p-4 bg-green-900/40 border border-accent-green rounded-lg text-center">
+            <p class="text-accent-green font-bold">🎉 ¡COMPLETASTE TU ENFOQUE DEL DÍA!</p>
+            <p class="text-sm text-white mt-1">Lo nombraste y lo reclamaste</p>
+          </div>
+        ` : ''}
+      </div>
+    `
+  },
+
+  getAreaIcon(area) {
+    const icons = {
+      'Empresarial': '🏢',
+      'Humano': '👨‍👩‍👧‍👦',
+      'Material': '💰'
+    }
+    return icons[area] || '📋'
   }
 }
 

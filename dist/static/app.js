@@ -170,7 +170,9 @@ const API = {
       API.request(`/agenda/tareas/${id}/seguimiento`, { method: 'POST', data }),
     // 🎯 NUEVO: Panorámica de acciones pendientes
     getPanoramicaPendientes: (area = 'todos') =>
-      API.request(`/agenda/panoramica-pendientes?area=${area}`)
+      API.request(`/agenda/panoramica-pendientes?area=${area}`),
+    // 🤖 Auto-scheduling
+    autoSchedule: (data) => API.request('/agenda/auto-schedule', { method: 'POST', data })
   },
 
   // Progreso
