@@ -111,7 +111,9 @@ const Agenda = {
     }
 
     // 🎯 NUEVO: Almacenar datos de Rutina Diaria (3 decretos primarios del día)
-    if (rutinaData.success && rutinaData.data) {
+    console.log('🔍 DEBUG: rutinaData recibido:', rutinaData)
+
+    if (rutinaData && rutinaData.success && rutinaData.data) {
       this.data.decretosDelDia = rutinaData.data.primary || {}
       console.log('🎯 Decretos del día cargados:', {
         empresarial: this.data.decretosDelDia.empresarial?.titulo,
@@ -121,6 +123,11 @@ const Agenda = {
     } else {
       this.data.decretosDelDia = null
       console.warn('⚠️ No se pudieron cargar los decretos del día desde Rutina')
+      console.warn('🔍 Razón:', {
+        rutinaDataExists: !!rutinaData,
+        success: rutinaData?.success,
+        hasData: !!rutinaData?.data
+      })
     }
 
     // Aplicar filtros después de cargar los datos
