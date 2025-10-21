@@ -2943,16 +2943,17 @@ const Agenda = {
 
   async borrarAccion(accionId) {
     try {
-      if (typeof Decretos !== 'undefined' && typeof Decretos.borrarAccion === 'function') {
-        await Decretos.borrarAccion(accionId)
-        // Recargar agenda
-        await this.loadAgendaData()
-        const mainContent = document.getElementById('main-content')
-        mainContent.innerHTML = this.renderAgendaView()
-      } else {
-        console.warn('Función Decretos.borrarAccion no disponible')
-        Utils.showToast('⚠️ Función no disponible', 'warning')
-      }
+      console.log('🗑️ Borrando acción:', accionId)
+
+      // Llamar directamente al endpoint de agenda
+      await API.agenda.deleteTarea(accionId)
+
+      Utils.showToast('🗑️ Acción eliminada', 'success')
+
+      // Recargar agenda
+      await this.loadAgendaData()
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderAgendaView()
     } catch (error) {
       console.error('❌ Error al borrar acción:', error)
       Utils.showToast('❌ Error al borrar acción', 'error')
