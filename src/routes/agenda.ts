@@ -741,45 +741,56 @@ agendaRoutes.post('/auto-schedule', async (c) => {
       console.log(`🎯 Creando acciones desde ${decretosPrioritarios.length} decretos prioritarios`)
 
       for (const decretoId of decretosPrioritarios) {
-        // Obtener información del decreto
-        const decreto = await c.env.DB.prepare(`
-          SELECT id, titulo, area, descripcion FROM decretos WHERE id = ?
-        `).bind(decretoId).first()
+        try {
+          // Obtener información del decreto
+          const decreto = await c.env.DB.prepare(`
+            SELECT id, titulo, area, descripcion FROM decretos WHERE id = ?
+          `).bind(decretoId).first()
 
-        if (decreto) {
-          // Crear acción para este decreto
-          const result = await c.env.DB.prepare(`
-            INSERT INTO acciones (
-              decreto_id,
-              titulo,
-              que_hacer,
-              fecha_evento,
-              tipo,
-              prioridad,
-              duracion_minutos,
-              estado,
-              created_at,
-              updated_at
-            ) VALUES (?, ?, ?, ?, 'primaria', 'alta', 30, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-          `).bind(
-            decreto.id,
-            decreto.titulo,
-            decreto.descripcion || '',
-            fecha
-          ).run()
+          if (decreto) {
+            // Generar ID manualmente
+            const accionId = crypto.randomUUID().replace(/-/g, '').substring(0, 32)
 
-          accionesCreadas.push({
-            id: result.meta.last_row_id,
-            titulo: decreto.titulo,
-            decreto_id: decreto.id,
-            tipo: 'primaria',
-            duracion_minutos: 30,
-            prioridad: 'alta',
-            es_enfoque_dia: 0,
-            area: decreto.area
-          })
+            // Crear acción para este decreto
+            await c.env.DB.prepare(`
+              INSERT INTO acciones (
+                id,
+                decreto_id,
+                titulo,
+                que_hacer,
+                fecha_evento,
+                tipo,
+                prioridad,
+                duracion_minutos,
+                estado,
+                created_at,
+                updated_at
+              ) VALUES (?, ?, ?, ?, ?, 'primaria', 'alta', 30, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            `).bind(
+              accionId,
+              decreto.id,
+              decreto.titulo,
+              decreto.descripcion || '',
+              fecha
+            ).run()
 
-          console.log(`✅ Acción creada: ${decreto.titulo}`)
+            accionesCreadas.push({
+              id: accionId,
+              titulo: decreto.titulo,
+              decreto_id: decreto.id,
+              tipo: 'primaria',
+              duracion_minutos: 30,
+              prioridad: 'alta',
+              es_enfoque_dia: 0,
+              area: decreto.area
+            })
+
+            console.log(`✅ Acción creada: ${decreto.titulo}`)
+          } else {
+            console.log(`⚠️ Decreto no encontrado: ${decretoId}`)
+          }
+        } catch (error: any) {
+          console.error(`❌ Error creando acción para decreto ${decretoId}:`, error.message)
         }
       }
     }
