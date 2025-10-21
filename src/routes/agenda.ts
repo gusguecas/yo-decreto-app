@@ -856,7 +856,7 @@ agendaRoutes.post('/auto-schedule', async (c) => {
     }
 
     // 7. Calcular estadísticas
-    const noAgendadas = accionesPendientes.results.length - accionesAgendadas.length
+    const noAgendadas = todasLasAcciones.length - accionesAgendadas.length
 
     return c.json({
       success: true,
