@@ -318,22 +318,8 @@ const Agenda = {
     const mainContent = document.getElementById('main-content')
     mainContent.innerHTML = this.renderAgendaView()
 
-    // Si cambia a vista propuesta, preguntar si quiere auto-agendar
-    if (vista === 'propuesta') {
-      setTimeout(async () => {
-        const quiereAutoAgendar = confirm(
-          '🤖 Auto-Agendar mi día\n\n' +
-          '¿Quieres que organice automáticamente tus acciones en los espacios libres de tu calendario?\n\n' +
-          '✅ Respetará tus eventos de Google Calendar\n' +
-          '✅ Priorizará tu enfoque del día\n' +
-          '✅ Distribuirá primarias y secundarias'
-        )
-
-        if (quiereAutoAgendar) {
-          await this.autoAgendarDia()
-        }
-      }, 500)
-    }
+    // Ya no hacemos auto-agenda automáticamente
+    // El usuario debe hacer click en el botón "Auto-agendar los 3 decretos"
   },
 
   renderEnfoqueDia() {
