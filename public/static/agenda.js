@@ -2818,22 +2818,23 @@ const Agenda = {
   async eliminarTarea(tareaId) {
     try {
       console.log('🗑️ Eliminando tarea:', tareaId)
-      
+
       const response = await fetch(`/api/agenda/tareas/${tareaId}`, {
         method: 'DELETE'
       })
 
       if (response.ok) {
-        showNotification('🗑️ Tarea eliminada', 'success')
+        Utils.showToast('🗑️ Tarea eliminada', 'success')
         // Recargar la agenda para reflejar cambios
-        await this.cargarEventos()
-        this.render()
+        await this.loadAgendaData()
+        const mainContent = document.getElementById('main-content')
+        mainContent.innerHTML = this.renderAgendaView()
       } else {
         throw new Error('Error al eliminar tarea')
       }
     } catch (error) {
       console.error('❌ Error eliminando tarea:', error)
-      showNotification('❌ Error al eliminar tarea', 'error')
+      Utils.showToast('❌ Error al eliminar tarea', 'error')
     }
   },
 
@@ -2944,9 +2945,10 @@ const Agenda = {
     try {
       if (typeof Decretos !== 'undefined' && typeof Decretos.borrarAccion === 'function') {
         await Decretos.borrarAccion(accionId)
-        // Recargar panorámica
-        await this.loadPanoramicaPendientes()
-        this.render()
+        // Recargar agenda
+        await this.loadAgendaData()
+        const mainContent = document.getElementById('main-content')
+        mainContent.innerHTML = this.renderAgendaView()
       } else {
         console.warn('Función Decretos.borrarAccion no disponible')
         Utils.showToast('⚠️ Función no disponible', 'warning')
@@ -5014,11 +5016,21 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
       Utils.showToast('🤖 Analizando espacios libres...', 'info')
 
       const fecha = this.data.selectedDate || dayjs().format('YYYY-MM-DD')
+      const hoy = dayjs().format('YYYY-MM-DD')
+
+      // Si es hoy, empezar desde la hora actual + 30 min, si no, desde las 8am
+      let horaInicio = '08:00'
+      if (fecha === hoy) {
+        const ahora = dayjs()
+        const proximaHora = ahora.add(30, 'minutes')
+        horaInicio = proximaHora.format('HH:mm')
+        console.log(`⏰ Es hoy, agendando desde: ${horaInicio}`)
+      }
 
       // Llamar al endpoint con los 3 decretos del día
       const result = await API.agenda.autoSchedule({
         fecha: fecha,
-        horaInicio: '08:00',
+        horaInicio: horaInicio,
         horaFin: '20:00',
         bloqueoComida: true, // 🍽️ Bloquear 2-4pm
         decretosPrioritarios: [
