@@ -4996,6 +4996,102 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
       'Material': '💰'
     }
     return icons[area] || '📋'
+  },
+
+  // ===================================================================
+  // 🎯 FUNCIONES PARA VISTA PROPUESTA CON DECRETOS DEL DÍA
+  // ===================================================================
+
+  /**
+   * Auto-agenda los 3 decretos del día desde Rutina Diaria
+   * Respeta Google Calendar y bloquea 2-4pm para comida
+   */
+  async autoAgendarDecretosDelDia() {
+    console.log('🤖 Auto-agendando los 3 decretos del día')
+
+    if (!this.data.decretosDelDia) {
+      Utils.showToast('⚠️ Primero ve a Rutina Diaria para generar tus decretos del día', 'warning')
+      return
+    }
+
+    try {
+      const confirmar = confirm(
+        '🤖 Auto-agendar mis 3 decretos del día\n\n' +
+        'Esto agendará automáticamente tus 3 decretos (Empresarial, Humano, Material) en espacios libres.\n\n' +
+        '✅ Respeta eventos de Google Calendar\n' +
+        '✅ Bloquea 2-4pm para comida\n\n' +
+        '¿Deseas continuar?'
+      )
+
+      if (!confirmar) return
+
+      Utils.showToast('🤖 Analizando espacios libres...', 'info')
+
+      const fecha = this.data.selectedDate || dayjs().format('YYYY-MM-DD')
+
+      // Llamar al endpoint con los 3 decretos del día
+      const result = await API.agenda.autoSchedule({
+        fecha: fecha,
+        horaInicio: '08:00',
+        horaFin: '20:00',
+        bloqueoComida: true, // 🍽️ Bloquear 2-4pm
+        decretosPrioritarios: [
+          this.data.decretosDelDia.empresarial?.id,
+          this.data.decretosDelDia.humano?.id,
+          this.data.decretosDelDia.material?.id
+        ].filter(Boolean),
+        exportToGoogle: confirm(
+          '📅 ¿Exportar a Google Calendar?\n\nCreará 3 eventos automáticamente.'
+        )
+      })
+
+      if (result.success) {
+        const data = result.data
+        Utils.showToast(
+          `✅ ${data.accionesAgendadas} decretos agendados!\n` +
+          `${data.accionesExportadas > 0 ? `📅 ${data.accionesExportadas} exportados a Google Calendar` : ''}`,
+          'success'
+        )
+
+        // Recargar la vista
+        await this.loadAgendaData()
+        const mainContent = document.getElementById('main-content')
+        mainContent.innerHTML = this.renderAgendaView()
+      } else {
+        Utils.showToast(`❌ Error: ${result.error}`, 'error')
+      }
+    } catch (error) {
+      console.error('❌ Error:', error)
+      Utils.showToast('❌ Error al auto-agendar decretos del día', 'error')
+    }
+  },
+
+  /**
+   * Completa un decreto del día desde la Vista Propuesta
+   */
+  async completarDecretoDelDia(decretoId, area) {
+    console.log('✅ Completando decreto del día:', { decretoId, area })
+
+    try {
+      // Marcar como completado en Rutina Diaria
+      await API.rutina.completeTask({
+        decretoId: decretoId,
+        taskType: 'primary',
+        minutesSpent: 30,
+        notes: `Completado desde Agenda (Vista Propuesta) - Área: ${area}`
+      })
+
+      Utils.showToast(`✅ Decreto ${area} completado!`, 'success')
+
+      // Recargar datos
+      await this.loadAgendaData()
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderAgendaView()
+
+    } catch (error) {
+      console.error('❌ Error al completar decreto:', error)
+      Utils.showToast('❌ Error al completar decreto del día', 'error')
+    }
   }
 }
 
@@ -5169,102 +5265,6 @@ const ComandoEjecutivo = {
         document.body.removeChild(notif)
       }, 500)
     }, 4000)
-  },
-
-  // ===================================================================
-  // 🎯 NUEVAS FUNCIONES PARA VISTA PROPUESTA CON DECRETOS DEL DÍA
-  // ===================================================================
-
-  /**
-   * Auto-agenda los 3 decretos del día desde Rutina Diaria
-   * Respeta Google Calendar y bloquea 2-4pm para comida
-   */
-  async autoAgendarDecretosDelDia() {
-    console.log('🤖 Auto-agendando los 3 decretos del día')
-
-    if (!this.data.decretosDelDia) {
-      Utils.showToast('⚠️ Primero ve a Rutina Diaria para generar tus decretos del día', 'warning')
-      return
-    }
-
-    try {
-      const confirmar = confirm(
-        '🤖 Auto-agendar mis 3 decretos del día\n\n' +
-        'Esto agendará automáticamente tus 3 decretos (Empresarial, Humano, Material) en espacios libres.\n\n' +
-        '✅ Respeta eventos de Google Calendar\n' +
-        '✅ Bloquea 2-4pm para comida\n\n' +
-        '¿Deseas continuar?'
-      )
-
-      if (!confirmar) return
-
-      Utils.showToast('🤖 Analizando espacios libres...', 'info')
-
-      const fecha = this.data.selectedDate || dayjs().format('YYYY-MM-DD')
-
-      // Llamar al endpoint con los 3 decretos del día
-      const result = await API.agenda.autoSchedule({
-        fecha: fecha,
-        horaInicio: '08:00',
-        horaFin: '20:00',
-        bloqueoComida: true, // 🍽️ Bloquear 2-4pm
-        decretosPrioritarios: [
-          this.data.decretosDelDia.empresarial?.id,
-          this.data.decretosDelDia.humano?.id,
-          this.data.decretosDelDia.material?.id
-        ].filter(Boolean),
-        exportToGoogle: confirm(
-          '📅 ¿Exportar a Google Calendar?\n\nCreará 3 eventos automáticamente.'
-        )
-      })
-
-      if (result.success) {
-        const data = result.data
-        Utils.showToast(
-          `✅ ${data.accionesAgendadas} decretos agendados!\n` +
-          `${data.accionesExportadas > 0 ? `📅 ${data.accionesExportadas} exportados a Google Calendar` : ''}`,
-          'success'
-        )
-
-        // Recargar la vista
-        await this.loadAgendaData()
-        const mainContent = document.getElementById('main-content')
-        mainContent.innerHTML = this.renderAgendaView()
-      } else {
-        Utils.showToast(`❌ Error: ${result.error}`, 'error')
-      }
-    } catch (error) {
-      console.error('❌ Error:', error)
-      Utils.showToast('❌ Error al auto-agendar decretos del día', 'error')
-    }
-  },
-
-  /**
-   * Completa un decreto del día desde la Vista Propuesta
-   */
-  async completarDecretoDelDia(decretoId, area) {
-    console.log('✅ Completando decreto del día:', { decretoId, area })
-
-    try {
-      // Marcar como completado en Rutina Diaria
-      await API.rutina.completeTask({
-        decretoId: decretoId,
-        taskType: 'primary',
-        minutesSpent: 30,
-        notes: `Completado desde Agenda (Vista Propuesta) - Área: ${area}`
-      })
-
-      Utils.showToast(`✅ Decreto ${area} completado!`, 'success')
-
-      // Recargar datos
-      await this.loadAgendaData()
-      const mainContent = document.getElementById('main-content')
-      mainContent.innerHTML = this.renderAgendaView()
-
-    } catch (error) {
-      console.error('❌ Error al completar decreto:', error)
-      Utils.showToast('❌ Error al completar decreto del día', 'error')
-    }
   }
 }
 
