@@ -5016,13 +5016,29 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
 
       Utils.showToast('🤖 Analizando espacios libres...', 'info')
 
-      const fecha = this.data.selectedDate || dayjs().format('YYYY-MM-DD')
+      const ahora = dayjs()
       const hoy = dayjs().format('YYYY-MM-DD')
-
-      // Si es hoy, empezar desde la hora actual + 30 min, si no, desde las 8am
+      let fecha = this.data.selectedDate || hoy
       let horaInicio = '08:00'
-      if (fecha === hoy) {
-        const ahora = dayjs()
+
+      // Si es tarde (después de las 6 PM), agendar para mañana
+      if (fecha === hoy && ahora.hour() >= 18) {
+        const aceptaMañana = confirm(
+          '🌙 Ya es tarde (después de las 6 PM)\n\n' +
+          '¿Quieres agendar para MAÑANA desde las 8:00 AM?\n\n' +
+          'Si dices NO, se agendará para lo que queda de hoy.'
+        )
+        if (aceptaMañana) {
+          fecha = ahora.add(1, 'day').format('YYYY-MM-DD')
+          horaInicio = '08:00'
+          console.log(`🌅 Agendando para mañana: ${fecha} desde ${horaInicio}`)
+        } else {
+          const proximaHora = ahora.add(30, 'minutes')
+          horaInicio = proximaHora.format('HH:mm')
+          console.log(`⏰ Agendando para hoy desde: ${horaInicio}`)
+        }
+      } else if (fecha === hoy) {
+        // Es hoy pero temprano, empezar desde hora actual + 30 min
         const proximaHora = ahora.add(30, 'minutes')
         horaInicio = proximaHora.format('HH:mm')
         console.log(`⏰ Es hoy, agendando desde: ${horaInicio}`)
