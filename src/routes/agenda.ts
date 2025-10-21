@@ -722,8 +722,15 @@ agendaRoutes.post('/auto-schedule', async (c) => {
     console.log('🤖 Iniciando auto-scheduling para:', { fecha, horaInicio, horaFin, bloqueoComida, decretosPrioritarios })
 
     // 1. Obtener eventos de Google Calendar
-    const eventosGoogle = await obtenerEventosGoogleCalendar(c, userId, fecha)
-    console.log(`📅 Eventos de Google Calendar: ${eventosGoogle.length}`)
+    let eventosGoogle: any[] = []
+    try {
+      eventosGoogle = await obtenerEventosGoogleCalendar(c, userId, fecha)
+      console.log(`📅 Eventos de Google Calendar: ${eventosGoogle.length}`)
+    } catch (error: any) {
+      console.error('⚠️ Error obteniendo eventos de Google Calendar:', error.message)
+      console.log('⚠️ Continuando sin eventos de Google Calendar')
+      eventosGoogle = []
+    }
 
     // 2. Detectar espacios libres (con bloqueo de comida si está habilitado)
     const espaciosLibres = detectarEspaciosLibres(
@@ -826,26 +833,37 @@ agendaRoutes.post('/auto-schedule', async (c) => {
     console.log(`📋 Total acciones a agendar: ${todasLasAcciones.length} (${accionesCreadas.length} creadas + ${accionesPendientes.results.length} existentes)`)
 
     // 5. Ejecutar algoritmo de scheduling con TODAS las acciones
+    console.log(`🔄 Ejecutando algoritmo de scheduling...`)
+    console.log(`📊 Espacios libres:`, espaciosLibres)
+    console.log(`📋 Acciones a agendar:`, todasLasAcciones.map(a => ({ id: a.id, titulo: a.titulo, duracion: a.duracion_minutos })))
+
     const accionesAgendadas = algoritmoScheduling(
       todasLasAcciones as any[],
       espaciosLibres
     )
 
     console.log(`✅ Acciones agendadas: ${accionesAgendadas.length}`)
+    console.log(`📋 Detalles:`, accionesAgendadas.map(a => ({ id: a.id, titulo: a.titulo, hora: a.hora_evento })))
 
     // 6. Actualizar acciones en BD con fecha y hora
     let actualizadas = 0
     for (const accion of accionesAgendadas) {
-      await c.env.DB.prepare(`
+      console.log(`💾 Actualizando acción ${accion.id} con hora ${accion.hora_evento}`)
+
+      const result = await c.env.DB.prepare(`
         UPDATE acciones
         SET
           fecha_evento = ?,
           hora_evento = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
-      `).bind(accion.fecha_evento, accion.hora_evento, accion.id).run()
+      `).bind(fecha, accion.hora_evento, accion.id).run()
+
+      console.log(`✅ Acción actualizada:`, result)
       actualizadas++
     }
+
+    console.log(`✅ Total actualizadas: ${actualizadas}`)
 
     // 7. Exportar a Google Calendar si se solicita
     let exportadas = 0
