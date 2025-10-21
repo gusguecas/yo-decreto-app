@@ -19,7 +19,7 @@ const Agenda = {
     metricas: {},
     enfoque: null,
     // 🎯 Vista activa: 'actual' o 'propuesta'
-    vistaActiva: 'actual',
+    vistaActiva: 'propuesta', // ✨ Por defecto mostrar Vista Propuesta con los 3 decretos del día
     // 🎯 NUEVO: 3 Decretos primarios del día desde Rutina Diaria
     decretosDelDia: null, // { empresarial: {...}, humano: {...}, material: {...} }
     // 🎯 NUEVO: Datos para panorámica de pendientes
