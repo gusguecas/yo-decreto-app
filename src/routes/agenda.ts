@@ -735,7 +735,56 @@ agendaRoutes.post('/auto-schedule', async (c) => {
     )
     console.log(`🆓 Espacios libres detectados: ${espaciosLibres.length}`)
 
-    // 3. Obtener acciones pendientes sin agendar
+    // 3. Si vienen decretosPrioritarios, crear acciones automáticamente
+    let accionesCreadas: any[] = []
+    if (decretosPrioritarios && decretosPrioritarios.length > 0) {
+      console.log(`🎯 Creando acciones desde ${decretosPrioritarios.length} decretos prioritarios`)
+
+      for (const decretoId of decretosPrioritarios) {
+        // Obtener información del decreto
+        const decreto = await c.env.DB.prepare(`
+          SELECT id, titulo, area, descripcion FROM decretos WHERE id = ?
+        `).bind(decretoId).first()
+
+        if (decreto) {
+          // Crear acción para este decreto
+          const result = await c.env.DB.prepare(`
+            INSERT INTO acciones (
+              decreto_id,
+              titulo,
+              que_hacer,
+              fecha_evento,
+              tipo,
+              prioridad,
+              duracion_minutos,
+              estado,
+              created_at,
+              updated_at
+            ) VALUES (?, ?, ?, ?, 'primaria', 'alta', 30, 'pendiente', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          `).bind(
+            decreto.id,
+            decreto.titulo,
+            decreto.descripcion || '',
+            fecha
+          ).run()
+
+          accionesCreadas.push({
+            id: result.meta.last_row_id,
+            titulo: decreto.titulo,
+            decreto_id: decreto.id,
+            tipo: 'primaria',
+            duracion_minutos: 30,
+            prioridad: 'alta',
+            es_enfoque_dia: 0,
+            area: decreto.area
+          })
+
+          console.log(`✅ Acción creada: ${decreto.titulo}`)
+        }
+      }
+    }
+
+    // 4. Obtener acciones pendientes sin agendar (además de las creadas)
     const accionesPendientes = await c.env.DB.prepare(`
       SELECT
         a.id,
@@ -761,17 +810,19 @@ agendaRoutes.post('/auto-schedule', async (c) => {
         a.created_at ASC
     `).bind(fecha).all()
 
-    console.log(`📋 Acciones pendientes: ${accionesPendientes.results.length}`)
+    // Combinar acciones creadas + acciones existentes
+    const todasLasAcciones = [...accionesCreadas, ...accionesPendientes.results]
+    console.log(`📋 Total acciones a agendar: ${todasLasAcciones.length} (${accionesCreadas.length} creadas + ${accionesPendientes.results.length} existentes)`)
 
-    // 4. Ejecutar algoritmo de scheduling
+    // 5. Ejecutar algoritmo de scheduling con TODAS las acciones
     const accionesAgendadas = algoritmoScheduling(
-      accionesPendientes.results as any[],
+      todasLasAcciones as any[],
       espaciosLibres
     )
 
     console.log(`✅ Acciones agendadas: ${accionesAgendadas.length}`)
 
-    // 5. Actualizar acciones en BD
+    // 6. Actualizar acciones en BD con fecha y hora
     let actualizadas = 0
     for (const accion of accionesAgendadas) {
       await c.env.DB.prepare(`
@@ -785,7 +836,7 @@ agendaRoutes.post('/auto-schedule', async (c) => {
       actualizadas++
     }
 
-    // 6. Exportar a Google Calendar si se solicita
+    // 7. Exportar a Google Calendar si se solicita
     let exportadas = 0
     if (exportToGoogle && accionesAgendadas.length > 0) {
       try {
