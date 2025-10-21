@@ -5061,7 +5061,11 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
           'success'
         )
 
-        // Recargar la vista
+        // Cambiar a la fecha donde se agendaron las acciones
+        this.data.selectedDate = fecha
+        console.log(`📅 Cambiando a la fecha agendada: ${fecha}`)
+
+        // Recargar la vista con la nueva fecha
         await this.loadAgendaData()
         const mainContent = document.getElementById('main-content')
         mainContent.innerHTML = this.renderAgendaView()
