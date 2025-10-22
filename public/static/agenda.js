@@ -2152,10 +2152,31 @@ const Agenda = {
           </div>
           
           <div class="flex items-center space-x-2 ml-auto">
-            <span class="text-sm text-slate-400">${this.data.selectedDate}</span>
-            <button 
+            <!-- Navegación de fechas -->
+            <button
+              onclick="Agenda.selectDate('${dayjs(this.data.selectedDate).subtract(1, 'day').format('YYYY-MM-DD')}')"
+              class="btn-secondary text-sm px-2 py-1 hover:bg-slate-700"
+              title="Día anterior"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <span class="text-sm font-medium text-slate-200 px-2">
+              ${dayjs(this.data.selectedDate).locale('es').format('ddd, D MMM')}
+            </span>
+
+            <button
+              onclick="Agenda.selectDate('${dayjs(this.data.selectedDate).add(1, 'day').format('YYYY-MM-DD')}')"
+              class="btn-secondary text-sm px-2 py-1 hover:bg-slate-700"
+              title="Día siguiente"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <button
               onclick="Agenda.selectDate('${dayjs().format('YYYY-MM-DD')}')"
-              class="btn-secondary text-sm px-3 py-1"
+              class="btn-primary text-sm px-3 py-1 ml-2"
+              title="Volver a hoy"
             >
               Hoy
             </button>
