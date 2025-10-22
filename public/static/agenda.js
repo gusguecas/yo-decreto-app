@@ -4755,7 +4755,12 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
             const esEnfoque = enfoque && enfoque.hora_evento?.startsWith(hora.substring(0, 2))
 
             return `
-              <div class="border-l-2 ${eventosEnHora.length > 0 || esEnfoque ? 'border-accent-green' : 'border-slate-700'} pl-3 py-2">
+              <div
+                class="border-l-2 ${eventosEnHora.length > 0 || esEnfoque ? 'border-accent-green' : 'border-slate-700'} pl-3 py-2 drop-zone"
+                data-hora="${hora}"
+                ondragover="Agenda.onDragOver(event)"
+                ondrop="Agenda.onDrop(event, '${hora}')"
+              >
                 <div class="text-xs font-mono text-slate-400 mb-1">${hora}</div>
                 ${esEnfoque ? `
                   <div class="bg-green-900/40 border border-accent-green rounded p-2 mb-1">
@@ -4769,13 +4774,33 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
                   </div>
                 ` : ''}
                 ${eventosEnHora.map(evento => `
-                  <div class="bg-slate-800 rounded p-2 mb-1 ${evento.tipo === 'google_calendar' ? 'border-l-2 border-blue-400' : ''}">
+                  <div
+                    class="bg-slate-800 rounded p-2 mb-1 ${evento.tipo === 'google_calendar' ? 'border-l-2 border-blue-400' : 'hover:bg-slate-700 transition-all cursor-move'}"
+                    ${evento.tipo !== 'google_calendar' ? `draggable="true"` : ''}
+                    ondragstart="Agenda.onDragStart(event, '${evento.id}', '${evento.hora_evento}')"
+                    ondragend="Agenda.onDragEnd(event)"
+                  >
                     <div class="flex items-center justify-between">
-                      <div>
-                        <div class="text-sm ${evento.tipo === 'google_calendar' ? 'text-blue-300' : 'text-white'}">${evento.titulo}</div>
+                      <div class="flex-1">
+                        <div class="flex items-center space-x-2">
+                          ${evento.tipo !== 'google_calendar' ? `<span class="text-slate-500">⋮⋮</span>` : ''}
+                          <div class="text-sm ${evento.tipo === 'google_calendar' ? 'text-blue-300' : 'text-white'}">${evento.titulo}</div>
+                        </div>
                         <div class="text-xs text-slate-400">${evento.decreto_titulo || ''}</div>
+                        ${evento.hora_evento ? `<div class="text-xs text-accent-green mt-1">⏰ ${evento.hora_evento}</div>` : ''}
                       </div>
-                      ${evento.tipo !== 'google_calendar' ? '<input type="checkbox" class="w-4 h-4" />' : ''}
+                      <div class="flex items-center space-x-2">
+                        ${evento.tipo !== 'google_calendar' ? `
+                          <button
+                            onclick="Agenda.editarHoraEvento('${evento.id}', '${evento.hora_evento}')"
+                            class="text-xs px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded transition-all"
+                            title="Editar hora manualmente"
+                          >
+                            <i class="fas fa-clock"></i>
+                          </button>
+                          <input type="checkbox" class="w-4 h-4" />
+                        ` : ''}
+                      </div>
                     </div>
                   </div>
                 `).join('')}
@@ -4791,62 +4816,124 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
   },
 
   renderAccionesPrimarias() {
-    const primarias = this.data.timeline.filter(t =>
-      t.tipo === 'primaria' &&
-      t.estado === 'pendiente' &&
-      !t.hora_evento  // Solo las que NO están agendadas
-    )
+    const decretos = this.data.decretosDelDia
+
+    // Si no hay decretos del día, mostrar mensaje
+    if (!decretos || (!decretos.empresarial && !decretos.humano && !decretos.material)) {
+      return `
+        <div class="gradient-card p-5 rounded-xl h-full">
+          <div class="mb-4">
+            <h3 class="text-lg font-bold flex items-center">
+              <span class="mr-2">🎯</span>
+              MIS 3 DECRETOS DEL DÍA
+            </h3>
+            <p class="text-xs text-slate-400">"Lo que nombro, lo reclamo"</p>
+          </div>
+          <div class="text-center py-8 text-slate-500">
+            <div class="mb-4">
+              <span class="text-5xl">⚠️</span>
+            </div>
+            <p class="text-sm mb-4">No se han generado los 3 decretos del día</p>
+            <button
+              onclick="Router.navigate('rutina')"
+              class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-all"
+            >
+              Ir a Rutina Diaria
+            </button>
+          </div>
+        </div>
+      `
+    }
 
     return `
       <div class="gradient-card p-5 rounded-xl h-full">
         <div class="mb-4">
           <h3 class="text-lg font-bold flex items-center">
-            <span class="mr-2">📌</span>
-            ACCIONES PRIMARIAS
+            <span class="mr-2">🎯</span>
+            MIS 3 DECRETOS DEL DÍA
           </h3>
-          <p class="text-xs text-slate-400">Construcción Estratégica (Semanales)</p>
-          <div class="text-xs text-accent-purple mt-1">
-            ${primarias.length} pendientes
-          </div>
+          <p class="text-xs text-slate-400">"Lo que nombro, lo reclamo"</p>
         </div>
 
-        <div class="space-y-3 overflow-y-auto" style="max-height: 550px;">
-          ${primarias.length === 0 ? `
-            <div class="text-center py-8 text-slate-500">
-              <p class="text-sm">No hay acciones primarias pendientes</p>
+        <div class="space-y-3">
+          <!-- 💼 EMPRESARIAL -->
+          ${decretos.empresarial ? `
+            <div class="bg-slate-800 rounded-lg p-4 border-l-4 border-blue-500">
+              <div class="flex items-center space-x-2 mb-2">
+                <span class="text-2xl">💼</span>
+                <div class="flex-1">
+                  <h4 class="text-sm font-bold text-white">EMPRESARIAL</h4>
+                  <p class="text-xs text-slate-400">${decretos.empresarial.titulo}</p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-xs mb-3">
+                <span class="text-slate-400">⏰ ${decretos.empresarial.duracion_minutos || 30} min</span>
+                <span class="px-2 py-1 bg-blue-600 rounded text-white">Estratégico</span>
+              </div>
               <button
-                onclick="Decretos.openUniversalAccionModal()"
-                class="mt-3 text-xs px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded transition-all"
+                onclick="Agenda.completarDecretoDelDia('${decretos.empresarial.id}', 'empresarial')"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-all text-sm"
               >
-                + Crear Acción Primaria
+                ✅ Completar
               </button>
             </div>
-          ` : primarias.map(accion => `
-            <div class="bg-slate-800 rounded-lg p-3 border-l-4 ${
-              accion.prioridad === 'alta' ? 'border-red-500' :
-              accion.prioridad === 'media' ? 'border-yellow-500' :
-              'border-green-500'
-            }">
-              <div class="flex items-start justify-between mb-2">
+          ` : '<div class="bg-slate-800 rounded-lg p-4 text-center text-slate-500 text-sm">💼 No asignado</div>'}
+
+          <!-- ❤️ HUMANO -->
+          ${decretos.humano ? `
+            <div class="bg-slate-800 rounded-lg p-4 border-l-4 border-pink-500">
+              <div class="flex items-center space-x-2 mb-2">
+                <span class="text-2xl">❤️</span>
                 <div class="flex-1">
-                  <h4 class="text-sm font-semibold text-white">${accion.titulo}</h4>
-                  <div class="text-xs text-slate-400 mt-1">
-                    ${accion.decreto_area ? this.getAreaIcon(accion.decreto_area) : ''} ${accion.decreto_titulo || 'Sin decreto'}
-                  </div>
+                  <h4 class="text-sm font-bold text-white">HUMANO</h4>
+                  <p class="text-xs text-slate-400">${decretos.humano.titulo}</p>
                 </div>
-                <span class="text-xs px-2 py-1 rounded ${
-                  accion.prioridad === 'alta' ? 'bg-red-600' :
-                  accion.prioridad === 'media' ? 'bg-yellow-600' :
-                  'bg-green-600'
-                } text-white">
-                  ${accion.prioridad === 'alta' ? '🔥' : accion.prioridad === 'media' ? '⚡' : '✓'}
-                </span>
               </div>
-              <div class="text-xs text-slate-500">
-                ⏰ ${accion.duracion_minutos || 60} min
+              <div class="flex items-center justify-between text-xs mb-3">
+                <span class="text-slate-400">⏰ ${decretos.humano.duracion_minutos || 30} min</span>
+                <span class="px-2 py-1 bg-pink-600 rounded text-white">Personal</span>
               </div>
+              <button
+                onclick="Agenda.completarDecretoDelDia('${decretos.humano.id}', 'humano')"
+                class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 rounded-lg transition-all text-sm"
+              >
+                ✅ Completar
+              </button>
             </div>
-          `).join('')}
+          ` : '<div class="bg-slate-800 rounded-lg p-4 text-center text-slate-500 text-sm">❤️ No asignado</div>'}
+
+          <!-- 💎 MATERIAL -->
+          ${decretos.material ? `
+            <div class="bg-slate-800 rounded-lg p-4 border-l-4 border-yellow-500">
+              <div class="flex items-center space-x-2 mb-2">
+                <span class="text-2xl">💎</span>
+                <div class="flex-1">
+                  <h4 class="text-sm font-bold text-white">MATERIAL</h4>
+                  <p class="text-xs text-slate-400">${decretos.material.titulo}</p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-xs mb-3">
+                <span class="text-slate-400">⏰ ${decretos.material.duracion_minutos || 30} min</span>
+                <span class="px-2 py-1 bg-yellow-600 rounded text-white">Recursos</span>
+              </div>
+              <button
+                onclick="Agenda.completarDecretoDelDia('${decretos.material.id}', 'material')"
+                class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 rounded-lg transition-all text-sm"
+              >
+                ✅ Completar
+              </button>
+            </div>
+          ` : '<div class="bg-slate-800 rounded-lg p-4 text-center text-slate-500 text-sm">💎 No asignado</div>'}
+        </div>
+
+        <!-- Botón de Auto-agendar -->
+        <div class="mt-4">
+          <button
+            onclick="Agenda.autoAgendarDecretosDelDia()"
+            class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-purple-600 hover:from-green-700 hover:to-purple-700 text-white font-bold rounded-lg transition-all shadow-lg text-sm"
+          >
+            🤖 Auto-agendar en espacios libres
+          </button>
         </div>
       </div>
     `
@@ -5104,6 +5191,204 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
       console.error('❌ Error al completar decreto:', error)
       Utils.showToast('❌ Error al completar decreto del día', 'error')
     }
+  },
+
+  /**
+   * Editar hora de un evento agendado
+   */
+  async editarHoraEvento(accionId, horaActual) {
+    console.log('✏️ Editando hora de evento:', { accionId, horaActual })
+
+    const nuevaHora = prompt('🕐 Nueva hora\n\nEjemplos:\n• 14:30\n• 2:30 pm\n• 08:00', horaActual || '08:00')
+
+    if (!nuevaHora) {
+      console.log('❌ Usuario canceló la edición')
+      return
+    }
+
+    // Convertir a formato 24h si viene en formato 12h (con am/pm)
+    let horaFinal = nuevaHora.trim()
+
+    // Detectar formato 12h con am/pm
+    const formato12h = /^(\d{1,2}):(\d{2})\s*(am|pm)$/i.test(horaFinal)
+
+    if (formato12h) {
+      const match = horaFinal.match(/^(\d{1,2}):(\d{2})\s*(am|pm)$/i)
+      let horas = parseInt(match[1])
+      const minutos = match[2]
+      const periodo = match[3].toLowerCase()
+
+      // Convertir a formato 24h
+      if (periodo === 'pm' && horas !== 12) {
+        horas += 12
+      } else if (periodo === 'am' && horas === 12) {
+        horas = 0
+      }
+
+      horaFinal = `${String(horas).padStart(2, '0')}:${minutos}`
+      console.log(`🔄 Convertido de 12h a 24h: ${nuevaHora} → ${horaFinal}`)
+    }
+
+    // Validar formato HH:MM (24 horas)
+    if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(horaFinal)) {
+      console.log('❌ Formato de hora inválido:', nuevaHora, '→', horaFinal)
+      Utils.showToast('⚠️ Formato inválido. Usa:\n• 14:30 (formato 24h)\n• 2:30 pm (formato 12h)', 'error')
+      return
+    }
+
+    try {
+      console.log('🔍 Obteniendo datos de la tarea:', accionId)
+      Utils.showToast('⏰ Actualizando hora...', 'info')
+
+      // Primero obtener la tarea completa
+      const tarea = await API.agenda.getTarea(accionId)
+      console.log('📦 Tarea obtenida:', tarea)
+
+      if (!tarea || !tarea.success) {
+        console.error('❌ No se pudo obtener la tarea:', tarea)
+        Utils.showToast('❌ No se pudo obtener la tarea', 'error')
+        return
+      }
+
+      const tareaData = tarea.data
+      console.log('📋 Datos de la tarea:', tareaData)
+
+      // Construir fecha_hora en formato ISO (YYYY-MM-DDTHH:MM)
+      const fechaHora = `${tareaData.fecha_evento || this.data.selectedDate}T${horaFinal}`
+      console.log('📅 Fecha/hora construida:', fechaHora)
+
+      // Actualizar con todos los campos requeridos
+      const updateData = {
+        titulo: tareaData.titulo,
+        descripcion: tareaData.que_hacer || tareaData.descripcion || '',
+        fecha_hora: fechaHora,
+        que_hacer: tareaData.que_hacer || '',
+        como_hacerlo: tareaData.como_hacerlo || '',
+        resultados: tareaData.resultados || '',
+        tipo: tareaData.tipo || 'diaria',
+        prioridad: tareaData.prioridad || 'media',
+        duracion_minutos: tareaData.duracion_minutos || 30
+      }
+      console.log('📤 Enviando actualización:', updateData)
+
+      const result = await API.agenda.updateTarea(accionId, updateData)
+      console.log('📥 Respuesta de actualización:', result)
+
+      if (result.success) {
+        console.log('✅ Actualización exitosa, recargando agenda...')
+        Utils.showToast('✅ Hora actualizada correctamente', 'success')
+
+        // Recargar datos y vista completa
+        await this.loadAgendaData()
+        console.log('📊 Datos recargados')
+
+        const mainContent = document.getElementById('main-content')
+        mainContent.innerHTML = this.renderAgendaView()
+        console.log('🎨 Vista renderizada')
+      } else {
+        console.error('❌ Error en la actualización:', result.error)
+        Utils.showToast(`❌ Error: ${result.error}`, 'error')
+      }
+    } catch (error) {
+      console.error('❌ Error capturado:', error)
+      Utils.showToast('❌ Error al actualizar la hora', 'error')
+    }
+  },
+
+  /**
+   * 🎯 DRAG & DROP - Funciones para arrastrar y soltar eventos
+   */
+  draggedEvent: null, // Variable para almacenar el evento que se está arrastrando
+
+  onDragStart(event, eventoId, horaActual) {
+    console.log('🎯 Iniciando drag:', { eventoId, horaActual })
+    this.draggedEvent = { id: eventoId, horaOriginal: horaActual }
+    event.dataTransfer.effectAllowed = 'move'
+    // Agregar efecto visual
+    event.target.style.opacity = '0.4'
+  },
+
+  onDragEnd(event) {
+    console.log('🎯 Finalizando drag')
+    event.target.style.opacity = '1'
+  },
+
+  onDragOver(event) {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+    // Agregar efecto visual a la zona de drop
+    const dropZone = event.currentTarget
+    dropZone.classList.add('bg-purple-900/20')
+  },
+
+  async onDrop(event, horaDestino) {
+    event.preventDefault()
+    console.log('🎯 Drop evento:', { horaDestino, draggedEvent: this.draggedEvent })
+
+    // Remover efecto visual
+    const dropZones = document.querySelectorAll('.drop-zone')
+    dropZones.forEach(zone => zone.classList.remove('bg-purple-900/20'))
+
+    if (!this.draggedEvent) {
+      console.error('❌ No hay evento siendo arrastrado')
+      return
+    }
+
+    const { id, horaOriginal } = this.draggedEvent
+    const nuevaHora = horaDestino.substring(0, 5) // Extraer HH:MM
+
+    if (nuevaHora === horaOriginal) {
+      console.log('⏭️ Misma hora, no hacer nada')
+      this.draggedEvent = null
+      return
+    }
+
+    console.log(`📦 Moviendo evento ${id} de ${horaOriginal} a ${nuevaHora}`)
+    Utils.showToast(`⏰ Moviendo a las ${nuevaHora}...`, 'info')
+
+    try {
+      // Obtener la tarea completa
+      const tarea = await API.agenda.getTarea(id)
+      if (!tarea || !tarea.success) {
+        Utils.showToast('❌ No se pudo obtener la tarea', 'error')
+        this.draggedEvent = null
+        return
+      }
+
+      const tareaData = tarea.data
+      const fechaHora = `${tareaData.fecha_evento || this.data.selectedDate}T${nuevaHora}`
+
+      // Actualizar en el backend
+      const result = await API.agenda.updateTarea(id, {
+        titulo: tareaData.titulo,
+        descripcion: tareaData.que_hacer || tareaData.descripcion || '',
+        fecha_hora: fechaHora,
+        que_hacer: tareaData.que_hacer || '',
+        como_hacerlo: tareaData.como_hacerlo || '',
+        resultados: tareaData.resultados || '',
+        tipo: tareaData.tipo || 'diaria',
+        prioridad: tareaData.prioridad || 'media',
+        duracion_minutos: tareaData.duracion_minutos || 30
+      })
+
+      if (result.success) {
+        console.log('✅ Evento movido exitosamente')
+        Utils.showToast(`✅ Movido a las ${nuevaHora}`, 'success')
+
+        // Recargar la vista
+        await this.loadAgendaData()
+        const mainContent = document.getElementById('main-content')
+        mainContent.innerHTML = this.renderAgendaView()
+      } else {
+        console.error('❌ Error moviendo evento:', result.error)
+        Utils.showToast(`❌ Error: ${result.error}`, 'error')
+      }
+    } catch (error) {
+      console.error('❌ Error en drag & drop:', error)
+      Utils.showToast('❌ Error al mover el evento', 'error')
+    }
+
+    this.draggedEvent = null
   }
 }
 
@@ -5228,14 +5513,14 @@ const ComandoEjecutivo = {
     try {
       // Aquí se conectaría con la API real
       console.log('Creando evento:', evento)
-      
+
       this.mostrarNotificacion(`✅ ${evento.titulo} programado exitosamente!`, 'success')
-      
+
       // Recargar calendario
       setTimeout(() => {
         Agenda.cargarDatos()
       }, 1000)
-      
+
     } catch (error) {
       console.error('Error creando evento:', error)
       this.mostrarNotificacion('❌ Error programando evento', 'error')

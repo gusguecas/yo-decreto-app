@@ -30,4 +30,5 @@ CREATE INDEX IF NOT EXISTS idx_auth_sessions_expires ON auth_sessions(expires_at
 
 -- Link existing user_name to auth system
 -- Update users table to link with auth_users
-ALTER TABLE users ADD COLUMN auth_user_id INTEGER REFERENCES auth_users(id);
+-- (Comentado - tabla users no existe)
+-- ALTER TABLE users ADD COLUMN auth_user_id INTEGER REFERENCES auth_users(id);
