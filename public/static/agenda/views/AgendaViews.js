@@ -897,56 +897,79 @@ export const AgendaViews = {
   },
 
   renderAccionesSecundarias() {
-    const secundarias = this.data.timeline.filter(t =>
-      t.tipo === 'secundaria' &&
-      t.estado === 'pendiente'
-    )
+    // 🎯 Mostrar decretos secundarios (que NO son los 3 primarios del día)
+    const decretosSecundarios = this.data.decretosSecundarios || []
 
-    const completadas = secundarias.filter(s => s.estado === 'completada').length
-    const total = secundarias.length
+    // Obtener iconos por área
+    const getAreaIcon = (area) => {
+      const icons = {
+        'empresarial': '💼',
+        'humano': '❤️',
+        'material': '💎'
+      }
+      return icons[area] || '📌'
+    }
+
+    // Obtener color por área
+    const getAreaColor = (area) => {
+      const colors = {
+        'empresarial': 'blue',
+        'humano': 'pink',
+        'material': 'yellow'
+      }
+      return colors[area] || 'gray'
+    }
 
     return `
       <div class="gradient-card p-5 rounded-xl h-full">
         <div class="mb-4">
           <h3 class="text-lg font-bold flex items-center">
-            <span class="mr-2">✅</span>
-            ACCIONES SECUNDARIAS
+            <span class="mr-2">📋</span>
+            DECRETOS SECUNDARIOS
           </h3>
-          <p class="text-xs text-slate-400">Disciplina Diaria (Hábitos)</p>
-          <div class="text-xs text-accent-green mt-1">
-            ${completadas}/${total} completadas
+          <p class="text-xs text-slate-400">Otros decretos disponibles hoy</p>
+          <div class="text-xs text-accent-purple mt-1">
+            ${decretosSecundarios.length} decretos disponibles
           </div>
         </div>
 
         <div class="space-y-2 overflow-y-auto" style="max-height: 550px;">
-          ${secundarias.length === 0 ? `
+          ${decretosSecundarios.length === 0 ? `
             <div class="text-center py-8 text-slate-500">
-              <p class="text-sm">No hay acciones secundarias pendientes</p>
-              <button
-                onclick="Decretos.openUniversalAccionModal()"
-                class="mt-3 text-xs px-3 py-1 bg-green-600 hover:bg-green-700 rounded transition-all"
-              >
-                + Crear Acción Secundaria
-              </button>
+              <p class="text-sm">No hay decretos secundarios</p>
+              <p class="text-xs mt-2">Los 3 decretos primarios del día ya están asignados</p>
             </div>
-          ` : secundarias.map(accion => `
-            <div class="bg-slate-800 rounded-lg p-2 flex items-center space-x-3 hover:bg-slate-700 transition-colors">
-              <input
-                type="checkbox"
-                ${accion.estado === 'completada' ? 'checked' : ''}
-                onclick="Agenda.toggleAccion('${accion.id}')"
-                class="w-4 h-4 rounded"
-              />
-              <div class="flex-1">
-                <div class="text-sm ${accion.estado === 'completada' ? 'line-through text-slate-500' : 'text-white'}">
-                  ${accion.titulo}
+          ` : decretosSecundarios.map(decreto => {
+            const area = decreto.categoria || decreto.area
+            const icon = getAreaIcon(area)
+            const color = getAreaColor(area)
+
+            return `
+              <div class="bg-slate-800 rounded-lg p-3 hover:bg-slate-700 transition-colors border-l-4 border-${color}-500">
+                <div class="flex items-start justify-between mb-2">
+                  <div class="flex items-center space-x-2 flex-1">
+                    <span class="text-xl">${icon}</span>
+                    <div class="flex-1">
+                      <div class="text-sm font-semibold text-white">
+                        ${decreto.titulo}
+                      </div>
+                      <div class="text-xs text-slate-400 mt-1">
+                        ${decreto.descripcion || 'Sin descripción'}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="text-xs text-slate-500">
-                  ${accion.duracion_minutos ? `⏰ ${accion.duracion_minutos} min` : ''}
-                </div>
+
+                <!-- Botón para crear acción desde este decreto -->
+                <button
+                  onclick="Agenda.crearAccionDesdeDecreto('${decreto.id}', '${decreto.titulo}', '${area}')"
+                  class="w-full mt-2 px-3 py-1.5 bg-${color}-600 hover:bg-${color}-700 text-white text-xs font-medium rounded transition-all"
+                >
+                  ➕ Crear Acción y Agendar
+                </button>
               </div>
-            </div>
-          `).join('')}
+            `
+          }).join('')}
         </div>
       </div>
     `

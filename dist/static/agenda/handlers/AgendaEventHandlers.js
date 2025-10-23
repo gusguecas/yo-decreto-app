@@ -1279,5 +1279,21 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
       console.error('❌ Error al borrar acción:', error)
       Utils.showToast('❌ Error al borrar acción', 'error')
     }
+  },
+
+  /**
+   * 🎯 NUEVO: Crear acción desde un decreto secundario
+   * Abre el modal universal de creación de acciones preseleccionando el decreto
+   */
+  crearAccionDesdeDecreto(decretoId, decretoTitulo, area) {
+    console.log('➕ Creando acción desde decreto secundario:', { decretoId, decretoTitulo, area })
+
+    // Llamar al modal universal de Decretos con el decreto preseleccionado
+    if (window.Decretos && typeof window.Decretos.openUniversalAccionModal === 'function') {
+      window.Decretos.openUniversalAccionModal(decretoId)
+    } else {
+      console.error('❌ No se encontró Decretos.openUniversalAccionModal')
+      Utils.showToast('❌ Error: Modal de acciones no disponible', 'error')
+    }
   }
 }

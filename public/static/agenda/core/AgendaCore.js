@@ -27,6 +27,8 @@ export const AgendaCore = {
     vistaActiva: 'propuesta', // ✨ Por defecto mostrar Vista Propuesta con los 3 decretos del día
     // 🎯 NUEVO: 3 Decretos primarios del día desde Rutina Diaria
     decretosDelDia: null, // { empresarial: {...}, humano: {...}, material: {...} }
+    // 🎯 NUEVO: Decretos secundarios (todos los demás decretos que no son primarios)
+    decretosSecundarios: [], // Array de decretos secundarios
     // 🎯 NUEVO: Datos para panorámica de pendientes
     panoramicaPendientes: {
       acciones: [],
@@ -114,13 +116,16 @@ export const AgendaCore = {
 
     if (rutinaData && rutinaData.success && rutinaData.data) {
       this.data.decretosDelDia = rutinaData.data.primary || {}
+      this.data.decretosSecundarios = rutinaData.data.secondary || []
       console.log('🎯 Decretos del día cargados:', {
         empresarial: this.data.decretosDelDia.empresarial?.titulo,
         humano: this.data.decretosDelDia.humano?.titulo,
         material: this.data.decretosDelDia.material?.titulo
       })
+      console.log('📋 Decretos secundarios cargados:', this.data.decretosSecundarios.length)
     } else {
       this.data.decretosDelDia = null
+      this.data.decretosSecundarios = []
       console.warn('⚠️ No se pudieron cargar los decretos del día desde Rutina')
       console.warn('🔍 Razón:', {
         rutinaDataExists: !!rutinaData,
