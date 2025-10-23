@@ -4152,7 +4152,7 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
         </div>
 
         <!-- Título y Decreto -->
-        <div class="mb-3 cursor-pointer" onclick="Decretos.openAccionModal('${accion.decreto_id}', '${accion.id}')">
+        <div class="mb-3 cursor-pointer" onclick="Agenda.openDetalleTarea('${accion.id}')">
           <h4 class="text-lg font-bold text-white mb-1 line-clamp-2 hover:text-accent-green transition-colors">
             ${accion.titulo}
           </h4>
