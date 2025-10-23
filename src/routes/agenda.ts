@@ -577,18 +577,16 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
 
     console.log('🔍 Obteniendo panorámica pendientes, área:', area, 'fecha:', fechaActual)
 
-    // PASO 1: Obtener decretos que YA están en las tareas primarias del día
-    const decretosEnPrimarias = await c.env.DB.prepare(`
-      SELECT DISTINCT decreto_id
+    // PASO 1: Obtener IDs de acciones que YA están agendadas en el día (no todo el decreto, solo las acciones específicas)
+    const accionesAgendadas = await c.env.DB.prepare(`
+      SELECT id
       FROM acciones
       WHERE fecha_evento = ?
-        AND tipo = 'primaria'
-        AND decreto_id IS NOT NULL
     `).bind(fechaActual).all()
 
-    const decretosExcluir = decretosEnPrimarias.results.map((r: any) => r.decreto_id)
+    const accionesExcluir = accionesAgendadas.results.map((r: any) => r.id)
 
-    console.log('🚫 Decretos a excluir (ya en primarias):', decretosExcluir)
+    console.log('🚫 Acciones a excluir (ya agendadas hoy):', accionesExcluir.length)
 
     let query = `
       SELECT
@@ -613,11 +611,11 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
 
     const params: any[] = []
 
-    // EXCLUIR decretos que ya están en primarias del día
-    if (decretosExcluir.length > 0) {
-      const placeholders = decretosExcluir.map(() => '?').join(',')
-      query += ` AND (a.decreto_id IS NULL OR a.decreto_id NOT IN (${placeholders}))`
-      params.push(...decretosExcluir)
+    // EXCLUIR acciones que ya están agendadas en el día
+    if (accionesExcluir.length > 0) {
+      const placeholders = accionesExcluir.map(() => '?').join(',')
+      query += ` AND a.id NOT IN (${placeholders})`
+      params.push(...accionesExcluir)
     }
 
     // Filtro por área/tipo de decreto
