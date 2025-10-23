@@ -370,7 +370,18 @@ googleCalendarRoutes.post('/import', async (c) => {
   try {
     const db = c.env.DB
     const userId = 'demo-user'
-    const { startDate, endDate } = await c.req.json()
+
+    // Parse request body with error handling
+    let startDate, endDate
+    try {
+      const body = await c.req.json()
+      startDate = body.startDate
+      endDate = body.endDate
+      console.log('📥 Import request:', { startDate, endDate })
+    } catch (jsonError: any) {
+      console.error('❌ Error parsing request JSON:', jsonError)
+      throw new Error(`Invalid request body: ${jsonError.message}`)
+    }
 
     // Crear log de sincronización
     const logResult = await db.prepare(`
@@ -401,6 +412,7 @@ googleCalendarRoutes.post('/import', async (c) => {
       url.searchParams.set('orderBy', 'startTime')
 
       // Llamar a Google Calendar API
+      console.log('🔗 Calling Google Calendar API:', url.toString())
       const response = await fetch(url.toString(), {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -408,10 +420,13 @@ googleCalendarRoutes.post('/import', async (c) => {
         }
       })
 
+      console.log('📡 Google Calendar API response status:', response.status)
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error?.message || 'Error fetching events from Google Calendar')
+        console.error('❌ Google Calendar API error:', data)
+        const errorMessage = data.error?.message || data.error || 'Error fetching events from Google Calendar'
+        throw new Error(`Google Calendar API error (${response.status}): ${errorMessage}`)
       }
 
       const events = data.items || []

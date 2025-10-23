@@ -109,10 +109,11 @@ const API = {
       return response.data
     } catch (error) {
       console.error('API Error:', error)
-      Utils.showToast(
-        error.response?.data?.error || 'Error en la comunicación con el servidor',
-        'error'
-      )
+      console.error('Error response:', error.response)
+      console.error('Error data:', error.response?.data)
+      console.error('Error message:', error.message)
+      const errorMessage = error.response?.data?.error || error.response?.data?.details || error.message || 'Error en la comunicación con el servidor'
+      Utils.showToast(errorMessage, 'error')
       throw error
     } finally {
       AppState.loading = false

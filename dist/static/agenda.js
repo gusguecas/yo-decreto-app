@@ -1292,7 +1292,14 @@ const Agenda = {
     // Aplicar filtros
     this.aplicarFiltros()
 
-    // Actualizar solo las secciones necesarias
+    // 🎯 SIMPLIFICADO: Recargar la vista completa en lugar de actualizar secciones
+    const mainContent = document.getElementById('main-content')
+    if (mainContent) {
+      mainContent.innerHTML = this.renderAgendaView()
+      return
+    }
+
+    // Fallback: Actualizar solo las secciones necesarias (Vista Actual)
     const timelineContainer = document.querySelector('[data-section="timeline"]')
     const panelControlContainer = document.querySelector('[data-section="panel-control"]')
     const recordatoriosContainer = document.querySelector('[data-section="recordatorios"]')
@@ -2152,10 +2159,31 @@ const Agenda = {
           </div>
           
           <div class="flex items-center space-x-2 ml-auto">
-            <span class="text-sm text-slate-400">${this.data.selectedDate}</span>
-            <button 
+            <!-- Navegación de fechas -->
+            <button
+              onclick="Agenda.selectDate('${dayjs(this.data.selectedDate).subtract(1, 'day').format('YYYY-MM-DD')}')"
+              class="btn-secondary text-sm px-2 py-1 hover:bg-slate-700"
+              title="Día anterior"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <span class="text-sm font-medium text-slate-200 px-2">
+              ${dayjs(this.data.selectedDate).locale('es').format('ddd, D MMM')}
+            </span>
+
+            <button
+              onclick="Agenda.selectDate('${dayjs(this.data.selectedDate).add(1, 'day').format('YYYY-MM-DD')}')"
+              class="btn-secondary text-sm px-2 py-1 hover:bg-slate-700"
+              title="Día siguiente"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <button
               onclick="Agenda.selectDate('${dayjs().format('YYYY-MM-DD')}')"
-              class="btn-secondary text-sm px-3 py-1"
+              class="btn-primary text-sm px-3 py-1 ml-2"
+              title="Volver a hoy"
             >
               Hoy
             </button>
@@ -3569,6 +3597,37 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
               <p class="text-xs text-slate-400 font-medium capitalize">${hoyFormatted}</p>
             </div>
           </div>
+
+          <!-- Navegación de fechas -->
+          <div class="flex items-center justify-center space-x-2 mt-3">
+            <button
+              onclick="Agenda.selectDate('${dayjs(this.data.selectedDate).subtract(1, 'day').format('YYYY-MM-DD')}')"
+              class="btn-secondary text-xs px-2 py-1 hover:bg-slate-700"
+              title="Día anterior"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <span class="text-xs font-medium text-slate-200 px-2">
+              ${dayjs(this.data.selectedDate).locale('es').format('ddd, D MMM')}
+            </span>
+
+            <button
+              onclick="Agenda.selectDate('${dayjs(this.data.selectedDate).add(1, 'day').format('YYYY-MM-DD')}')"
+              class="btn-secondary text-xs px-2 py-1 hover:bg-slate-700"
+              title="Día siguiente"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <button
+              onclick="Agenda.selectDate('${dayjs().format('YYYY-MM-DD')}')"
+              class="btn-primary text-xs px-2 py-1 ml-2"
+              title="Volver a hoy"
+            >
+              Hoy
+            </button>
+          </div>
         </div>
 
         <!-- Timeline Vertical con Scroll -->
@@ -4743,6 +4802,9 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
             🤖 Auto-agendar
           </button>
         </div>
+
+        <!-- Navegación de fechas y filtros -->
+        ${this.renderFiltrosHorizontales()}
 
         <div class="space-y-2 overflow-y-auto" style="max-height: 600px;">
           ${horas.map(hora => {
