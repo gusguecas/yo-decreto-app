@@ -2953,7 +2953,7 @@ const Agenda = {
       if (typeof Decretos !== 'undefined' && typeof Decretos.cambiarEstadoAccion === 'function') {
         await Decretos.cambiarEstadoAccion(accionId)
         // Recargar panorámica
-        await this.loadPanoramicaPendientes()
+        await this.refrescarPanoramica()
         this.render()
       } else {
         console.warn('Función Decretos.cambiarEstadoAccion no disponible')
