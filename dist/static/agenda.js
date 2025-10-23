@@ -64,7 +64,7 @@ const Agenda = {
       API.agenda.getMetricasDia(this.data.selectedDate),
       API.agenda.getEnfoque(this.data.selectedDate),
       // 🎯 NUEVO: Cargar panorámica de pendientes
-      API.agenda.getPanoramicaPendientes(this.data.panoramicaPendientes.filtroArea),
+      API.agenda.getPanoramicaPendientes(this.data.panoramicaPendientes.filtroArea, this.data.selectedDate),
       // 📅 NUEVO: Cargar eventos de Google Calendar
       API.googleCalendar.getEvents({
         startDate: this.data.selectedDate,
@@ -3229,7 +3229,7 @@ const Agenda = {
       this.data.panoramicaPendientes.filtroArea = area
       
       // Recargar datos con el nuevo filtro
-      const panoramica = await API.agenda.getPanoramicaPendientes(area)
+      const panoramica = await API.agenda.getPanoramicaPendientes(area, this.data.selectedDate)
       
       if (panoramica.success) {
         this.data.panoramicaPendientes.acciones = panoramica.data.acciones
@@ -3257,7 +3257,7 @@ const Agenda = {
     
     try {
       const area = this.data.panoramicaPendientes.filtroArea
-      const panoramica = await API.agenda.getPanoramicaPendientes(area)
+      const panoramica = await API.agenda.getPanoramicaPendientes(area, this.data.selectedDate)
       
       if (panoramica.success) {
         this.data.panoramicaPendientes.acciones = panoramica.data.acciones

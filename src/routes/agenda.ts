@@ -572,9 +572,23 @@ agendaRoutes.post('/tareas/:id/seguimiento', async (c) => {
 // Vista panorámica de acciones pendientes
 agendaRoutes.get('/panoramica-pendientes', async (c) => {
   try {
-    const { area } = c.req.query()
+    const { area, fecha } = c.req.query()
+    const fechaActual = fecha || new Date().toISOString().split('T')[0]
 
-    console.log('🔍 Obteniendo panorámica pendientes, área:', area)
+    console.log('🔍 Obteniendo panorámica pendientes, área:', area, 'fecha:', fechaActual)
+
+    // PASO 1: Obtener decretos que YA están en las tareas primarias del día
+    const decretosEnPrimarias = await c.env.DB.prepare(`
+      SELECT DISTINCT decreto_id
+      FROM agenda_tareas
+      WHERE fecha = ?
+        AND tipo = 'primaria'
+        AND decreto_id IS NOT NULL
+    `).bind(fechaActual).all()
+
+    const decretosExcluir = decretosEnPrimarias.results.map((r: any) => r.decreto_id)
+
+    console.log('🚫 Decretos a excluir (ya en primarias):', decretosExcluir)
 
     let query = `
       SELECT
@@ -598,6 +612,13 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
     `
 
     const params: any[] = []
+
+    // EXCLUIR decretos que ya están en primarias del día
+    if (decretosExcluir.length > 0) {
+      const placeholders = decretosExcluir.map(() => '?').join(',')
+      query += ` AND (a.decreto_id IS NULL OR a.decreto_id NOT IN (${placeholders}))`
+      params.push(...decretosExcluir)
+    }
 
     // Filtro por área/tipo de decreto
     if (area && area !== 'todos') {

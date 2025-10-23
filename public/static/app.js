@@ -170,8 +170,10 @@ const API = {
     createSeguimiento: (id, data) =>
       API.request(`/agenda/tareas/${id}/seguimiento`, { method: 'POST', data }),
     // 🎯 NUEVO: Panorámica de acciones pendientes
-    getPanoramicaPendientes: (area = 'todos') =>
-      API.request(`/agenda/panoramica-pendientes?area=${area}`),
+    getPanoramicaPendientes: (area = 'todos', fecha = null) => {
+      const fechaParam = fecha || new Date().toISOString().split('T')[0]
+      return API.request(`/agenda/panoramica-pendientes?area=${area}&fecha=${fechaParam}`)
+    },
     // 🤖 Auto-scheduling
     autoSchedule: (data) => API.request('/agenda/auto-schedule', { method: 'POST', data })
   },
