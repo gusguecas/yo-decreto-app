@@ -1292,7 +1292,14 @@ const Agenda = {
     // Aplicar filtros
     this.aplicarFiltros()
 
-    // Actualizar solo las secciones necesarias
+    // 🎯 SIMPLIFICADO: Recargar la vista completa en lugar de actualizar secciones
+    const mainContent = document.getElementById('main-content')
+    if (mainContent) {
+      mainContent.innerHTML = this.renderAgendaView()
+      return
+    }
+
+    // Fallback: Actualizar solo las secciones necesarias (Vista Actual)
     const timelineContainer = document.querySelector('[data-section="timeline"]')
     const panelControlContainer = document.querySelector('[data-section="panel-control"]')
     const recordatoriosContainer = document.querySelector('[data-section="recordatorios"]')
