@@ -3727,7 +3727,8 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
         <div class="timeline-connector"></div>
 
         <!-- Card de Tarea -->
-        <div class="timeline-card" data-evento-id="${tarea.id}"
+        <div class="timeline-card cursor-pointer" data-evento-id="${tarea.id}"
+             onclick="Agenda.openDetalleTarea('${tarea.id}')"
              style="border-left: ${bordeGrosor} solid ${areaConfig.color}; position: relative; background: transparent !important; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 16px; margin-bottom: 16px;">
 
           <!-- Badge de PRIMARIA (solo si es primaria) -->
@@ -3754,7 +3755,7 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
               <!-- Título -->
               <div class="flex items-center space-x-2 mb-1">
                 <span class="text-base">${prioridadIcon}</span>
-                <h4 class="font-medium text-white text-base truncate">${tarea.titulo}</h4>
+                <h4 class="font-medium text-white text-base truncate hover:text-accent-green transition-colors">${tarea.titulo}</h4>
               </div>
 
               ${tarea.decreto_titulo ? `
@@ -3775,7 +3776,7 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
           <!-- Actions Flotantes - Movidos debajo del badge cuando es primaria -->
           <div class="flex justify-end space-x-2 mt-2 pr-2">
             <button
-              onclick="Agenda.openSeguimientoModal('${tarea.id}')"
+              onclick="event.stopPropagation(); Agenda.openSeguimientoModal('${tarea.id}')"
               class="group relative bg-gradient-to-r from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 border border-green-400/50 text-green-300 hover:text-green-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-green-500/20"
               title="Seguimiento"
             >
@@ -3783,7 +3784,7 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
               <div class="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
             <button
-              onclick="Agenda.cambiarEstadoTarea('${tarea.id}')"
+              onclick="event.stopPropagation(); Agenda.cambiarEstadoTarea('${tarea.id}')"
               class="group relative bg-gradient-to-r from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30 border border-purple-400/50 text-purple-300 hover:text-purple-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
               title="${tarea.estado === 'completada' ? 'Marcar pendiente' : 'Completar tarea'}"
             >
@@ -3791,7 +3792,7 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
               <div class="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
             <button
-              onclick="Agenda.confirmarBorrarTarea('${tarea.id}')"
+              onclick="event.stopPropagation(); Agenda.confirmarBorrarTarea('${tarea.id}')"
               class="group relative bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-400/50 text-red-300 hover:text-red-200 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/20"
               title="Borrar"
             >
@@ -4842,28 +4843,30 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
               >
                 <div class="text-xs font-mono text-slate-400 mb-1">${hora}</div>
                 ${esEnfoque ? `
-                  <div class="bg-green-900/40 border border-accent-green rounded p-2 mb-1">
+                  <div class="bg-green-900/40 border border-accent-green rounded p-2 mb-1 cursor-pointer hover:bg-green-900/60 transition-all"
+                       onclick="Agenda.openDetalleTarea('${enfoque.id}')">
                     <div class="flex items-center justify-between">
                       <div>
-                        <div class="text-sm font-bold text-white">🎯 ${enfoque.titulo}</div>
+                        <div class="text-sm font-bold text-white hover:text-accent-green transition-colors">🎯 ${enfoque.titulo}</div>
                         <div class="text-xs text-accent-green">${enfoque.duracion_minutos || 60} min</div>
                       </div>
-                      <input type="checkbox" class="w-4 h-4" />
+                      <input type="checkbox" class="w-4 h-4" onclick="event.stopPropagation()" />
                     </div>
                   </div>
                 ` : ''}
                 ${eventosEnHora.map(evento => `
                   <div
-                    class="bg-slate-800 rounded p-2 mb-1 ${evento.tipo === 'google_calendar' ? 'border-l-2 border-blue-400' : 'hover:bg-slate-700 transition-all cursor-move'}"
+                    class="bg-slate-800 rounded p-2 mb-1 ${evento.tipo === 'google_calendar' ? 'border-l-2 border-blue-400 cursor-pointer' : 'hover:bg-slate-700 transition-all cursor-move'}"
                     ${evento.tipo !== 'google_calendar' ? `draggable="true"` : ''}
                     ondragstart="Agenda.onDragStart(event, '${evento.id}', '${evento.hora_evento}')"
                     ondragend="Agenda.onDragEnd(event)"
+                    onclick="Agenda.openDetalleTarea('${evento.id}')"
                   >
                     <div class="flex items-center justify-between">
                       <div class="flex-1">
                         <div class="flex items-center space-x-2">
                           ${evento.tipo !== 'google_calendar' ? `<span class="text-slate-500">⋮⋮</span>` : ''}
-                          <div class="text-sm ${evento.tipo === 'google_calendar' ? 'text-blue-300' : 'text-white'}">${evento.titulo}</div>
+                          <div class="text-sm ${evento.tipo === 'google_calendar' ? 'text-blue-300 hover:text-blue-200' : 'text-white hover:text-accent-green'} transition-colors">${evento.titulo}</div>
                         </div>
                         <div class="text-xs text-slate-400">${evento.decreto_titulo || ''}</div>
                         ${evento.hora_evento ? `<div class="text-xs text-accent-green mt-1">⏰ ${evento.hora_evento}</div>` : ''}
@@ -4871,13 +4874,13 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
                       <div class="flex items-center space-x-2">
                         ${evento.tipo !== 'google_calendar' ? `
                           <button
-                            onclick="Agenda.editarHoraEvento('${evento.id}', '${evento.hora_evento}')"
+                            onclick="event.stopPropagation(); Agenda.editarHoraEvento('${evento.id}', '${evento.hora_evento}')"
                             class="text-xs px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded transition-all"
                             title="Editar hora manualmente"
                           >
                             <i class="fas fa-clock"></i>
                           </button>
-                          <input type="checkbox" class="w-4 h-4" />
+                          <input type="checkbox" class="w-4 h-4" onclick="event.stopPropagation()" />
                         ` : ''}
                       </div>
                     </div>
