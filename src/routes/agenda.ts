@@ -577,6 +577,20 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
 
     console.log('🔍 Obteniendo panorámica pendientes, área:', area, 'fecha:', fechaActual)
 
+    // DEBUGGING: Ver cuántas acciones hay en total
+    const totalAcciones = await c.env.DB.prepare(`
+      SELECT COUNT(*) as total FROM acciones WHERE estado = 'pendiente'
+    `).first()
+    const accionesHoy = await c.env.DB.prepare(`
+      SELECT COUNT(*) as total FROM acciones WHERE fecha_evento = ?
+    `).bind(fechaActual).first()
+
+    console.log('📊 Estadísticas DB:', {
+      totalAccionesPendientes: totalAcciones?.total,
+      accionesAgendadasHoy: accionesHoy?.total,
+      disponibles: (totalAcciones?.total || 0) - (accionesHoy?.total || 0)
+    })
+
     // Traer TODAS las acciones pendientes EXCEPTO las que están agendadas HOY
     let query = `
       SELECT
@@ -665,7 +679,8 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
     console.log('✅ Panorámica obtenida:', {
       total: estadisticas.total,
       areas: estadisticas.por_area,
-      accionesIds: accionesProcesadas.map((a: any) => ({ id: a.id, titulo: a.titulo })).slice(0, 5)
+      accionesIds: accionesProcesadas.map((a: any) => ({ id: a.id, titulo: a.titulo, decreto: a.decreto_titulo })).slice(0, 10),
+      decretosUnicos: [...new Set(accionesProcesadas.map((a: any) => a.decreto_id))].length
     })
 
     return c.json({
