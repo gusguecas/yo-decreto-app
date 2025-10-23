@@ -577,7 +577,7 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
 
     console.log('🔍 Obteniendo panorámica pendientes, área:', area, 'fecha:', fechaActual)
 
-    // Traer todas las acciones pendientes SIN fecha asignada (las que están disponibles para agendar)
+    // Traer TODAS las acciones pendientes EXCEPTO las que están agendadas HOY
     let query = `
       SELECT
         a.id,
@@ -597,10 +597,10 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
       FROM acciones a
       LEFT JOIN decretos d ON a.decreto_id = d.id
       WHERE a.estado = 'pendiente'
-        AND (a.fecha_evento IS NULL OR a.fecha_evento = '')
+        AND (a.fecha_evento IS NULL OR a.fecha_evento != ?)
     `
 
-    const params: any[] = []
+    const params: any[] = [fechaActual]
 
     // Filtro por área/tipo de decreto
     if (area && area !== 'todos') {
