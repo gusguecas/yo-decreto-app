@@ -5069,8 +5069,8 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
                 onclick="Agenda.toggleAccion('${accion.id}')"
                 class="w-4 h-4 rounded"
               />
-              <div class="flex-1">
-                <div class="text-sm ${accion.estado === 'completada' ? 'line-through text-slate-500' : 'text-white'}">
+              <div class="flex-1 cursor-pointer" onclick="Agenda.openDetalleTarea('${accion.id}')">
+                <div class="text-sm ${accion.estado === 'completada' ? 'line-through text-slate-500' : 'text-white'} hover:text-accent-green transition-colors">
                   ${accion.titulo}
                 </div>
                 <div class="text-xs text-slate-500">
