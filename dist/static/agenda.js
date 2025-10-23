@@ -4856,16 +4856,21 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
                 ` : ''}
                 ${eventosEnHora.map(evento => `
                   <div
-                    class="bg-slate-800 rounded p-2 mb-1 ${evento.tipo === 'google_calendar' ? 'border-l-2 border-blue-400 cursor-pointer' : 'hover:bg-slate-700 transition-all cursor-move'}"
-                    ${evento.tipo !== 'google_calendar' ? `draggable="true"` : ''}
-                    ondragstart="Agenda.onDragStart(event, '${evento.id}', '${evento.hora_evento}')"
-                    ondragend="Agenda.onDragEnd(event)"
+                    class="bg-slate-800 rounded p-2 mb-1 cursor-pointer ${evento.tipo === 'google_calendar' ? 'border-l-2 border-blue-400' : 'hover:bg-slate-700 transition-all'}"
                     onclick="Agenda.openDetalleTarea('${evento.id}')"
                   >
                     <div class="flex items-center justify-between">
                       <div class="flex-1">
                         <div class="flex items-center space-x-2">
-                          ${evento.tipo !== 'google_calendar' ? `<span class="text-slate-500">⋮⋮</span>` : ''}
+                          ${evento.tipo !== 'google_calendar' ? `
+                            <span
+                              class="text-slate-500 cursor-move"
+                              draggable="true"
+                              ondragstart="Agenda.onDragStart(event, '${evento.id}', '${evento.hora_evento}')"
+                              ondragend="Agenda.onDragEnd(event)"
+                              onclick="event.stopPropagation()"
+                            >⋮⋮</span>
+                          ` : ''}
                           <div class="text-sm ${evento.tipo === 'google_calendar' ? 'text-blue-300 hover:text-blue-200' : 'text-white hover:text-accent-green'} transition-colors">${evento.titulo}</div>
                         </div>
                         <div class="text-xs text-slate-400">${evento.decreto_titulo || ''}</div>
