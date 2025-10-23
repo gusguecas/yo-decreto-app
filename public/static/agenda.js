@@ -4152,17 +4152,12 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
         </div>
 
         <!-- Título y Decreto -->
-        <div class="mb-3">
-          <h4 class="text-lg font-bold text-white mb-1 line-clamp-2 hover:text-accent-green transition-colors cursor-pointer">
+        <div class="mb-3 cursor-pointer" onclick="Decretos.openAccionModal('${accion.decreto_id}', '${accion.id}')">
+          <h4 class="text-lg font-bold text-white mb-1 line-clamp-2 hover:text-accent-green transition-colors">
             ${accion.titulo}
           </h4>
           <p class="text-xs line-clamp-1 text-slate-400" style="color: ${decretoColor};">${accion.decreto_titulo}</p>
         </div>
-
-        <!-- Descripción -->
-        ${accion.que_hacer ? `
-          <p class="text-sm text-slate-400 mb-3 line-clamp-2">${accion.que_hacer}</p>
-        ` : ''}
 
         <!-- Metadatos -->
         <div class="flex flex-wrap gap-2 text-xs text-slate-500 mb-4">
