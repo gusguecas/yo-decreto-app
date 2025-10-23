@@ -3201,8 +3201,8 @@ const Agenda = {
                 <i class="fas fa-calendar"></i>
               </button>
             ` : ''}
-            <button 
-              onclick="Decretos.openAccionModal('${accion.decreto_id}', '${accion.id}')"
+            <button
+              onclick="Agenda.openDetalleTarea('${accion.id}')"
               class="p-2 bg-slate-700 hover:bg-accent-green rounded-lg text-xs"
               title="Ver detalles"
             >
