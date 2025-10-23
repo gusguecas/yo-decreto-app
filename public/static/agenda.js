@@ -4153,10 +4153,10 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
 
         <!-- Título y Decreto -->
         <div class="mb-3">
-          <h4 class="font-semibold text-white mb-1 line-clamp-2 hover:text-accent-green transition-colors cursor-pointer">
+          <h4 class="text-lg font-bold text-white mb-1 line-clamp-2 hover:text-accent-green transition-colors cursor-pointer">
             ${accion.titulo}
           </h4>
-          <p class="text-sm line-clamp-1" style="color: ${decretoColor};">${accion.decreto_titulo}</p>
+          <p class="text-xs line-clamp-1 text-slate-400" style="color: ${decretoColor};">${accion.decreto_titulo}</p>
         </div>
 
         <!-- Descripción -->
