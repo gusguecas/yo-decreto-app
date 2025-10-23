@@ -1299,7 +1299,7 @@ agendaRoutes.get('/debug/decretos-acciones', async (c) => {
   try {
     // Obtener todos los decretos
     const decretos = await c.env.DB.prepare(`
-      SELECT id, titulo, area, estado
+      SELECT id, titulo, area
       FROM decretos
       ORDER BY area, titulo
     `).all()
