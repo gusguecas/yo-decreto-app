@@ -1291,3 +1291,68 @@ function formatearFecha(fecha: string): string {
   }
   return date.toLocaleDateString('es-ES', opciones)
 }
+
+// ============================================
+// 🔍 DEBUG: Endpoint para ver todos los decretos y acciones
+// ============================================
+agendaRoutes.get('/debug/decretos-acciones', async (c) => {
+  try {
+    // Obtener todos los decretos
+    const decretos = await c.env.DB.prepare(`
+      SELECT id, titulo, area, estado
+      FROM decretos
+      ORDER BY area, titulo
+    `).all()
+
+    // Para cada decreto, obtener sus acciones
+    const decretosConAcciones = await Promise.all(
+      decretos.results.map(async (decreto: any) => {
+        const acciones = await c.env.DB.prepare(`
+          SELECT
+            id,
+            titulo,
+            estado,
+            fecha_evento,
+            tipo
+          FROM acciones
+          WHERE decreto_id = ?
+          ORDER BY fecha_creacion DESC
+        `).bind(decreto.id).all()
+
+        return {
+          ...decreto,
+          total_acciones: acciones.results.length,
+          acciones_pendientes: acciones.results.filter((a: any) => a.estado === 'pendiente').length,
+          acciones_completadas: acciones.results.filter((a: any) => a.estado === 'completada').length,
+          acciones: acciones.results
+        }
+      })
+    )
+
+    // Estadísticas generales
+    const stats = {
+      total_decretos: decretos.results.length,
+      decretos_con_acciones: decretosConAcciones.filter(d => d.total_acciones > 0).length,
+      decretos_sin_acciones: decretosConAcciones.filter(d => d.total_acciones === 0).length,
+      total_acciones: decretosConAcciones.reduce((sum, d) => sum + d.total_acciones, 0),
+      total_pendientes: decretosConAcciones.reduce((sum, d) => sum + d.acciones_pendientes, 0),
+      total_completadas: decretosConAcciones.reduce((sum, d) => sum + d.acciones_completadas, 0),
+      por_area: {
+        empresarial: decretosConAcciones.filter(d => d.area === 'empresarial').length,
+        material: decretosConAcciones.filter(d => d.area === 'material').length,
+        humano: decretosConAcciones.filter(d => d.area === 'humano').length
+      }
+    }
+
+    return c.json({
+      success: true,
+      stats,
+      decretos: decretosConAcciones
+    })
+  } catch (error: any) {
+    return c.json({
+      success: false,
+      error: error.message
+    }, 500)
+  }
+})

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug - Decretos y Acciones</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white p-8">
+  <div class="max-w-7xl mx-auto">
+    <h1 class="text-4xl font-bold mb-8">🔍 Debug - Decretos y Acciones</h1>
+
+    <!-- Estadísticas -->
+    <div id="stats" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-slate-800 p-6 rounded-lg">
+        <div class="text-sm text-slate-400">Total Decretos</div>
+        <div class="text-3xl font-bold" id="total-decretos">-</div>
+      </div>
+      <div class="bg-slate-800 p-6 rounded-lg">
+        <div class="text-sm text-slate-400">Con Acciones</div>
+        <div class="text-3xl font-bold text-green-400" id="con-acciones">-</div>
+      </div>
+      <div class="bg-slate-800 p-6 rounded-lg">
+        <div class="text-sm text-slate-400">Sin Acciones</div>
+        <div class="text-3xl font-bold text-red-400" id="sin-acciones">-</div>
+      </div>
+      <div class="bg-slate-800 p-6 rounded-lg">
+        <div class="text-sm text-slate-400">Acciones Pendientes</div>
+        <div class="text-3xl font-bold text-yellow-400" id="pendientes">-</div>
+      </div>
+    </div>
+
+    <!-- Tabla de decretos -->
+    <div class="bg-slate-800 rounded-lg p-6">
+      <h2 class="text-2xl font-bold mb-4">Decretos por Área</h2>
+      <div id="decretos-container" class="space-y-6">
+        <div class="text-center text-slate-400">Cargando...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function cargarDatos() {
+      try {
+        const response = await fetch('/api/agenda/debug/decretos-acciones')
+        const data = await response.json()
+
+        if (!data.success) {
+          throw new Error(data.error)
+        }
+
+        // Actualizar estadísticas
+        document.getElementById('total-decretos').textContent = data.stats.total_decretos
+        document.getElementById('con-acciones').textContent = data.stats.decretos_con_acciones
+        document.getElementById('sin-acciones').textContent = data.stats.decretos_sin_acciones
+        document.getElementById('pendientes').textContent = data.stats.total_pendientes
+
+        // Agrupar por área
+        const porArea = {
+          empresarial: data.decretos.filter(d => d.area === 'empresarial'),
+          material: data.decretos.filter(d => d.area === 'material'),
+          humano: data.decretos.filter(d => d.area === 'humano')
+        }
+
+        // Renderizar
+        const container = document.getElementById('decretos-container')
+        container.innerHTML = ''
+
+        Object.entries(porArea).forEach(([area, decretos]) => {
+          const areaDiv = document.createElement('div')
+          areaDiv.className = 'mb-8'
+
+          const areaColors = {
+            empresarial: 'text-blue-400',
+            material: 'text-green-400',
+            humano: 'text-purple-400'
+          }
+
+          areaDiv.innerHTML = `
+            <h3 class="text-xl font-bold ${areaColors[area]} mb-4">
+              ${area.toUpperCase()} (${decretos.length})
+            </h3>
+            <div class="space-y-2">
+              ${decretos.map(decreto => `
+                <details class="bg-slate-700 rounded-lg">
+                  <summary class="p-4 cursor-pointer hover:bg-slate-600 rounded-lg flex justify-between">
+                    <span class="font-semibold">${decreto.titulo}</span>
+                    <span class="text-sm">
+                      <span class="text-yellow-400">${decreto.acciones_pendientes} pendientes</span>
+                      <span class="text-gray-400"> / </span>
+                      <span class="text-green-400">${decreto.acciones_completadas} completadas</span>
+                      <span class="text-gray-400"> / </span>
+                      <span class="text-slate-400">${decreto.total_acciones} total</span>
+                    </span>
+                  </summary>
+                  <div class="p-4 pt-0 space-y-2">
+                    ${decreto.acciones.length === 0
+                      ? '<p class="text-slate-400 italic">Sin acciones creadas</p>'
+                      : decreto.acciones.map(accion => `
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded text-sm">
+                          <div class="flex-1">
+                            <div class="font-medium ${accion.estado === 'completada' ? 'line-through text-slate-500' : ''}">${accion.titulo}</div>
+                            <div class="text-xs text-slate-400">
+                              ${accion.fecha_evento ? `📅 ${accion.fecha_evento}` : '📌 Sin fecha'}
+                              • ${accion.tipo || 'sin tipo'}
+                            </div>
+                          </div>
+                          <span class="px-2 py-1 rounded text-xs ${
+                            accion.estado === 'pendiente'
+                              ? 'bg-yellow-900 text-yellow-200'
+                              : 'bg-green-900 text-green-200'
+                          }">
+                            ${accion.estado}
+                          </span>
+                        </div>
+                      `).join('')
+                    }
+                  </div>
+                </details>
+              `).join('')}
+            </div>
+          `
+
+          container.appendChild(areaDiv)
+        })
+
+      } catch (error) {
+        console.error('Error cargando datos:', error)
+        document.getElementById('decretos-container').innerHTML = `
+          <div class="text-red-400">Error: ${error.message}</div>
+        `
+      }
+    }
+
+    cargarDatos()
+  </script>
+</body>
+</html>
