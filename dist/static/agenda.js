@@ -299,6 +299,11 @@ const Agenda = {
         <!-- Progreso del día -->
         ${this.renderProgresoDia()}
 
+        <!-- Panorámica de Acciones Pendientes (para arrastrar a secundarias) -->
+        <div id="panoramica-container">
+          ${this.renderPanoramicaPendientes()}
+        </div>
+
         <!-- Botón crear acción -->
         <div class="fixed bottom-6 right-6 z-50">
           <button
@@ -3131,21 +3136,26 @@ const Agenda = {
       'antigua': 'border-l-blue-500 bg-blue-900/20',
       'normal': 'border-l-slate-600 bg-slate-800/50'
     }
-    
+
     const urgenciaIcons = {
       'vencida': '🔴',
-      'urgente': '🟠', 
+      'urgente': '🟠',
       'importante': '🟡',
       'muy_antigua': '🟣',
       'antigua': '🔵',
       'normal': '⚪'
     }
-    
+
     const colorClass = urgenciaColors[accion.urgencia] || urgenciaColors.normal
     const urgenciaIcon = urgenciaIcons[accion.urgencia] || urgenciaIcons.normal
-    
+
     return `
-      <div class="border-l-4 ${colorClass} p-4 rounded-r-lg hover:bg-slate-700/50 transition-colors group">
+      <div
+        class="border-l-4 ${colorClass} p-4 rounded-r-lg hover:bg-slate-700/50 transition-colors group cursor-move"
+        draggable="true"
+        ondragstart="Agenda.onDragStartAccion(event, '${accion.id}')"
+        ondragend="Agenda.onDragEndAccion(event)"
+      >
         <div class="flex items-start justify-between">
           <!-- Contenido principal -->
           <div class="flex-1">
@@ -5021,9 +5031,19 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
           <div class="text-xs text-accent-green mt-1">
             ${completadas}/${total} completadas
           </div>
+          <div class="mt-2 text-xs text-slate-500 italic">
+            💡 Arrastra acciones desde la Panorámica hacia aquí
+          </div>
         </div>
 
-        <div class="space-y-2 overflow-y-auto" style="max-height: 550px;">
+        <div
+          id="drop-zone-secundarias"
+          class="space-y-2 overflow-y-auto min-h-[200px] p-2 rounded-lg transition-all"
+          style="max-height: 550px;"
+          ondragover="Agenda.onDragOverSecundarias(event)"
+          ondragleave="Agenda.onDragLeaveSecundarias(event)"
+          ondrop="Agenda.onDropSecundarias(event)"
+        >
           ${secundarias.length === 0 ? `
             <div class="text-center py-8 text-slate-500">
               <p class="text-sm">No hay acciones secundarias pendientes</p>
@@ -5586,6 +5606,102 @@ const ComandoEjecutivo = {
     } catch (error) {
       console.error('Error creando evento:', error)
       this.mostrarNotificacion('❌ Error programando evento', 'error')
+    }
+  },
+
+  // ========================================
+  // DRAG & DROP: Acciones desde Panorámica a Secundarias
+  // ========================================
+
+  draggedAccionId: null,
+
+  onDragStartAccion(event, accionId) {
+    this.draggedAccionId = accionId
+    event.target.style.opacity = '0.5'
+    console.log('🎯 Arrastrando acción:', accionId)
+  },
+
+  onDragEndAccion(event) {
+    event.target.style.opacity = '1'
+  },
+
+  onDragOverSecundarias(event) {
+    event.preventDefault()
+    const dropZone = document.getElementById('drop-zone-secundarias')
+    if (dropZone) {
+      dropZone.classList.add('bg-green-900/20', 'border-2', 'border-green-500', 'border-dashed')
+    }
+  },
+
+  onDragLeaveSecundarias(event) {
+    const dropZone = document.getElementById('drop-zone-secundarias')
+    if (dropZone) {
+      dropZone.classList.remove('bg-green-900/20', 'border-2', 'border-green-500', 'border-dashed')
+    }
+  },
+
+  async onDropSecundarias(event) {
+    event.preventDefault()
+
+    const dropZone = document.getElementById('drop-zone-secundarias')
+    if (dropZone) {
+      dropZone.classList.remove('bg-green-900/20', 'border-2', 'border-green-500', 'border-dashed')
+    }
+
+    if (!this.draggedAccionId) {
+      console.warn('⚠️ No hay acción arrastrándose')
+      return
+    }
+
+    console.log('📥 Acción soltada en secundarias:', this.draggedAccionId)
+
+    try {
+      // Buscar la acción en panorámica
+      const accion = this.data.panoramicaPendientes.acciones?.find(a => a.id === this.draggedAccionId)
+
+      if (!accion) {
+        this.mostrarNotificacion('❌ Acción no encontrada', 'error')
+        return
+      }
+
+      // Crear tarea en agenda como secundaria
+      const tareaData = {
+        nombre: accion.titulo,
+        descripcion: accion.que_hacer || '',
+        tipo: 'secundaria',
+        decreto_id: accion.decreto_id,
+        accion_id: accion.id,
+        fecha: this.data.fechaActual,
+        estado: 'pendiente',
+        hora_inicio: null,
+        hora_fin: null,
+        duracion_minutos: null
+      }
+
+      console.log('📝 Creando tarea secundaria:', tareaData)
+
+      const result = await API.agenda.createTarea(tareaData)
+
+      if (result.success) {
+        this.mostrarNotificacion(`✅ "${accion.titulo}" agregada a secundarias`, 'success')
+
+        // Recargar timeline
+        await this.cargarTimeline()
+
+        // Re-renderizar solo la columna de secundarias
+        const mainContent = document.getElementById('main-content')
+        if (mainContent) {
+          mainContent.innerHTML = this.renderAgendaView()
+        }
+      } else {
+        this.mostrarNotificacion('❌ Error al agregar acción', 'error')
+      }
+
+    } catch (error) {
+      console.error('❌ Error al agregar acción a secundarias:', error)
+      this.mostrarNotificacion('❌ Error al agregar acción', 'error')
+    } finally {
+      this.draggedAccionId = null
     }
   },
 
