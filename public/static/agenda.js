@@ -3924,16 +3924,22 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
 
   renderPanoramicaMaestra() {
     const { acciones, estadisticas } = this.data.panoramicaPendientes
-    
+
+    console.log('🎨 Renderizando Panorámica Maestra:', {
+      acciones: acciones?.length,
+      estadisticas,
+      data: this.data.panoramicaPendientes
+    })
+
     if (!acciones || acciones.length === 0) {
       return `
         <div class="glassmorphism-card premium-shadow text-center p-12">
           <div class="w-24 h-24 rounded-full bg-gradient-to-br from-accent-green to-emerald-600 flex items-center justify-center mx-auto mb-6 premium-glow">
             <i class="fas fa-trophy text-white text-2xl"></i>
           </div>
-          <h3 class="text-2xl font-bold text-white mb-2">¡Misión Cumplida!</h3>
-          <p class="text-slate-300 text-lg">No hay acciones pendientes</p>
-          <p class="text-slate-400 text-sm mt-2">Eres increíble, Gus 🎉</p>
+          <h3 class="text-2xl font-bold text-white mb-2">¡Sin Acciones Pendientes!</h3>
+          <p class="text-slate-300 text-lg">No hay acciones sin agendar disponibles</p>
+          <p class="text-slate-400 text-sm mt-2">Todas tus acciones están agendadas o completadas 🎉</p>
         </div>
       `
     }
