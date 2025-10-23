@@ -923,27 +923,14 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
 
     try {
       const ahora = dayjs()
-      const hoy = dayjs().format('YYYY-MM-DD')
-      let fecha = this.data.selectedDate || hoy
-      let horaInicio = '08:00'
-      let mensajeConfirm = '🤖 Auto-agendar mis 3 decretos del día\n\n'
+      const manana = ahora.add(1, 'day').format('YYYY-MM-DD')
+      const fecha = manana // 🌅 Siempre agendar para mañana
+      const horaInicio = '08:00'
+      const fechaFormateada = dayjs(fecha).format('DD/MM/YYYY')
 
-      // Si es tarde (después de las 6 PM), agendar para mañana automáticamente
-      if (fecha === hoy && ahora.hour() >= 18) {
-        fecha = ahora.add(1, 'day').format('YYYY-MM-DD')
-        const fechaFormateada = dayjs(fecha).format('DD/MM/YYYY')
-        horaInicio = '08:00'
-        mensajeConfirm += `🌙 Ya es tarde. Se agendará para MAÑANA (${fechaFormateada}) desde las 8:00 AM\n\n`
-        console.log(`🌅 Agendando para mañana: ${fecha} desde ${horaInicio}`)
-      } else if (fecha === hoy) {
-        // Es hoy pero temprano
-        const proximaHora = ahora.add(30, 'minutes')
-        horaInicio = proximaHora.format('HH:mm')
-        mensajeConfirm += `⏰ Se agendará para HOY desde las ${horaInicio}\n\n`
-        console.log(`⏰ Es hoy, agendando desde: ${horaInicio}`)
-      } else {
-        mensajeConfirm += `📅 Se agendará para ${dayjs(fecha).format('DD/MM/YYYY')} desde las 8:00 AM\n\n`
-      }
+      let mensajeConfirm = '🤖 Auto-agendar mis 3 decretos del día\n\n'
+      mensajeConfirm += `🌅 Se agendará para MAÑANA (${fechaFormateada}) desde las 8:00 AM\n\n`
+      console.log(`🌅 Agendando para mañana: ${fecha} desde ${horaInicio}`)
 
       mensajeConfirm += '✅ Respeta eventos de Google Calendar\n'
       mensajeConfirm += '✅ Bloquea 2-4pm para comida\n\n'
