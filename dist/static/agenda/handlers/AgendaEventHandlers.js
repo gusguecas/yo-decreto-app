@@ -1295,5 +1295,29 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
       console.error('❌ No se encontró Decretos.openUniversalAccionModal')
       Utils.showToast('❌ Error: Modal de acciones no disponible', 'error')
     }
+  },
+
+  /**
+   * 🎯 Toggle para expandir/colapsar sección de Decretos Disponibles
+   */
+  toggleDecretosDisponibles() {
+    const content = document.getElementById('decretos-disponibles-content')
+    const icon = document.getElementById('decretos-disponibles-icon')
+
+    if (content && icon) {
+      const isHidden = content.style.display === 'none'
+
+      if (isHidden) {
+        // Expandir
+        content.style.display = 'block'
+        icon.classList.remove('fa-chevron-down')
+        icon.classList.add('fa-chevron-up')
+      } else {
+        // Colapsar
+        content.style.display = 'none'
+        icon.classList.remove('fa-chevron-up')
+        icon.classList.add('fa-chevron-down')
+      }
+    }
   }
 }

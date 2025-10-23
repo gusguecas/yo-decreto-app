@@ -897,8 +897,17 @@ export const AgendaViews = {
   },
 
   renderAccionesSecundarias() {
-    // 🎯 Mostrar decretos secundarios (que NO son los 3 primarios del día)
+    // 🎯 Mostrar decretos secundarios disponibles + acciones secundarias creadas
     const decretosSecundarios = this.data.decretosSecundarios || []
+
+    // Acciones secundarias del timeline
+    const accionesSecundarias = this.data.timeline.filter(t =>
+      t.tipo === 'secundaria' &&
+      t.estado === 'pendiente'
+    )
+
+    const completadas = accionesSecundarias.filter(s => s.estado === 'completada').length
+    const total = accionesSecundarias.length
 
     // Obtener iconos por área
     const getAreaIcon = (area) => {
@@ -921,55 +930,96 @@ export const AgendaViews = {
     }
 
     return `
-      <div class="gradient-card p-5 rounded-xl h-full">
-        <div class="mb-4">
-          <h3 class="text-lg font-bold flex items-center">
-            <span class="mr-2">📋</span>
-            DECRETOS SECUNDARIOS
-          </h3>
-          <p class="text-xs text-slate-400">Otros decretos disponibles hoy</p>
-          <div class="text-xs text-accent-purple mt-1">
-            ${decretosSecundarios.length} decretos disponibles
-          </div>
-        </div>
-
-        <div class="space-y-2 overflow-y-auto" style="max-height: 550px;">
-          ${decretosSecundarios.length === 0 ? `
-            <div class="text-center py-8 text-slate-500">
-              <p class="text-sm">No hay decretos secundarios</p>
-              <p class="text-xs mt-2">Los 3 decretos primarios del día ya están asignados</p>
+      <div class="space-y-4">
+        <!-- 📋 SECCIÓN 1: Decretos Disponibles (Colapsable) -->
+        <div class="gradient-card rounded-xl overflow-hidden">
+          <button
+            onclick="Agenda.toggleDecretosDisponibles()"
+            class="w-full p-4 flex items-center justify-between hover:bg-slate-700/50 transition-colors"
+          >
+            <div class="flex items-center space-x-2">
+              <span class="text-lg">📋</span>
+              <div class="text-left">
+                <h3 class="text-sm font-bold">DECRETOS DISPONIBLES</h3>
+                <p class="text-xs text-slate-400">${decretosSecundarios.length} decretos para crear acciones</p>
+              </div>
             </div>
-          ` : decretosSecundarios.map(decreto => {
-            const area = decreto.categoria || decreto.area
-            const icon = getAreaIcon(area)
-            const color = getAreaColor(area)
+            <i id="decretos-disponibles-icon" class="fas fa-chevron-down text-slate-400"></i>
+          </button>
 
-            return `
-              <div class="bg-slate-800 rounded-lg p-3 hover:bg-slate-700 transition-colors border-l-4 border-${color}-500">
-                <div class="flex items-start justify-between mb-2">
-                  <div class="flex items-center space-x-2 flex-1">
-                    <span class="text-xl">${icon}</span>
+          <div id="decretos-disponibles-content" class="p-4 pt-0 space-y-2" style="display: none;">
+            ${decretosSecundarios.length === 0 ? `
+              <div class="text-center py-4 text-slate-500">
+                <p class="text-xs">Los 3 decretos primarios del día ya están asignados</p>
+              </div>
+            ` : decretosSecundarios.map(decreto => {
+              const area = decreto.categoria || decreto.area
+              const icon = getAreaIcon(area)
+              const color = getAreaColor(area)
+
+              return `
+                <div class="bg-slate-800 rounded-lg p-3 hover:bg-slate-700 transition-colors border-l-4 border-${color}-500">
+                  <div class="flex items-center space-x-2 mb-2">
+                    <span class="text-lg">${icon}</span>
                     <div class="flex-1">
                       <div class="text-sm font-semibold text-white">
                         ${decreto.titulo}
                       </div>
-                      <div class="text-xs text-slate-400 mt-1">
+                      <div class="text-xs text-slate-400 mt-1 line-clamp-1">
                         ${decreto.descripcion || 'Sin descripción'}
                       </div>
                     </div>
                   </div>
+                  <button
+                    onclick="Agenda.crearAccionDesdeDecreto('${decreto.id}', '${decreto.titulo}', '${area}')"
+                    class="w-full mt-2 px-3 py-1.5 bg-${color}-600 hover:bg-${color}-700 text-white text-xs font-medium rounded transition-all"
+                  >
+                    ➕ Crear Acción
+                  </button>
                 </div>
+              `
+            }).join('')}
+          </div>
+        </div>
 
-                <!-- Botón para crear acción desde este decreto -->
-                <button
-                  onclick="Agenda.crearAccionDesdeDecreto('${decreto.id}', '${decreto.titulo}', '${area}')"
-                  class="w-full mt-2 px-3 py-1.5 bg-${color}-600 hover:bg-${color}-700 text-white text-xs font-medium rounded transition-all"
-                >
-                  ➕ Crear Acción y Agendar
-                </button>
+        <!-- ✅ SECCIÓN 2: Acciones Secundarias Creadas -->
+        <div class="gradient-card p-5 rounded-xl">
+          <div class="mb-4">
+            <h3 class="text-lg font-bold flex items-center">
+              <span class="mr-2">✅</span>
+              ACCIONES SECUNDARIAS
+            </h3>
+            <p class="text-xs text-slate-400">Acciones que creaste desde decretos</p>
+            <div class="text-xs text-accent-green mt-1">
+              ${completadas}/${total} completadas
+            </div>
+          </div>
+
+          <div class="space-y-2 overflow-y-auto" style="max-height: 350px;">
+            ${accionesSecundarias.length === 0 ? `
+              <div class="text-center py-8 text-slate-500">
+                <p class="text-sm">No hay acciones secundarias</p>
+                <p class="text-xs mt-2">👆 Crea acciones desde los decretos disponibles</p>
               </div>
-            `
-          }).join('')}
+            ` : accionesSecundarias.map(accion => `
+              <div class="bg-slate-800 rounded-lg p-2 flex items-center space-x-3 hover:bg-slate-700 transition-colors">
+                <input
+                  type="checkbox"
+                  ${accion.estado === 'completada' ? 'checked' : ''}
+                  onclick="Agenda.toggleAccion('${accion.id}')"
+                  class="w-4 h-4 rounded"
+                />
+                <div class="flex-1">
+                  <div class="text-sm ${accion.estado === 'completada' ? 'line-through text-slate-500' : 'text-white'}">
+                    ${accion.titulo}
+                  </div>
+                  <div class="text-xs text-slate-500">
+                    ${accion.duracion_minutos ? `⏰ ${accion.duracion_minutos} min` : ''}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
         </div>
       </div>
     `
