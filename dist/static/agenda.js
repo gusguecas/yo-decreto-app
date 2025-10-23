@@ -301,7 +301,7 @@ const Agenda = {
 
         <!-- Panorámica de Acciones Pendientes (para arrastrar a secundarias) -->
         <div id="panoramica-container">
-          ${this.renderPanoramicaPendientes()}
+          ${this.renderPanoramicaMaestra()}
         </div>
 
         <!-- Botón crear acción -->
@@ -3969,6 +3969,9 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
 
         <!-- Grid por Áreas: 3 columnas -->
         <div class="p-6">
+          <div class="mb-4 text-center">
+            <p class="text-sm text-slate-400 italic">💡 Arrastra acciones hacia la columna de <span class="text-accent-green font-semibold">Acciones Secundarias</span> arriba</p>
+          </div>
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Columna Empresarial -->
             <div class="space-y-4 border-2 border-green-500/30 rounded-lg p-4">
@@ -4125,9 +4128,12 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
     }
     
     return `
-      <div class="accion-maestra-card ${config.pulse} fade-in-masonry"
-           style="animation-delay: ${index * 0.05}s; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 16px; margin-bottom: 16px;">
-        
+      <div class="accion-maestra-card ${config.pulse} fade-in-masonry cursor-move"
+           style="animation-delay: ${index * 0.05}s; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 16px; margin-bottom: 16px;"
+           draggable="true"
+           ondragstart="Agenda.onDragStartAccion(event, '${accion.id}')"
+           ondragend="Agenda.onDragEndAccion(event)">
+
         <!-- Header de la Acción -->
         <div class="flex items-start justify-between mb-3">
           <div class="flex items-center space-x-2">
