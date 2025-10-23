@@ -580,8 +580,8 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
     // PASO 1: Obtener decretos que YA están en las tareas primarias del día
     const decretosEnPrimarias = await c.env.DB.prepare(`
       SELECT DISTINCT decreto_id
-      FROM agenda_tareas
-      WHERE fecha = ?
+      FROM acciones
+      WHERE fecha_evento = ?
         AND tipo = 'primaria'
         AND decreto_id IS NOT NULL
     `).bind(fechaActual).all()
