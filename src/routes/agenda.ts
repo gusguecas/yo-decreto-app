@@ -586,7 +586,7 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
 
     const accionesExcluir = accionesAgendadas.results.map((r: any) => r.id)
 
-    console.log('🚫 Acciones a excluir (ya agendadas hoy):', accionesExcluir.length)
+    console.log('🚫 Acciones a excluir (ya agendadas hoy):', accionesExcluir.length, accionesExcluir)
 
     let query = `
       SELECT
@@ -607,6 +607,7 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
       FROM acciones a
       LEFT JOIN decretos d ON a.decreto_id = d.id
       WHERE a.estado = 'pendiente'
+        AND a.fecha_evento IS NULL
     `
 
     const params: any[] = []
@@ -680,7 +681,8 @@ agendaRoutes.get('/panoramica-pendientes', async (c) => {
 
     console.log('✅ Panorámica obtenida:', {
       total: estadisticas.total,
-      areas: estadisticas.por_area
+      areas: estadisticas.por_area,
+      accionesIds: accionesProcesadas.map((a: any) => ({ id: a.id, titulo: a.titulo })).slice(0, 5)
     })
 
     return c.json({
