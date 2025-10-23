@@ -518,9 +518,11 @@ googleCalendarRoutes.post('/import', async (c) => {
 
   } catch (error: any) {
     console.error('Error importing events:', error)
+    console.error('Error stack:', error.stack)
     return c.json({
       success: false,
-      error: error.message || 'Error al importar eventos de Google Calendar'
+      error: error.message || 'Error al importar eventos de Google Calendar',
+      details: error.stack || String(error)
     }, 500)
   }
 })
