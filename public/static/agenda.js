@@ -5070,20 +5070,32 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
               </button>
             </div>
           ` : secundarias.map(accion => `
-            <div class="bg-slate-800 rounded-lg p-2 flex items-center space-x-3 hover:bg-slate-700 transition-colors">
-              <input
-                type="checkbox"
-                ${accion.estado === 'completada' ? 'checked' : ''}
-                onclick="Agenda.toggleAccion('${accion.id}')"
-                class="w-4 h-4 rounded"
-              />
-              <div class="flex-1 cursor-pointer" onclick="Agenda.openDetalleTarea('${accion.id}')">
-                <div class="text-sm ${accion.estado === 'completada' ? 'line-through text-slate-500' : 'text-white'} hover:text-accent-green transition-colors">
-                  ${accion.titulo}
+            <div class="bg-slate-800 rounded-lg p-3 hover:bg-slate-700 transition-colors">
+              <div class="flex items-center space-x-3 mb-2">
+                <div class="flex-1 cursor-pointer" onclick="Agenda.openDetalleTarea('${accion.id}')">
+                  <div class="text-sm ${accion.estado === 'completada' ? 'line-through text-slate-500' : 'text-white'} hover:text-accent-green transition-colors">
+                    ${accion.titulo}
+                  </div>
+                  <div class="text-xs text-slate-500">
+                    ${accion.duracion_minutos ? `⏰ ${accion.duracion_minutos} min` : ''}
+                  </div>
                 </div>
-                <div class="text-xs text-slate-500">
-                  ${accion.duracion_minutos ? `⏰ ${accion.duracion_minutos} min` : ''}
-                </div>
+              </div>
+              <div class="flex justify-end space-x-2">
+                <button
+                  onclick="event.stopPropagation(); Agenda.openSeguimientoModal('${accion.id}')"
+                  class="text-xs px-2 py-1 bg-green-600 hover:bg-green-700 rounded transition-all"
+                  title="Seguimiento"
+                >
+                  <i class="fas fa-lock"></i>
+                </button>
+                <button
+                  onclick="event.stopPropagation(); Agenda.cambiarEstadoTarea('${accion.id}')"
+                  class="text-xs px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded transition-all"
+                  title="${accion.estado === 'completada' ? 'Marcar pendiente' : 'Completar'}"
+                >
+                  <i class="fas fa-${accion.estado === 'completada' ? 'undo' : 'check'}"></i>
+                </button>
               </div>
             </div>
           `).join('')}
