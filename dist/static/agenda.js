@@ -4718,7 +4718,16 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
         <!-- Grid de 3 decretos -->
         <div class="grid grid-cols-3 gap-4">
           <!-- 💼 EMPRESARIAL -->
-          <div class="bg-slate-800/80 rounded-lg p-4 border-l-4 border-blue-500">
+          <div class="bg-slate-800/80 rounded-lg p-4 border-l-4 border-blue-500 relative">
+            ${decretos.empresarial ? `
+              <button
+                onclick="Agenda.eliminarDecretoDelDia('${decretos.empresarial.id}', 'empresarial')"
+                class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition-colors"
+                title="Eliminar de agenda"
+              >
+                <i class="fas fa-trash text-xs"></i>
+              </button>
+            ` : ''}
             <div class="flex items-center space-x-2 mb-3">
               <span class="text-3xl">💼</span>
               <div>
@@ -4727,7 +4736,7 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
               </div>
             </div>
             ${decretos.empresarial ? `
-              <h4 class="text-sm font-semibold text-white mb-2">${decretos.empresarial.titulo}</h4>
+              <h4 class="text-sm font-semibold text-white mb-2 pr-6">${decretos.empresarial.titulo}</h4>
               <div class="flex items-center justify-between text-xs text-slate-300 mb-3">
                 <span>⏰ ${decretos.empresarial.duracion_minutos || 30} min</span>
                 <span class="px-2 py-1 bg-blue-600 rounded">Estratégico</span>
@@ -4744,7 +4753,16 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
           </div>
 
           <!-- ❤️ HUMANO -->
-          <div class="bg-slate-800/80 rounded-lg p-4 border-l-4 border-pink-500">
+          <div class="bg-slate-800/80 rounded-lg p-4 border-l-4 border-pink-500 relative">
+            ${decretos.humano ? `
+              <button
+                onclick="Agenda.eliminarDecretoDelDia('${decretos.humano.id}', 'humano')"
+                class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition-colors"
+                title="Eliminar de agenda"
+              >
+                <i class="fas fa-trash text-xs"></i>
+              </button>
+            ` : ''}
             <div class="flex items-center space-x-2 mb-3">
               <span class="text-3xl">❤️</span>
               <div>
@@ -4753,7 +4771,7 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
               </div>
             </div>
             ${decretos.humano ? `
-              <h4 class="text-sm font-semibold text-white mb-2">${decretos.humano.titulo}</h4>
+              <h4 class="text-sm font-semibold text-white mb-2 pr-6">${decretos.humano.titulo}</h4>
               <div class="flex items-center justify-between text-xs text-slate-300 mb-3">
                 <span>⏰ ${decretos.humano.duracion_minutos || 30} min</span>
                 <span class="px-2 py-1 bg-pink-600 rounded">Personal</span>
@@ -4770,7 +4788,16 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
           </div>
 
           <!-- 💎 MATERIAL -->
-          <div class="bg-slate-800/80 rounded-lg p-4 border-l-4 border-yellow-500">
+          <div class="bg-slate-800/80 rounded-lg p-4 border-l-4 border-yellow-500 relative">
+            ${decretos.material ? `
+              <button
+                onclick="Agenda.eliminarDecretoDelDia('${decretos.material.id}', 'material')"
+                class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition-colors"
+                title="Eliminar de agenda"
+              >
+                <i class="fas fa-trash text-xs"></i>
+              </button>
+            ` : ''}
             <div class="flex items-center space-x-2 mb-3">
               <span class="text-3xl">💎</span>
               <div>
@@ -4779,7 +4806,7 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
               </div>
             </div>
             ${decretos.material ? `
-              <h4 class="text-sm font-semibold text-white mb-2">${decretos.material.titulo}</h4>
+              <h4 class="text-sm font-semibold text-white mb-2 pr-6">${decretos.material.titulo}</h4>
               <div class="flex items-center justify-between text-xs text-slate-300 mb-3">
                 <span>⏰ ${decretos.material.duracion_minutos || 30} min</span>
                 <span class="px-2 py-1 bg-yellow-600 rounded">Recursos</span>
