@@ -4908,6 +4908,13 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
                           >
                             <i class="fas fa-clock"></i>
                           </button>
+                          <button
+                            onclick="event.stopPropagation(); Agenda.confirmarBorrarTarea('${evento.id}')"
+                            class="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 rounded transition-all"
+                            title="Eliminar tarea"
+                          >
+                            <i class="fas fa-trash"></i>
+                          </button>
                           <input
                             type="checkbox"
                             class="w-4 h-4 cursor-pointer"
