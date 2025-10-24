@@ -2796,6 +2796,12 @@ const Agenda = {
     try {
       console.log('🎯 Completando tarea:', tareaId)
 
+      // Verificar si es un evento de Google Calendar (no se puede modificar)
+      if (tareaId.startsWith('gcal_')) {
+        Utils.showToast('⚠️ Los eventos de Google Calendar no se pueden marcar como completados desde aquí', 'warning')
+        return
+      }
+
       const response = await fetch(`/api/agenda/tareas/${tareaId}/completar`, {
         method: 'PUT',
         headers: {
@@ -2806,8 +2812,11 @@ const Agenda = {
       if (response.ok) {
         Utils.showToast('✅ Tarea completada', 'success')
         // Recargar la agenda para reflejar cambios
-        await this.cargarEventos()
-        this.render()
+        await this.loadAgendaData()
+        const mainContent = document.getElementById('main-content')
+        if (mainContent) {
+          mainContent.innerHTML = this.renderAgendaView()
+        }
       } else {
         throw new Error('Error al completar tarea')
       }
@@ -2821,6 +2830,12 @@ const Agenda = {
     try {
       console.log('🔄 Marcando tarea como pendiente:', tareaId)
 
+      // Verificar si es un evento de Google Calendar (no se puede modificar)
+      if (tareaId.startsWith('gcal_')) {
+        Utils.showToast('⚠️ Los eventos de Google Calendar no se pueden modificar desde aquí', 'warning')
+        return
+      }
+
       const response = await fetch(`/api/agenda/tareas/${tareaId}/pendiente`, {
         method: 'PUT',
         headers: {
@@ -2831,8 +2846,11 @@ const Agenda = {
       if (response.ok) {
         Utils.showToast('🔄 Tarea marcada como pendiente', 'success')
         // Recargar la agenda para reflejar cambios
-        await this.cargarEventos()
-        this.render()
+        await this.loadAgendaData()
+        const mainContent = document.getElementById('main-content')
+        if (mainContent) {
+          mainContent.innerHTML = this.renderAgendaView()
+        }
       } else {
         throw new Error('Error al marcar tarea como pendiente')
       }
