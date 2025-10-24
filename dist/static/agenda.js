@@ -4955,10 +4955,17 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
         <div class="space-y-3">
           <!-- 💼 EMPRESARIAL -->
           ${decretos.empresarial ? `
-            <div class="bg-slate-800 rounded-lg p-4 border-l-4 border-blue-500">
+            <div class="bg-slate-800 rounded-lg p-4 border-l-4 border-blue-500 relative">
+              <button
+                onclick="Agenda.eliminarDecretoDelDia('${decretos.empresarial.id}', 'empresarial')"
+                class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition-colors"
+                title="Eliminar de agenda"
+              >
+                <i class="fas fa-trash text-sm"></i>
+              </button>
               <div class="flex items-center space-x-2 mb-2">
                 <span class="text-2xl">💼</span>
-                <div class="flex-1">
+                <div class="flex-1 pr-6">
                   <h4 class="text-sm font-bold text-white">EMPRESARIAL</h4>
                   <p class="text-xs text-slate-400">${decretos.empresarial.titulo}</p>
                 </div>
@@ -4978,10 +4985,17 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
 
           <!-- ❤️ HUMANO -->
           ${decretos.humano ? `
-            <div class="bg-slate-800 rounded-lg p-4 border-l-4 border-pink-500">
+            <div class="bg-slate-800 rounded-lg p-4 border-l-4 border-pink-500 relative">
+              <button
+                onclick="Agenda.eliminarDecretoDelDia('${decretos.humano.id}', 'humano')"
+                class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition-colors"
+                title="Eliminar de agenda"
+              >
+                <i class="fas fa-trash text-sm"></i>
+              </button>
               <div class="flex items-center space-x-2 mb-2">
                 <span class="text-2xl">❤️</span>
-                <div class="flex-1">
+                <div class="flex-1 pr-6">
                   <h4 class="text-sm font-bold text-white">HUMANO</h4>
                   <p class="text-xs text-slate-400">${decretos.humano.titulo}</p>
                 </div>
@@ -5001,10 +5015,17 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
 
           <!-- 💎 MATERIAL -->
           ${decretos.material ? `
-            <div class="bg-slate-800 rounded-lg p-4 border-l-4 border-yellow-500">
+            <div class="bg-slate-800 rounded-lg p-4 border-l-4 border-yellow-500 relative">
+              <button
+                onclick="Agenda.eliminarDecretoDelDia('${decretos.material.id}', 'material')"
+                class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition-colors"
+                title="Eliminar de agenda"
+              >
+                <i class="fas fa-trash text-sm"></i>
+              </button>
               <div class="flex items-center space-x-2 mb-2">
                 <span class="text-2xl">💎</span>
-                <div class="flex-1">
+                <div class="flex-1 pr-6">
                   <h4 class="text-sm font-bold text-white">MATERIAL</h4>
                   <p class="text-xs text-slate-400">${decretos.material.titulo}</p>
                 </div>
@@ -5309,6 +5330,30 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
     } catch (error) {
       console.error('❌ Error al completar decreto:', error)
       Utils.showToast('❌ Error al completar decreto del día', 'error')
+    }
+  },
+
+  async eliminarDecretoDelDia(decretoId, area) {
+    if (!confirm(`¿Estás seguro de que quieres eliminar el decreto ${area} de la agenda del día?`)) {
+      return
+    }
+
+    console.log('🗑️ Eliminando decreto del día:', { decretoId, area })
+
+    try {
+      // Eliminar de los decretos del día en Rutina Diaria
+      await API.rutina.removeDecretoDelDia(area)
+
+      Utils.showToast(`🗑️ Decreto ${area} eliminado de la agenda`, 'success')
+
+      // Recargar datos
+      await this.loadAgendaData()
+      const mainContent = document.getElementById('main-content')
+      mainContent.innerHTML = this.renderAgendaView()
+
+    } catch (error) {
+      console.error('❌ Error al eliminar decreto:', error)
+      Utils.showToast('❌ Error al eliminar decreto del día', 'error')
     }
   },
 

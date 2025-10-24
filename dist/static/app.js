@@ -260,7 +260,8 @@ const API = {
     getStats: () => API.request('/rutina/stats'),
     recordSignal: (data) => API.request('/rutina/signal', { method: 'POST', data }),
     swapPrimary: (data) => API.request('/rutina/swap-primary', { method: 'POST', data }),
-    getDecretosByArea: (area) => API.request(`/rutina/decretos-by-area/${area}`)
+    getDecretosByArea: (area) => API.request(`/rutina/decretos-by-area/${area}`),
+    removeDecretoDelDia: (area) => API.request('/rutina/remove-decreto-del-dia', { method: 'POST', data: { area } })
   },
 
   // Google Calendar Integration

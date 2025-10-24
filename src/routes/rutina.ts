@@ -611,6 +611,58 @@ rutinaRoutes.post('/swap-primary', async (c) => {
 })
 
 /**
+ * POST /api/rutina/remove-decreto-del-dia
+ * Elimina un decreto del día de la agenda
+ */
+rutinaRoutes.post('/remove-decreto-del-dia', async (c) => {
+  try {
+    const userId = c.req.header('X-User-ID') || 'demo-user'
+    const db = c.env.DB
+    const { area } = await c.req.json()
+
+    const today = new Date().toISOString().split('T')[0]
+
+    // Mapeo de área a columna
+    const columnMap = {
+      'material': 'decreto_material_id',
+      'humano': 'decreto_humano_id',
+      'empresarial': 'decreto_empresarial_id'
+    }
+
+    const column = columnMap[area]
+    if (!column) {
+      return c.json({
+        success: false,
+        error: 'Área inválida'
+      }, 400)
+    }
+
+    // Poner el campo en NULL para eliminar el decreto del día
+    await db.prepare(`
+      UPDATE daily_rotation
+      SET ${column} = NULL
+      WHERE user_id = ? AND date = ?
+    `).bind(userId, today).run()
+
+    return c.json({
+      success: true,
+      message: `Decreto ${area} eliminado de la agenda del día`,
+      data: {
+        area: area,
+        date: today
+      }
+    })
+
+  } catch (error) {
+    console.error('Error al eliminar decreto del día:', error)
+    return c.json({
+      success: false,
+      error: error.message || 'Error al eliminar decreto del día'
+    }, 500)
+  }
+})
+
+/**
  * GET /api/rutina/decretos-by-area/:area
  * Obtiene todos los decretos de un área/categoría específica con días desde último primario
  */
