@@ -2795,7 +2795,7 @@ const Agenda = {
   async completarTarea(tareaId) {
     try {
       console.log('🎯 Completando tarea:', tareaId)
-      
+
       const response = await fetch(`/api/agenda/tareas/${tareaId}/completar`, {
         method: 'PUT',
         headers: {
@@ -2804,7 +2804,7 @@ const Agenda = {
       })
 
       if (response.ok) {
-        showNotification('✅ Tarea completada', 'success')
+        Utils.showToast('✅ Tarea completada', 'success')
         // Recargar la agenda para reflejar cambios
         await this.cargarEventos()
         this.render()
@@ -2813,14 +2813,14 @@ const Agenda = {
       }
     } catch (error) {
       console.error('❌ Error completando tarea:', error)
-      showNotification('❌ Error al completar tarea', 'error')
+      Utils.showToast('❌ Error al completar tarea', 'error')
     }
   },
 
   async marcarPendiente(tareaId) {
     try {
       console.log('🔄 Marcando tarea como pendiente:', tareaId)
-      
+
       const response = await fetch(`/api/agenda/tareas/${tareaId}/pendiente`, {
         method: 'PUT',
         headers: {
@@ -2829,7 +2829,7 @@ const Agenda = {
       })
 
       if (response.ok) {
-        showNotification('🔄 Tarea marcada como pendiente', 'success')
+        Utils.showToast('🔄 Tarea marcada como pendiente', 'success')
         // Recargar la agenda para reflejar cambios
         await this.cargarEventos()
         this.render()
@@ -2838,7 +2838,7 @@ const Agenda = {
       }
     } catch (error) {
       console.error('❌ Error marcando tarea como pendiente:', error)
-      showNotification('❌ Error al marcar tarea como pendiente', 'error')
+      Utils.showToast('❌ Error al marcar tarea como pendiente', 'error')
     }
   },
 
