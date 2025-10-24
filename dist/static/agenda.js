@@ -4850,7 +4850,12 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
                         <div class="text-sm font-bold text-white hover:text-accent-green transition-colors">🎯 ${enfoque.titulo}</div>
                         <div class="text-xs text-accent-green">${enfoque.duracion_minutos || 60} min</div>
                       </div>
-                      <input type="checkbox" class="w-4 h-4" onclick="event.stopPropagation()" />
+                      <input
+                        type="checkbox"
+                        class="w-4 h-4 cursor-pointer"
+                        ${enfoque.estado === 'completada' ? 'checked' : ''}
+                        onclick="event.stopPropagation(); Agenda.cambiarEstadoTarea('${enfoque.id}')"
+                      />
                     </div>
                   </div>
                 ` : ''}
@@ -4885,7 +4890,12 @@ ${data.detalles && data.detalles.length > 0 ? '\n📋 Acciones agendadas:\n' + d
                           >
                             <i class="fas fa-clock"></i>
                           </button>
-                          <input type="checkbox" class="w-4 h-4" onclick="event.stopPropagation()" />
+                          <input
+                            type="checkbox"
+                            class="w-4 h-4 cursor-pointer"
+                            ${evento.estado === 'completada' ? 'checked' : ''}
+                            onclick="event.stopPropagation(); Agenda.cambiarEstadoTarea('${evento.id}')"
+                          />
                         ` : ''}
                       </div>
                     </div>
