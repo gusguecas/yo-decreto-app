@@ -300,15 +300,6 @@ const Decretos = {
             ></div>
           </div>
         </div>
-        
-        <!-- Botón acción diaria -->
-        <button
-          onclick="event.stopPropagation(); Decretos.openUniversalAccionModal('${decreto.id}')"
-          class="w-full btn-${area === 'empresarial' ? 'primary' : area === 'material' ? 'warning' : 'info'} py-2 rounded-lg text-sm font-medium"
-        >
-          <i class="fas fa-plus mr-2"></i>
-          Nueva Acción
-        </button>
       </div>
     `
   },
