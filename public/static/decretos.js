@@ -545,17 +545,18 @@ const Decretos = {
     `
   },
 
-  // ===== MODAL UNIVERSAL PARA ACCIONES =====
+  // ===== MODAL UNIVERSAL PARA ACCIONES (SIMPLIFICADO) =====
   renderUniversalAccionModal() {
     return UI.renderModal('universalAccionModal', '➕ Nueva Acción', `
       <form id="universalAccionForm" onsubmit="Decretos.handleUniversalAccionSubmit(event)">
         <input type="hidden" name="decreto_id" id="universalDecretoId">
+        <input type="hidden" name="tipo" id="universalTipoAccion" value="secundaria">
 
-        <div class="space-y-6">
+        <div class="space-y-5">
           <!-- Título de la acción -->
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-2">
-              Título de la acción *
+              Título *
             </label>
             <input
               type="text"
@@ -569,7 +570,7 @@ const Decretos = {
           <!-- Qué se debe hacer -->
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-2">
-              Qué se debe hacer *
+              ¿Qué hacer? *
             </label>
             <textarea
               name="que_hacer"
@@ -584,7 +585,7 @@ const Decretos = {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-2">
-                📅 Fecha *
+                📅 ¿Cuándo hacerla? *
               </label>
               <input
                 type="date"
@@ -595,247 +596,34 @@ const Decretos = {
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-2">
-                🕐 Hora *
+                🕐 Hora
               </label>
               <input
                 type="time"
                 name="hora_evento"
-                required
                 class="form-input w-full px-4 py-3 text-base"
                 value="09:00"
               >
             </div>
           </div>
+        </div>
 
-          <!-- Tipo y Duración -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-300 mb-2">
-                Tipo de acción
-              </label>
-              <select name="tipo" class="form-select w-full px-4 py-3 text-base">
-                <option value="secundaria">Secundaria (diaria - 10-15 min)</option>
-                <option value="primaria">Primaria (semanal - más tiempo)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-300 mb-2">
-                ⏱️ Duración (minutos)
-              </label>
-              <input
-                type="number"
-                name="duracion_minutos"
-                min="5"
-                max="480"
-                value="15"
-                class="form-input w-full px-4 py-3 text-base"
-              >
-            </div>
-          </div>
-
-          <!-- Prioridad y Repetir -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-300 mb-2">
-                Prioridad
-              </label>
-              <select name="prioridad" class="form-select w-full px-4 py-3 text-base">
-                <option value="baja">🟢 Baja</option>
-                <option value="media" selected>🟡 Media</option>
-                <option value="alta">🔴 Alta</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-300 mb-2">
-                🔄 Repetir
-              </label>
-              <select name="repetir_dias" class="form-select w-full px-4 py-3 text-base">
-                <option value="todos">Todos los días</option>
-                <option value="lun,mar,mie,jue,vie">Lunes a Viernes</option>
-                <option value="lun">Solo Lunes</option>
-                <option value="mar">Solo Martes</option>
-                <option value="mie">Solo Miércoles</option>
-                <option value="jue">Solo Jueves</option>
-                <option value="vie">Solo Viernes</option>
-                <option value="sab">Solo Sábado</option>
-                <option value="dom">Solo Domingo</option>
-                <option value="una_vez">Solo una vez</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Es enfoque del día -->
-          <div class="flex items-center justify-between bg-slate-800 p-4 rounded-lg">
-            <label class="text-sm font-medium text-slate-300 flex items-center">
-              <i class="fas fa-star mr-2 text-yellow-400"></i>
-              ¿Es el enfoque del día? (acción primaria)
-            </label>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" name="es_enfoque_dia" class="sr-only peer">
-              <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
-            </label>
-          </div>
-
-          <!-- Cómo hacerlo (opcional) -->
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">
-              Cómo hacerlo (opcional)
-            </label>
-            <textarea
-              name="como_hacerlo"
-              rows="2"
-              class="form-textarea w-full px-4 py-3 text-base"
-              placeholder="Metodología, pasos, recursos necesarios..."
-            ></textarea>
-          </div>
-
-          <!-- Resultados esperados (opcional) -->
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">
-              Resultados esperados (opcional)
-            </label>
-            <textarea
-              name="resultados"
-              rows="2"
-              class="form-textarea w-full px-4 py-3 text-base"
-              placeholder="Qué resultados esperas obtener..."
-            ></textarea>
-          </div>
-
-          <!-- Calificación del progreso -->
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-3">
-              Calificación del progreso (1-10)
-            </label>
-            <div class="relative">
-              <input
-                type="range"
-                name="calificacion"
-                min="1"
-                max="10"
-                value="5"
-                class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
-                oninput="document.getElementById('universalCalificacionValue').textContent = this.value"
-              >
-              <div class="flex justify-between text-xs text-slate-400 mt-1">
-                <span>1</span>
-                <span>2</span>
-                <span>3</span>
-                <span>4</span>
-                <span>5</span>
-                <span>6</span>
-                <span>7</span>
-                <span>8</span>
-                <span>9</span>
-                <span>10</span>
-              </div>
-            </div>
-            <div class="text-center mt-2">
-              <span id="universalCalificacionValue" class="text-2xl font-bold text-white">5</span>
-            </div>
-          </div>
-
-          <!-- Sección de Sub-tareas -->
-          <div class="border-t border-slate-700 pt-6">
-            <div class="flex items-center justify-between mb-4">
-              <label class="text-sm font-medium text-slate-300 flex items-center">
-                <i class="fas fa-list mr-2 text-accent-purple"></i>
-                ¿Esta tarea tiene sub-tareas?
-              </label>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="universalTieneSubtareas" onchange="Decretos.toggleUniversalSubtareas(this.checked)" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-              </label>
-            </div>
-
-            <div id="universalSubtareasContainer" class="hidden bg-slate-800 p-4 rounded-lg space-y-3">
-              <h4 class="text-sm font-medium text-white mb-3">
-                <i class="fas fa-list mr-2 text-accent-green"></i>
-                Sub-tareas (máximo 3)
-              </h4>
-
-              <!-- Sub-tarea 1 -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs font-medium text-slate-300 mb-1">Sub-tarea 1</label>
-                  <input
-                    type="text"
-                    name="subtarea_1_titulo"
-                    class="form-input w-full px-3 py-2 text-sm"
-                    placeholder="Título de la primera sub-tarea"
-                  >
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-slate-300 mb-1">Fecha</label>
-                  <input
-                    type="date"
-                    name="subtarea_1_fecha"
-                    class="form-input w-full px-3 py-2 text-sm"
-                  >
-                </div>
-              </div>
-
-              <!-- Sub-tarea 2 -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs font-medium text-slate-300 mb-1">Sub-tarea 2</label>
-                  <input
-                    type="text"
-                    name="subtarea_2_titulo"
-                    class="form-input w-full px-3 py-2 text-sm"
-                    placeholder="Título de la segunda sub-tarea"
-                  >
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-slate-300 mb-1">Fecha</label>
-                  <input
-                    type="date"
-                    name="subtarea_2_fecha"
-                    class="form-input w-full px-3 py-2 text-sm"
-                  >
-                </div>
-              </div>
-
-              <!-- Sub-tarea 3 -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs font-medium text-slate-300 mb-1">Sub-tarea 3</label>
-                  <input
-                    type="text"
-                    name="subtarea_3_titulo"
-                    class="form-input w-full px-3 py-2 text-sm"
-                    placeholder="Título de la tercera sub-tarea"
-                  >
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-slate-300 mb-1">Fecha</label>
-                  <input
-                    type="date"
-                    name="subtarea_3_fecha"
-                    class="form-input w-full px-3 py-2 text-sm"
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Botones -->
-          <div class="flex space-x-3 pt-6">
-            <button
-              type="button"
-              onclick="Modal.close('universalAccionModal')"
-              class="flex-1 px-6 py-3 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors text-white"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              class="btn-primary flex-1 py-3 rounded-lg font-medium"
-            >
-              <i class="fas fa-save mr-2"></i>
-              Guardar Acción
-            </button>
-          </div>
+        <!-- Botones -->
+        <div class="flex space-x-3 pt-6">
+          <button
+            type="button"
+            onclick="Modal.close('universalAccionModal')"
+            class="flex-1 px-6 py-3 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors text-white"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn-primary flex-1 py-3 rounded-lg font-medium"
+          >
+            <i class="fas fa-save mr-2"></i>
+            Guardar Acción
+          </button>
         </div>
       </form>
     `)
@@ -1069,11 +857,10 @@ const Decretos = {
   },
 
   // ===== FUNCIONES PARA MODAL UNIVERSAL =====
-  openUniversalAccionModal(decretoId) {
+  openUniversalAccionModal(decretoId, tipo = 'secundaria') {
     // Si no se proporciona decreto ID, usar el primero disponible por defecto
     if (!decretoId) {
       console.log('⚠️ No se proporcionó decreto ID, usando decreto por defecto')
-      // Usar el primer decreto activo o el primero en general
       const primerDecreto = this.data.decretos?.[0]
       if (primerDecreto) {
         decretoId = primerDecreto.id
@@ -1083,7 +870,7 @@ const Decretos = {
       }
     }
 
-    console.log('📝 Abriendo modal universal para decreto:', decretoId)
+    console.log('📝 Abriendo modal universal para decreto:', decretoId, 'tipo:', tipo)
 
     // Cerrar cualquier otro modal que pueda estar abierto
     Modal.close('createAccionModal')
@@ -1093,8 +880,17 @@ const Decretos = {
     this._processingForm = null
     this._lastFormHash = null
 
-    // Establecer decreto ID
+    // Establecer decreto ID y tipo
     document.getElementById('universalDecretoId').value = decretoId
+    document.getElementById('universalTipoAccion').value = tipo
+
+    // Actualizar título del modal según el tipo
+    const modalTitle = document.querySelector('#universalAccionModal .text-xl')
+    if (modalTitle) {
+      modalTitle.innerHTML = tipo === 'primaria'
+        ? '🎯 Nueva Acción Primaria (Semanal)'
+        : '📅 Nueva Acción Secundaria (Diaria)'
+    }
 
     // Establecer fecha actual por defecto
     const today = new Date().toISOString().split('T')[0]
@@ -1105,23 +901,18 @@ const Decretos = {
         const fechaInput = form.querySelector('[name="fecha_evento"]')
         if (fechaInput) fechaInput.value = today
 
-        // Resetear el checkbox de subtareas
-        const subtareasCheckbox = document.getElementById('universalTieneSubtareas')
-        if (subtareasCheckbox) {
-          subtareasCheckbox.checked = false
-          this.toggleUniversalSubtareas(false)
-        }
+        // Re-establecer el tipo después del reset
+        document.getElementById('universalTipoAccion').value = tipo
       }
     }, 100)
 
     Modal.open('universalAccionModal')
   },
 
+  // Función eliminada - ya no usamos sub-tareas
   toggleUniversalSubtareas(checked) {
-    const container = document.getElementById('universalSubtareasContainer')
-    if (container) {
-      container.classList.toggle('hidden', !checked)
-    }
+    // Eliminada - simplificación version-2
+    return
   },
 
   procesarUniversalSubtareas() {
@@ -1466,6 +1257,9 @@ const Decretos = {
       // Renderizar modales específicos de detalle
       this.renderDetalleModals()
 
+      // Agregar event listeners para botones dinámicos
+      this.attachDetalleEventListeners()
+
       console.log('✅ Detalle del decreto renderizado exitosamente')
 
     } catch (error) {
@@ -1724,17 +1518,45 @@ const Decretos = {
     return `
       <div class="gradient-card p-6 rounded-xl">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-semibold flex items-center">
-            <i class="fas fa-tasks mr-2"></i>
-            Mis Acciones
-          </h3>
-          <button
-            onclick="Decretos.openUniversalAccionModal('${decreto.id}')"
-            class="btn-primary px-4 py-2 rounded-lg text-sm"
-          >
-            <i class="fas fa-plus mr-1"></i>
-            Nueva Acción
-          </button>
+          <div class="flex items-center gap-2">
+            <h3 class="text-xl font-semibold flex items-center">
+              <i class="fas fa-tasks mr-2"></i>
+              Mis Acciones
+            </h3>
+            <button
+              id="btnAccionesHelp"
+              class="w-6 h-6 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white text-xs flex items-center justify-center transition-all"
+              title="¿Qué son las acciones primarias y secundarias?"
+              type="button"
+            >
+              <i class="fas fa-question"></i>
+            </button>
+          </div>
+          <div class="flex gap-2">
+            <button
+              id="btnSuggestAI"
+              data-decreto-id="${decreto.id}"
+              class="btn-primary px-4 py-2 rounded-lg text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-purple-500/50 transition-all"
+              title="Helene te sugerirá acciones basadas en tu decreto"
+            >
+              <i class="fas fa-magic mr-1"></i>
+              Sugerir con IA
+            </button>
+            <button
+              onclick="Decretos.openUniversalAccionModal('${decreto.id}', 'primaria')"
+              class="btn-primary px-4 py-2 rounded-lg text-sm bg-accent-green hover:bg-accent-green/80"
+            >
+              <i class="fas fa-star mr-1"></i>
+              Acción Primaria
+            </button>
+            <button
+              onclick="Decretos.openUniversalAccionModal('${decreto.id}', 'secundaria')"
+              class="btn-primary px-4 py-2 rounded-lg text-sm bg-accent-blue hover:bg-accent-blue/80"
+            >
+              <i class="fas fa-calendar-day mr-1"></i>
+              Acción Secundaria
+            </button>
+          </div>
         </div>
 
         <!-- Acciones Primarias (Semanales) -->
@@ -3407,12 +3229,708 @@ Preparar presentación para próxima reunión"
       // Sin selección - mantener rojo
       select.classList.add('border-accent-red/50', 'focus:border-accent-red')
       select.classList.remove('border-accent-green/50', 'focus:border-accent-green', 'bg-green-900/10')
-      
+
       // Mostrar mensaje de error
       const errorMsg = select.parentElement.querySelector('.text-accent-red')
       if (errorMsg) {
         errorMsg.style.display = 'block'
       }
+    }
+  },
+
+  // 🔗 Agregar event listeners para botones dinámicos del detalle
+  attachDetalleEventListeners() {
+    // Botón de ayuda (?)
+    const btnHelp = document.getElementById('btnAccionesHelp')
+    if (btnHelp) {
+      btnHelp.addEventListener('click', () => {
+        console.log('🔘 Click en botón de ayuda')
+        this.showAccionesHelp()
+      })
+    }
+
+    // Botón de sugerir con IA
+    const btnSuggestAI = document.getElementById('btnSuggestAI')
+    if (btnSuggestAI) {
+      const decretoId = btnSuggestAI.dataset.decretoId
+      btnSuggestAI.addEventListener('click', () => {
+        console.log('🔘 Click en botón de IA para decreto:', decretoId)
+        this.suggestAccionesWithAI(decretoId)
+      })
+    }
+  },
+
+  // 📖 Mostrar modal de ayuda sobre acciones primarias y secundarias
+  showAccionesHelp() {
+    const helpContent = `
+      <div class="space-y-6">
+        <div class="text-center mb-4">
+          <div class="text-5xl mb-2">👑</div>
+          <h3 class="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
+            Metodología SPEC de Helene Hadsell
+          </h3>
+          <p class="text-slate-400 text-sm mt-1">La Reina de los Concursos te explica</p>
+        </div>
+
+        <!-- Acciones Primarias -->
+        <div class="bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-500/30 rounded-lg p-5">
+          <div class="flex items-center mb-3">
+            <div class="w-10 h-10 bg-accent-green rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-star text-white text-xl"></i>
+            </div>
+            <div>
+              <h4 class="text-lg font-bold text-accent-green">Acciones Primarias (Semanales)</h4>
+              <p class="text-xs text-slate-400">PROJECT - Proyecta en el mundo físico</p>
+            </div>
+          </div>
+          <p class="text-sm text-slate-300 mb-3">
+            Son las <strong>acciones estratégicas</strong> que realmente te acercan a tu decreto.
+          </p>
+
+          <div class="space-y-2 text-sm">
+            <div class="flex items-start">
+              <i class="fas fa-check text-accent-green mr-2 mt-1"></i>
+              <span class="text-slate-300">Requieren <strong>tiempo dedicado</strong> (1-3 horas o más)</span>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-check text-accent-green mr-2 mt-1"></i>
+              <span class="text-slate-300">Son las que <strong>realmente mueven la aguja</strong></span>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-check text-accent-green mr-2 mt-1"></i>
+              <span class="text-slate-300">No urgentes, pero <strong>IMPORTANTES</strong></span>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-check text-accent-green mr-2 mt-1"></i>
+              <span class="text-slate-300">Frecuencia: <strong>1-2 veces por semana</strong></span>
+            </div>
+          </div>
+
+          <div class="mt-4 bg-slate-900/50 rounded p-3">
+            <p class="text-xs text-slate-400 mb-2">📝 Ejemplo:</p>
+            <p class="text-sm text-slate-200">
+              <strong>Decreto:</strong> "Generar $10,000 USD mensuales"<br>
+              <strong>✅ Primaria:</strong> Crear campaña de marketing (Lunes)<br>
+              <strong>✅ Primaria:</strong> Hacer networking con 3 clientes (Jueves)
+            </p>
+          </div>
+        </div>
+
+        <!-- Acciones Secundarias -->
+        <div class="bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-500/30 rounded-lg p-5">
+          <div class="flex items-center mb-3">
+            <div class="w-10 h-10 bg-accent-blue rounded-lg flex items-center justify-center mr-3">
+              <i class="fas fa-calendar-day text-white text-xl"></i>
+            </div>
+            <div>
+              <h4 class="text-lg font-bold text-accent-blue">Acciones Secundarias (Diarias)</h4>
+              <p class="text-xs text-slate-400">EXPECT - Mantén la expectativa viva</p>
+            </div>
+          </div>
+          <p class="text-sm text-slate-300 mb-3">
+            Son los <strong>hábitos y recordatorios diarios</strong> que mantienen tu energía enfocada.
+          </p>
+
+          <div class="space-y-2 text-sm">
+            <div class="flex items-start">
+              <i class="fas fa-check text-accent-blue mr-2 mt-1"></i>
+              <span class="text-slate-300"><strong>Rápidas</strong> (5-30 minutos)</span>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-check text-accent-blue mr-2 mt-1"></i>
+              <span class="text-slate-300">Refuerzan la <strong>fe en tu decreto</strong></span>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-check text-accent-blue mr-2 mt-1"></i>
+              <span class="text-slate-300">Mantienen el <strong>momentum</strong></span>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-check text-accent-blue mr-2 mt-1"></i>
+              <span class="text-slate-300">Frecuencia: <strong>Diarias o casi diarias</strong></span>
+            </div>
+          </div>
+
+          <div class="mt-4 bg-slate-900/50 rounded p-3">
+            <p class="text-xs text-slate-400 mb-2">📝 Ejemplo:</p>
+            <p class="text-sm text-slate-200">
+              <strong>Decreto:</strong> "Generar $10,000 USD mensuales"<br>
+              <strong>✅ Secundaria:</strong> Visualizar cuenta bancaria con $10k (5 min/día)<br>
+              <strong>✅ Secundaria:</strong> Agradecer por clientes que llegan (5 min/día)
+            </p>
+          </div>
+        </div>
+
+        <!-- Regla de Oro -->
+        <div class="bg-gradient-to-r from-yellow-900/30 to-pink-900/30 border border-yellow-500/30 rounded-lg p-4">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-lightbulb text-yellow-400 text-xl mr-2"></i>
+            <h4 class="font-bold text-yellow-400">La Regla de Oro</h4>
+          </div>
+          <div class="space-y-2 text-sm text-slate-300">
+            <p><strong class="text-accent-green">PRIMARIAS =</strong> ACCIÓN FÍSICA hacia tu meta (PROJECT)</p>
+            <p><strong class="text-accent-blue">SECUNDARIAS =</strong> ACCIÓN MENTAL/ESPIRITUAL hacia tu meta (EXPECT)</p>
+          </div>
+        </div>
+
+        <!-- Preguntas para identificar -->
+        <div class="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+          <h4 class="font-semibold mb-3 flex items-center text-slate-200">
+            <i class="fas fa-question-circle mr-2 text-purple-400"></i>
+            ¿Cómo saber cuál es cuál?
+          </h4>
+
+          <div class="space-y-3">
+            <div>
+              <p class="text-xs font-semibold text-accent-green mb-1">¿Es PRIMARIA?</p>
+              <ul class="text-xs text-slate-400 space-y-1 ml-4">
+                <li>• ¿Me acerca DIRECTAMENTE a mi decreto?</li>
+                <li>• ¿Requiere esfuerzo y tiempo significativo?</li>
+                <li>• ¿Puedo medir resultados tangibles?</li>
+              </ul>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold text-accent-blue mb-1">¿Es SECUNDARIA?</p>
+              <ul class="text-xs text-slate-400 space-y-1 ml-4">
+                <li>• ¿Mantiene mi energía/fe/expectativa alta?</li>
+                <li>• ¿Es rápido y fácil de hacer?</li>
+                <li>• ¿Es más mental/espiritual que física?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center pt-2">
+          <p class="text-sm text-slate-400 italic">
+            "Me pregunto cuándo va a aparecer..." - Helene Hadsell 💫
+          </p>
+        </div>
+      </div>
+    `
+
+    // Crear modal personalizado
+    const modalId = 'accionesHelpModal'
+    const existingModal = document.getElementById(modalId)
+    if (existingModal) {
+      existingModal.remove()
+    }
+
+    const modalHTML = `
+      <div id="${modalId}" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50" style="display: flex;">
+        <div class="modal-container max-w-3xl">
+          <div class="modal-header">
+            <h2 class="text-2xl font-bold">
+              <i class="fas fa-book-open mr-2"></i>
+              Guía de Acciones SPEC
+            </h2>
+            <button onclick="document.getElementById('${modalId}').remove()" class="modal-close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body max-h-[70vh] overflow-y-auto">
+            ${helpContent}
+          </div>
+        </div>
+      </div>
+    `
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML)
+  },
+
+  // 🤖 Sugerir acciones con IA (Helene)
+  async suggestAccionesWithAI(decretoId) {
+    try {
+      // Buscar el decreto - primero intentar con selectedDecreto, luego en el array
+      let decreto = this.data.selectedDecreto
+
+      // Si selectedDecreto no tiene el ID correcto, buscar en el array
+      if (!decreto || decreto.id !== decretoId) {
+        decreto = this.data.decretos.find(d => d.id === decretoId)
+      }
+
+      if (!decreto) {
+        console.error('❌ Decreto no encontrado. ID:', decretoId)
+        console.error('❌ selectedDecreto:', this.data.selectedDecreto)
+        console.error('❌ decretos array:', this.data.decretos)
+        Utils.showToast('Decreto no encontrado', 'error')
+        return
+      }
+
+      console.log('✅ Decreto encontrado para IA:', decreto)
+
+      // Mostrar loading
+      Utils.showToast('🤖 Helene está analizando tu decreto...', 'info')
+
+      // Llamar al chatbot con un prompt especial
+      const prompt = `Analiza este decreto y sugiere acciones PRIMARIAS y SECUNDARIAS según el método SPEC:
+
+DECRETO: "${decreto.titulo}"
+DESCRIPCIÓN: "${decreto.descripcion}"
+CATEGORÍA: ${decreto.categoria}
+FECHA LÍMITE: ${decreto.fecha_limite || 'No especificada'}
+
+INSTRUCCIONES:
+- Sugiere 3 ACCIONES PRIMARIAS (semanales, estratégicas, que requieren tiempo)
+- Sugiere 5 ACCIONES SECUNDARIAS (diarias, rápidas, para mantener fe/expectativa)
+- Usa mi metodología SPEC (PROJECT para primarias, EXPECT para secundarias)
+- Sé específica y práctica
+
+FORMATO DE RESPUESTA (JSON):
+{
+  "primarias": [
+    {"titulo": "...", "descripcion": "...", "dia_sugerido": "lunes|miércoles|viernes"},
+    ...
+  ],
+  "secundarias": [
+    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"},
+    ...
+  ]
+}`
+
+      const response = await API.chatbot.sendMessage(prompt, [])
+
+      console.log('📨 Response de chatbot:', response)
+
+      if (!response.success) {
+        throw new Error(response.error || 'Error al obtener sugerencias')
+      }
+
+      // Intentar parsear el JSON de la respuesta
+      const message = response.data.message
+      console.log('💬 Mensaje de Helene:', message)
+
+      let suggestions
+
+      try {
+        // Buscar JSON en la respuesta
+        const jsonMatch = message.match(/\{[\s\S]*"primarias"[\s\S]*"secundarias"[\s\S]*\}/)
+        console.log('🔍 JSON encontrado:', jsonMatch ? jsonMatch[0].substring(0, 100) + '...' : 'NO ENCONTRADO')
+
+        if (jsonMatch) {
+          suggestions = JSON.parse(jsonMatch[0])
+          console.log('✅ Suggestions parseadas:', suggestions)
+        } else {
+          throw new Error('No se encontró JSON en la respuesta')
+        }
+      } catch (parseError) {
+        console.error('❌ Error parseando JSON:', parseError)
+        console.log('📄 Mostrando respuesta como texto...')
+        // Si no hay JSON, mostrar la respuesta de Helene directamente
+        Utils.showToast('Helene respondió, pero no en el formato esperado', 'warning')
+
+        // Mostrar la respuesta en un modal
+        this.showAISuggestionsText(message)
+        return
+      }
+
+      console.log('🎯 Abriendo modal de sugerencias...')
+      // Mostrar modal con sugerencias
+      this.showAISuggestionsModal(decretoId, suggestions)
+
+    } catch (error) {
+      console.error('Error al sugerir acciones con IA:', error)
+      Utils.showToast('Error al obtener sugerencias de Helene', 'error')
+    }
+  },
+
+  // Mostrar respuesta de texto de Helene
+  showAISuggestionsText(message) {
+    const modalId = 'aiSuggestionsTextModal'
+    const existingModal = document.getElementById(modalId)
+    if (existingModal) {
+      existingModal.remove()
+    }
+
+    const modalHTML = `
+      <div id="${modalId}" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50" style="display: flex;">
+        <div class="modal-container max-w-3xl">
+          <div class="modal-header bg-gradient-to-r from-purple-600 to-pink-600">
+            <h2 class="text-2xl font-bold flex items-center">
+              <span class="text-3xl mr-2">👑</span>
+              Helene te responde
+            </h2>
+            <button onclick="document.getElementById('${modalId}').remove()" class="modal-close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body max-h-[60vh] overflow-y-auto">
+            <div class="prose prose-invert max-w-none">
+              <div class="whitespace-pre-wrap text-slate-200">${message.replace(/\*\*(.*?)\*\*/g, '<strong class="text-yellow-300">$1</strong>')}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML)
+  },
+
+  // Mostrar modal con sugerencias parseadas
+  showAISuggestionsModal(decretoId, suggestions) {
+    const { primarias = [], secundarias = [] } = suggestions
+
+    const modalId = 'aiSuggestionsModal'
+    const existingModal = document.getElementById(modalId)
+    if (existingModal) {
+      existingModal.remove()
+    }
+
+    const modalHTML = `
+      <div id="${modalId}" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50" style="display: flex;">
+        <div class="modal-container max-w-4xl">
+          <div class="modal-header bg-gradient-to-r from-purple-600 to-pink-600">
+            <h2 class="text-2xl font-bold flex items-center">
+              <span class="text-3xl mr-2">👑</span>
+              Sugerencias de Helene
+            </h2>
+            <button onclick="document.getElementById('${modalId}').remove()" class="modal-close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body max-h-[70vh] overflow-y-auto">
+            <p class="text-slate-300 mb-6 italic">
+              "Dear, basándome en tu decreto, aquí están las acciones que te recomiendo según mi método SPEC..." 💫
+            </p>
+
+            <!-- Acciones Primarias -->
+            <div class="mb-6">
+              <h3 class="text-xl font-bold text-accent-green mb-4 flex items-center">
+                <i class="fas fa-star mr-2"></i>
+                Acciones Primarias (Semanales)
+              </h3>
+              <div class="space-y-3">
+                ${primarias.map((accion, index) => `
+                  <div class="bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-500/30 rounded-lg p-4">
+                    <div class="flex items-start justify-between mb-2">
+                      <div class="flex-1">
+                        <h4 class="font-semibold text-white mb-1">${accion.titulo}</h4>
+                        <p class="text-sm text-slate-300">${accion.descripcion}</p>
+                        ${accion.dia_sugerido ? `
+                          <div class="mt-2 flex items-center text-xs text-slate-400">
+                            <i class="fas fa-calendar mr-1"></i>
+                            Sugerido para: ${accion.dia_sugerido}
+                          </div>
+                        ` : ''}
+                      </div>
+                      <label class="flex items-center ml-4">
+                        <input
+                          type="checkbox"
+                          class="ai-suggestion-checkbox"
+                          data-tipo="primaria"
+                          data-index="${index}"
+                          checked
+                        />
+                        <span class="ml-2 text-sm text-slate-400">Agregar</span>
+                      </label>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Acciones Secundarias -->
+            <div class="mb-6">
+              <h3 class="text-xl font-bold text-accent-blue mb-4 flex items-center">
+                <i class="fas fa-calendar-day mr-2"></i>
+                Acciones Secundarias (Diarias)
+              </h3>
+              <div class="space-y-3">
+                ${secundarias.map((accion, index) => `
+                  <div class="bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-500/30 rounded-lg p-4">
+                    <div class="flex items-start justify-between mb-2">
+                      <div class="flex-1">
+                        <h4 class="font-semibold text-white mb-1">${accion.titulo}</h4>
+                        <p class="text-sm text-slate-300">${accion.descripcion}</p>
+                        ${accion.momento ? `
+                          <div class="mt-2 flex items-center text-xs text-slate-400">
+                            <i class="fas fa-clock mr-1"></i>
+                            Momento: ${accion.momento}
+                          </div>
+                        ` : ''}
+                      </div>
+                      <label class="flex items-center ml-4">
+                        <input
+                          type="checkbox"
+                          class="ai-suggestion-checkbox"
+                          data-tipo="secundaria"
+                          data-index="${index}"
+                          checked
+                        />
+                        <span class="ml-2 text-sm text-slate-400">Agregar</span>
+                      </label>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="space-y-3 pt-4 border-t border-slate-700">
+              <!-- Botón principal: Agregar seleccionadas -->
+              <button
+                onclick="Decretos.createSuggestedAcciones('${decretoId}', ${JSON.stringify(suggestions).replace(/"/g, '&quot;')})"
+                class="btn-primary w-full"
+              >
+                <i class="fas fa-check mr-2"></i>
+                Agregar Seleccionadas
+              </button>
+
+              <!-- Botones secundarios: Repensar y Agregar más -->
+              <div class="flex gap-2">
+                <button
+                  onclick="document.getElementById('${modalId}').remove(); Decretos.suggestMoreAcciones('${decretoId}')"
+                  class="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
+                >
+                  <i class="fas fa-plus-circle mr-1"></i>
+                  Agregar Más
+                </button>
+                <button
+                  onclick="document.getElementById('${modalId}').remove(); Decretos.rethinkAcciones('${decretoId}')"
+                  class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors text-sm"
+                >
+                  <i class="fas fa-sync mr-1"></i>
+                  Repensar
+                </button>
+                <button
+                  onclick="document.getElementById('${modalId}').remove()"
+                  class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML)
+  },
+
+  // Crear las acciones sugeridas seleccionadas
+  async createSuggestedAcciones(decretoId, suggestions) {
+    try {
+      const checkboxes = document.querySelectorAll('.ai-suggestion-checkbox:checked')
+
+      if (checkboxes.length === 0) {
+        Utils.showToast('Selecciona al menos una acción', 'warning')
+        return
+      }
+
+      const { primarias = [], secundarias = [] } = suggestions
+      const accionesToCreate = []
+
+      checkboxes.forEach(checkbox => {
+        const tipo = checkbox.dataset.tipo
+        const index = parseInt(checkbox.dataset.index)
+
+        const accion = tipo === 'primaria' ? primarias[index] : secundarias[index]
+
+        if (accion) {
+          accionesToCreate.push({
+            decreto_id: decretoId,
+            tipo: tipo,
+            titulo: accion.titulo,
+            que_hacer: accion.descripcion,
+            fecha_evento: new Date().toISOString().split('T')[0], // Hoy
+            hora_evento: '09:00'
+          })
+        }
+      })
+
+      Utils.showToast(`Creando ${accionesToCreate.length} acciones...`, 'info')
+
+      // Crear cada acción
+      let created = 0
+      for (const accionData of accionesToCreate) {
+        const response = await API.decretos.createAccion(accionData)
+        if (response.success) {
+          created++
+        }
+      }
+
+      Modal.close('aiSuggestionsModal')
+      Utils.showToast(`✅ ${created} acciones creadas exitosamente`, 'success')
+
+      // Recargar datos
+      await this.loadDecretos()
+
+      // Reabrir el detalle del decreto
+      this.openDetalleModal(decretoId)
+
+    } catch (error) {
+      console.error('Error al crear acciones sugeridas:', error)
+      Utils.showToast('Error al crear las acciones', 'error')
+    }
+  },
+
+  // Sugerir MÁS acciones adicionales (se agregan a las existentes)
+  async suggestMoreAcciones(decretoId) {
+    try {
+      console.log('🔮 Pidiendo MÁS sugerencias para decreto:', decretoId)
+
+      let decreto = this.data.selectedDecreto
+      if (!decreto || decreto.id !== decretoId) {
+        decreto = this.data.decretos.find(d => d.id === decretoId)
+      }
+
+      if (!decreto) {
+        Utils.showToast('Decreto no encontrado', 'error')
+        return
+      }
+
+      Utils.showToast('Helene está pensando en más acciones...', 'info')
+
+      const prompt = `Analiza este decreto y dame MÁS sugerencias ADICIONALES de acciones según el método SPEC.
+
+DECRETO: "${decreto.titulo}"
+DESCRIPCIÓN: "${decreto.descripcion}"
+
+IMPORTANTE: Dame acciones DIFERENTES y COMPLEMENTARIAS a las que ya sugeriste antes. Piensa en otros ángulos, otras estrategias.
+
+FORMATO DE RESPUESTA (JSON):
+{
+  "primarias": [
+    {"titulo": "...", "descripcion": "...", "dia_sugerido": "lunes|miércoles|viernes"},
+    {"titulo": "...", "descripcion": "...", "dia_sugerido": "lunes|miércoles|viernes"}
+  ],
+  "secundarias": [
+    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"},
+    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"},
+    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"}
+  ]
+}`
+
+      const response = await API.chatbot.sendMessage(prompt, [])
+      console.log('📨 Response de chatbot (Agregar Más):', response)
+
+      if (response.success && response.message) {
+        const message = response.message
+        console.log('💬 Mensaje de Helene (Agregar Más):', message)
+        console.log('📏 Longitud del mensaje:', message.length)
+
+        // Intentar encontrar JSON con diferentes patrones
+        let jsonMatch = message.match(/\{[\s\S]*?"primarias"[\s\S]*?"secundarias"[\s\S]*?\}/m)
+
+        if (!jsonMatch) {
+          // Intentar con ```json
+          jsonMatch = message.match(/```json\s*(\{[\s\S]*?\})\s*```/)
+          if (jsonMatch) {
+            jsonMatch[0] = jsonMatch[1]
+          }
+        }
+
+        if (jsonMatch) {
+          console.log('🔍 JSON encontrado (Agregar Más):', jsonMatch[0])
+          try {
+            const suggestions = JSON.parse(jsonMatch[0])
+            console.log('✅ Suggestions parseadas (Agregar Más):', suggestions)
+            this.showAISuggestionsModal(decretoId, suggestions)
+          } catch (parseError) {
+            console.error('❌ Error parseando JSON:', parseError)
+            console.log('⚠️ Mostrando respuesta de texto en su lugar')
+            this.showAISuggestionsText(message)
+          }
+        } else {
+          console.log('⚠️ No se encontró JSON en respuesta de Agregar Más, mostrando texto')
+          console.log('🔎 Buscando en el mensaje:', message.substring(0, 500))
+          this.showAISuggestionsText(message)
+        }
+      } else {
+        console.error('❌ Respuesta inválida del chatbot:', response)
+      }
+
+    } catch (error) {
+      console.error('Error al sugerir más acciones con IA:', error)
+      Utils.showToast('Error al obtener más sugerencias de Helene', 'error')
+    }
+  },
+
+  // Repensar las sugerencias con un enfoque diferente
+  async rethinkAcciones(decretoId) {
+    try {
+      console.log('🔄 Repensando sugerencias para decreto:', decretoId)
+
+      let decreto = this.data.selectedDecreto
+      if (!decreto || decreto.id !== decretoId) {
+        decreto = this.data.decretos.find(d => d.id === decretoId)
+      }
+
+      if (!decreto) {
+        Utils.showToast('Decreto no encontrado', 'error')
+        return
+      }
+
+      Utils.showToast('Helene está repensando las acciones...', 'info')
+
+      const prompt = `Analiza este decreto y dame sugerencias de acciones con un ENFOQUE COMPLETAMENTE DIFERENTE según el método SPEC.
+
+DECRETO: "${decreto.titulo}"
+DESCRIPCIÓN: "${decreto.descripcion}"
+
+IMPORTANTE:
+- Piensa FUERA DE LA CAJA
+- Usa un enfoque más creativo o innovador
+- Considera ángulos poco convencionales
+- Sé más específica y práctica
+
+FORMATO DE RESPUESTA (JSON):
+{
+  "primarias": [
+    {"titulo": "...", "descripcion": "...", "dia_sugerido": "lunes|miércoles|viernes"},
+    {"titulo": "...", "descripcion": "...", "dia_sugerido": "lunes|miércoles|viernes"},
+    {"titulo": "...", "descripcion": "...", "dia_sugerido": "lunes|miércoles|viernes"}
+  ],
+  "secundarias": [
+    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"},
+    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"},
+    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"},
+    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"},
+    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"}
+  ]
+}`
+
+      const response = await API.chatbot.sendMessage(prompt, [])
+      console.log('📨 Response de chatbot (Repensar):', response)
+
+      if (response.success && response.message) {
+        const message = response.message
+        console.log('💬 Mensaje de Helene (Repensar):', message)
+        console.log('📏 Longitud del mensaje:', message.length)
+
+        // Intentar encontrar JSON con diferentes patrones
+        let jsonMatch = message.match(/\{[\s\S]*?"primarias"[\s\S]*?"secundarias"[\s\S]*?\}/m)
+
+        if (!jsonMatch) {
+          // Intentar con ```json
+          jsonMatch = message.match(/```json\s*(\{[\s\S]*?\})\s*```/)
+          if (jsonMatch) {
+            jsonMatch[0] = jsonMatch[1]
+          }
+        }
+
+        if (jsonMatch) {
+          console.log('🔍 JSON encontrado (Repensar):', jsonMatch[0])
+          try {
+            const suggestions = JSON.parse(jsonMatch[0])
+            console.log('✅ Suggestions parseadas (Repensar):', suggestions)
+            this.showAISuggestionsModal(decretoId, suggestions)
+          } catch (parseError) {
+            console.error('❌ Error parseando JSON:', parseError)
+            console.log('⚠️ Mostrando respuesta de texto en su lugar')
+            this.showAISuggestionsText(message)
+          }
+        } else {
+          console.log('⚠️ No se encontró JSON en respuesta de Repensar, mostrando texto')
+          console.log('🔎 Buscando en el mensaje:', message.substring(0, 500))
+          this.showAISuggestionsText(message)
+        }
+      } else {
+        console.error('❌ Respuesta inválida del chatbot:', response)
+      }
+
+    } catch (error) {
+      console.error('Error al repensar acciones con IA:', error)
+      Utils.showToast('Error al repensar sugerencias de Helene', 'error')
     }
   }
 }
