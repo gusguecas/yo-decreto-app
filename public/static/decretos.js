@@ -236,8 +236,10 @@ const Decretos = {
   },
 
   renderDecretoCard(decreto, area) {
+    const isActive = decreto.estado === 'activo' || !decreto.estado
+
     return `
-      <div class="decreto-card ${area} p-6 hover-lift cursor-pointer" onclick="Decretos.openDetalleDecreto('${decreto.id}')">
+      <div class="decreto-card ${area} p-6 hover-lift cursor-pointer ${!isActive ? 'opacity-60' : ''}" onclick="Decretos.openDetalleDecreto('${decreto.id}')">
         <div class="flex items-start justify-between mb-4">
           <div class="flex items-center space-x-3 flex-1">
             ${decreto.logo_url ? `
@@ -247,10 +249,20 @@ const Decretos = {
               ${decreto.empresa_nombre ? `
                 <div class="text-xs text-slate-400 mb-1 uppercase tracking-wider">${decreto.empresa_nombre}</div>
               ` : ''}
-              <h4 class="text-xl font-bold text-white uppercase">${decreto.titulo}</h4>
+              <div class="flex items-center space-x-2">
+                <h4 class="text-xl font-bold text-white uppercase">${decreto.titulo}</h4>
+                ${!isActive ? '<span class="px-2 py-0.5 text-xs bg-slate-700 text-slate-400 rounded-full">💤 Standby</span>' : '<span class="px-2 py-0.5 text-xs bg-green-900/30 text-green-400 rounded-full border border-green-600/30">🟢 Activo</span>'}
+              </div>
             </div>
           </div>
           <div class="flex items-center space-x-2 flex-shrink-0">
+            <button
+              onclick="event.stopPropagation(); Decretos.toggleEstado('${decreto.id}', '${isActive ? 'standby' : 'activo'}')"
+              class="text-slate-400 hover:text-${isActive ? 'orange' : 'green'}-400 transition-colors"
+              title="${isActive ? 'Pausar (Standby)' : 'Activar'}"
+            >
+              <i class="fas fa-${isActive ? 'pause' : 'play'}-circle"></i>
+            </button>
             <button
               onclick="event.stopPropagation(); Decretos.openEditModal('${decreto.id}')"
               class="text-slate-400 hover:text-blue-400 transition-colors"
@@ -545,7 +557,7 @@ const Decretos = {
     `
   },
 
-  // ===== MODAL UNIVERSAL PARA ACCIONES (SIMPLIFICADO) =====
+  // ===== MODAL UNIVERSAL PARA ACCIONES (DINÁMICO P/S) =====
   renderUniversalAccionModal() {
     return UI.renderModal('universalAccionModal', '➕ Nueva Acción', `
       <form id="universalAccionForm" onsubmit="Decretos.handleUniversalAccionSubmit(event)">
@@ -569,47 +581,83 @@ const Decretos = {
 
           <!-- Qué se debe hacer -->
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">
-              ¿Qué hacer? *
-            </label>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-medium text-slate-300">
+                ¿Qué hacer? *
+              </label>
+              <button
+                type="button"
+                id="btnAyudaIA"
+                onclick="Decretos.generarQueHacerConIA()"
+                class="px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs rounded-lg transition-all duration-200 flex items-center space-x-1"
+                title="Helene te ayudará a definir qué hacer"
+              >
+                <i class="fas fa-magic"></i>
+                <span>✨ Ayuda IA</span>
+              </button>
+            </div>
+
+            <!-- Contenedor de auto-sugerencia -->
+            <div id="aiSuggestionContainer" class="hidden mb-2 p-3 bg-purple-900/30 border border-purple-500/50 rounded-lg">
+              <div class="flex items-start space-x-2">
+                <div class="flex-shrink-0 text-purple-400 mt-1">
+                  <i class="fas fa-lightbulb"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-xs text-purple-300 font-medium mb-1">💡 Sugerencia de Helene:</p>
+                  <p id="aiSuggestionText" class="text-sm text-slate-300"></p>
+                  <div class="flex space-x-2 mt-2">
+                    <button
+                      type="button"
+                      onclick="Decretos.usarSugerenciaIA()"
+                      class="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white text-xs rounded transition-colors"
+                    >
+                      ✓ Usar
+                    </button>
+                    <button
+                      type="button"
+                      onclick="Decretos.cerrarSugerenciaIA()"
+                      class="px-3 py-1 bg-slate-600 hover:bg-slate-500 text-white text-xs rounded transition-colors"
+                    >
+                      ✕ Ignorar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <textarea
               name="que_hacer"
+              id="queHacerTextarea"
               required
               rows="3"
               class="form-textarea w-full px-4 py-3 text-base"
-              placeholder="Describe específicamente qué hay que hacer..."
+              placeholder="Describe específicamente qué hay que hacer... (o usa ✨ Ayuda IA)"
+              oninput="Decretos.onQueHacerInput()"
             ></textarea>
           </div>
 
-          <!-- Fecha y Hora de la acción -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-300 mb-2">
-                📅 ¿Cuándo hacerla? *
-              </label>
-              <input
-                type="date"
-                name="fecha_evento"
-                required
-                class="form-input w-full px-4 py-3 text-base"
-              >
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-300 mb-2">
-                🕐 Hora
-              </label>
-              <input
-                type="time"
-                name="hora_evento"
-                class="form-input w-full px-4 py-3 text-base"
-                value="09:00"
-              >
-            </div>
+          <!-- CONTENEDOR DINÁMICO: Campos de Fecha/Hora -->
+          <div id="accionFechaContainer">
+            <!-- Se renderiza dinámicamente según tipo -->
           </div>
         </div>
 
+        <!-- Botón Sugerir con IA -->
+        <div class="pt-4 border-t border-slate-600">
+          <button
+            type="button"
+            onclick="Decretos.openAISuggestModalFromUniversal()"
+            class="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
+            title="Helene te sugerirá acciones basadas en tu decreto"
+          >
+            <i class="fas fa-magic"></i>
+            <span>Sugerir con IA</span>
+          </button>
+        </div>
+
         <!-- Botones -->
-        <div class="flex space-x-3 pt-6">
+        <div class="flex space-x-3 pt-4">
           <button
             type="button"
             onclick="Modal.close('universalAccionModal')"
@@ -888,25 +936,243 @@ const Decretos = {
     const modalTitle = document.querySelector('#universalAccionModal .text-xl')
     if (modalTitle) {
       modalTitle.innerHTML = tipo === 'primaria'
-        ? '🎯 Nueva Acción Primaria (Semanal)'
-        : '📅 Nueva Acción Secundaria (Diaria)'
+        ? '🎯 Nueva Acción Primaria (1-3 hrs)'
+        : '📅 Nueva Acción Secundaria (5-30 min)'
     }
 
-    // Establecer fecha actual por defecto
-    const today = new Date().toISOString().split('T')[0]
+    // Renderizar campos dinámicamente según tipo
     setTimeout(() => {
-      const form = document.getElementById('universalAccionForm')
-      if (form) {
-        form.reset()
-        const fechaInput = form.querySelector('[name="fecha_evento"]')
-        if (fechaInput) fechaInput.value = today
-
-        // Re-establecer el tipo después del reset
-        document.getElementById('universalTipoAccion').value = tipo
-      }
+      this.renderAccionFechaFields(tipo)
     }, 100)
 
     Modal.open('universalAccionModal')
+  },
+
+  renderAccionFechaFields(tipo) {
+    const container = document.getElementById('accionFechaContainer')
+    if (!container) return
+
+    const today = new Date().toISOString().split('T')[0]
+
+    if (tipo === 'primaria') {
+      // PRIMARIA: Opcional programar con fecha
+      container.innerHTML = `
+        <div class="p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+          <label class="flex items-center space-x-3 cursor-pointer">
+            <input
+              type="checkbox"
+              id="programarPrimariaCheck"
+              onchange="Decretos.toggleProgramarPrimaria()"
+              class="w-5 h-5 rounded text-green-600 focus:ring-green-500"
+            >
+            <span class="text-slate-300 font-medium">📅 Programar para fecha específica</span>
+          </label>
+          <p class="text-xs text-slate-400 mt-2 ml-8">
+            Si no programas, aparecerá en el banco de tareas para arrastrar cuando quieras
+          </p>
+        </div>
+
+        <div id="primariaFechaFields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              📅 Fecha *
+            </label>
+            <input
+              type="date"
+              name="fecha_evento"
+              class="form-input w-full px-4 py-3 text-base"
+              value="${today}"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              🕐 Hora
+            </label>
+            <input
+              type="time"
+              name="hora_evento"
+              class="form-input w-full px-4 py-3 text-base"
+              value="09:00"
+            >
+          </div>
+        </div>
+      `
+    } else {
+      // SECUNDARIA: Siempre requiere fecha
+      container.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              📅 ¿Cuándo hacerla? *
+            </label>
+            <input
+              type="date"
+              name="fecha_evento"
+              required
+              class="form-input w-full px-4 py-3 text-base"
+              value="${today}"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              🕐 Hora
+            </label>
+            <input
+              type="time"
+              name="hora_evento"
+              class="form-input w-full px-4 py-3 text-base"
+              value="09:00"
+            >
+          </div>
+        </div>
+      `
+    }
+  },
+
+  toggleProgramarPrimaria() {
+    const checkbox = document.getElementById('programarPrimariaCheck')
+    const fieldsContainer = document.getElementById('primariaFechaFields')
+
+    if (checkbox && fieldsContainer) {
+      if (checkbox.checked) {
+        fieldsContainer.classList.remove('hidden')
+        // Hacer campos requeridos
+        const fechaInput = fieldsContainer.querySelector('[name="fecha_evento"]')
+        if (fechaInput) fechaInput.required = true
+      } else {
+        fieldsContainer.classList.add('hidden')
+        // Quitar requerido
+        const fechaInput = fieldsContainer.querySelector('[name="fecha_evento"]')
+        if (fechaInput) {
+          fechaInput.required = false
+          fechaInput.value = ''
+        }
+        const horaInput = fieldsContainer.querySelector('[name="hora_evento"]')
+        if (horaInput) horaInput.value = ''
+      }
+    }
+  },
+
+  // ===== FUNCIONES DE IA ASISTENTE =====
+
+  _aiSuggestionTimeout: null,
+  _currentAISuggestion: '',
+
+  onQueHacerInput() {
+    // Limpiar timeout anterior
+    if (this._aiSuggestionTimeout) {
+      clearTimeout(this._aiSuggestionTimeout)
+    }
+
+    // Auto-sugerencia después de 2 segundos de pausa
+    this._aiSuggestionTimeout = setTimeout(() => {
+      this.generarAutoSugerencia()
+    }, 2000)
+  },
+
+  async generarQueHacerConIA() {
+    const titulo = document.querySelector('#universalAccionForm [name="titulo"]')?.value
+    if (!titulo || !titulo.trim()) {
+      Utils.showToast('Primero escribe el título de la acción', 'warning')
+      return
+    }
+
+    const btn = document.getElementById('btnAyudaIA')
+    if (btn) {
+      btn.disabled = true
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Generando...</span>'
+    }
+
+    try {
+      await this.generarSugerencia(titulo, true)
+    } finally {
+      if (btn) {
+        btn.disabled = false
+        btn.innerHTML = '<i class="fas fa-magic"></i> <span>✨ Ayuda IA</span>'
+      }
+    }
+  },
+
+  async generarAutoSugerencia() {
+    const titulo = document.querySelector('#universalAccionForm [name="titulo"]')?.value
+    const queHacer = document.getElementById('queHacerTextarea')?.value
+
+    // Solo auto-sugerir si hay título y NO hay contenido en "qué hacer"
+    if (!titulo || !titulo.trim() || (queHacer && queHacer.trim())) {
+      return
+    }
+
+    await this.generarSugerencia(titulo, false)
+  },
+
+  async generarSugerencia(titulo, usarDirectamente) {
+    try {
+      const decretoId = document.getElementById('universalDecretoId')?.value
+      if (!decretoId) return
+
+      // Obtener decreto actual
+      const decreto = this.data.decretos.find(d => d.id === decretoId)
+      if (!decreto) return
+
+      // Llamar a la IA
+      const response = await API.request('/chatbot/accion-helper', {
+        method: 'POST',
+        data: {
+          decreto: {
+            titulo: decreto.titulo,
+            descripcion: decreto.descripcion || decreto.sueno_meta
+          },
+          tituloAccion: titulo
+        }
+      })
+
+      if (response.success && response.data.sugerencia) {
+        this._currentAISuggestion = response.data.sugerencia
+
+        if (usarDirectamente) {
+          // Usar directamente (botón "Ayuda IA")
+          const textarea = document.getElementById('queHacerTextarea')
+          if (textarea) {
+            textarea.value = this._currentAISuggestion
+          }
+          Utils.showToast('✨ Sugerencia aplicada', 'success')
+        } else {
+          // Mostrar como auto-sugerencia
+          this.mostrarSugerenciaIA(this._currentAISuggestion)
+        }
+      }
+    } catch (error) {
+      console.error('Error al generar sugerencia:', error)
+      if (usarDirectamente) {
+        Utils.showToast('Error al generar sugerencia', 'error')
+      }
+    }
+  },
+
+  mostrarSugerenciaIA(sugerencia) {
+    const container = document.getElementById('aiSuggestionContainer')
+    const textElement = document.getElementById('aiSuggestionText')
+
+    if (container && textElement) {
+      textElement.textContent = sugerencia
+      container.classList.remove('hidden')
+    }
+  },
+
+  usarSugerenciaIA() {
+    const textarea = document.getElementById('queHacerTextarea')
+    if (textarea && this._currentAISuggestion) {
+      textarea.value = this._currentAISuggestion
+      this.cerrarSugerenciaIA()
+      Utils.showToast('✨ Sugerencia aplicada', 'success')
+    }
+  },
+
+  cerrarSugerenciaIA() {
+    const container = document.getElementById('aiSuggestionContainer')
+    if (container) {
+      container.classList.add('hidden')
+    }
   },
 
   // Función eliminada - ya no usamos sub-tareas
@@ -1175,7 +1441,7 @@ const Decretos = {
   async editFraseVida() {
     const user = AppState.user || {}
     const nuevaFrase = prompt('Edita tu frase de vida:', user.frase_vida || '')
-    
+
     if (nuevaFrase !== null) {
       try {
         await API.config.update({
@@ -1188,6 +1454,22 @@ const Decretos = {
       } catch (error) {
         Utils.showToast('Error al actualizar frase', 'error')
       }
+    }
+  },
+
+  async toggleEstado(decretoId, nuevoEstado) {
+    try {
+      const estadoTexto = nuevoEstado === 'activo' ? 'Activo' : 'Standby'
+
+      await API.request(`/decretos/${decretoId}/estado`, {
+        method: 'PUT',
+        data: { estado: nuevoEstado }
+      })
+
+      Utils.showToast(`Decreto cambiado a ${estadoTexto}`, 'success')
+      await this.render()
+    } catch (error) {
+      Utils.showToast('Error al cambiar estado del decreto', 'error')
     }
   },
 
@@ -1400,10 +1682,36 @@ const Decretos = {
             <!-- Progreso -->
             ${this.renderDetalleProgreso(decreto)}
 
-            <!-- Acciones y Sugerencias -->
-            <div class="space-y-6">
+            <!-- Sistema de Pestañas -->
+            <div class="mb-6">
+              <div class="flex border-b border-slate-700">
+                <button
+                  onclick="Decretos.switchDetalleTab('acciones')"
+                  id="tab-acciones"
+                  class="tab-button active px-6 py-3 font-semibold text-sm transition-all border-b-2 border-accent-green text-accent-green"
+                >
+                  <i class="fas fa-tasks mr-2"></i>
+                  Mis Acciones
+                </button>
+                <button
+                  onclick="Decretos.switchDetalleTab('historial')"
+                  id="tab-historial"
+                  class="tab-button px-6 py-3 font-semibold text-sm transition-all border-b-2 border-transparent text-slate-400 hover:text-slate-200"
+                >
+                  <i class="fas fa-history mr-2"></i>
+                  Historial CRM
+                </button>
+              </div>
+            </div>
+
+            <!-- Contenido de Pestañas -->
+            <div id="tab-content-acciones" class="tab-content space-y-6">
               ${this.renderMisAcciones(decreto)}
               ${this.renderSugerenciasHoy(decreto)}
+            </div>
+
+            <div id="tab-content-historial" class="tab-content hidden">
+              ${this.renderHistorialCRM(decreto)}
             </div>
 
           </div>
@@ -1533,15 +1841,6 @@ const Decretos = {
             </button>
           </div>
           <div class="flex gap-2">
-            <button
-              id="btnSuggestAI"
-              data-decreto-id="${decreto.id}"
-              class="btn-primary px-4 py-2 rounded-lg text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-purple-500/50 transition-all"
-              title="Helene te sugerirá acciones basadas en tu decreto"
-            >
-              <i class="fas fa-magic mr-1"></i>
-              Sugerir con IA
-            </button>
             <button
               onclick="Decretos.openUniversalAccionModal('${decreto.id}', 'primaria')"
               class="btn-primary px-4 py-2 rounded-lg text-sm bg-accent-green hover:bg-accent-green/80"
@@ -1790,6 +2089,302 @@ const Decretos = {
     AppState.selectedDecreto = null
     this.data.selectedDecreto = null
     this.render()
+  },
+
+  // Función para cambiar entre pestañas en vista detalle
+  switchDetalleTab(tabName) {
+    // Remover clases activas de todos los botones
+    document.querySelectorAll('.tab-button').forEach(btn => {
+      btn.classList.remove('active', 'border-accent-green', 'text-accent-green')
+      btn.classList.add('border-transparent', 'text-slate-400')
+    })
+
+    // Ocultar todos los contenidos
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.add('hidden')
+    })
+
+    // Activar el tab seleccionado
+    const tabButton = document.getElementById(`tab-${tabName}`)
+    const tabContent = document.getElementById(`tab-content-${tabName}`)
+
+    if (tabButton && tabContent) {
+      tabButton.classList.add('active', 'border-accent-green', 'text-accent-green')
+      tabButton.classList.remove('border-transparent', 'text-slate-400')
+      tabContent.classList.remove('hidden')
+    }
+  },
+
+  // Renderizar la vista de Historial CRM
+  renderHistorialCRM(decreto) {
+    const acciones = decreto.acciones || []
+
+    // Ordenar por fecha (más recientes primero)
+    const accionesOrdenadas = [...acciones].sort((a, b) => {
+      const fechaA = a.fecha_completada || a.fecha_hora || a.created_at
+      const fechaB = b.fecha_completada || b.fecha_hora || b.created_at
+      return new Date(fechaB) - new Date(fechaA)
+    })
+
+    // Calcular estadísticas
+    const stats = this.calcularEstadisticasHistorial(acciones)
+
+    return `
+      <div class="space-y-6">
+        <!-- Panel de Estadísticas -->
+        ${this.renderEstadisticasHistorial(stats)}
+
+        <!-- Filtros -->
+        <div class="gradient-card p-4 rounded-xl">
+          <div class="flex flex-wrap gap-3">
+            <div class="flex-1 min-w-[200px]">
+              <input
+                type="text"
+                id="historial-search"
+                placeholder="🔍 Buscar acción..."
+                oninput="Decretos.filtrarHistorial()"
+                class="w-full px-4 py-2 bg-slate-800 text-white rounded-lg border border-slate-700 focus:border-accent-green focus:outline-none"
+              />
+            </div>
+            <select
+              id="historial-filter-estado"
+              onchange="Decretos.filtrarHistorial()"
+              class="px-4 py-2 bg-slate-800 text-white rounded-lg border border-slate-700 focus:border-accent-green focus:outline-none"
+            >
+              <option value="todas">📊 Todos los estados</option>
+              <option value="completada">✅ Completadas</option>
+              <option value="en_progreso">⏳ En Progreso</option>
+              <option value="pendiente">⏸️ Pendientes</option>
+              <option value="cancelada">❌ Canceladas</option>
+            </select>
+            <select
+              id="historial-filter-tipo"
+              onchange="Decretos.filtrarHistorial()"
+              class="px-4 py-2 bg-slate-800 text-white rounded-lg border border-slate-700 focus:border-accent-green focus:outline-none"
+            >
+              <option value="todas">🎯 Todos los tipos</option>
+              <option value="primaria">🌟 Primarias</option>
+              <option value="secundaria">📅 Secundarias</option>
+            </select>
+            <select
+              id="historial-filter-fecha"
+              onchange="Decretos.filtrarHistorial()"
+              class="px-4 py-2 bg-slate-800 text-white rounded-lg border border-slate-700 focus:border-accent-green focus:outline-none"
+            >
+              <option value="todas">📅 Todo el tiempo</option>
+              <option value="semana">Última semana</option>
+              <option value="mes">Último mes</option>
+              <option value="3meses">Últimos 3 meses</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Timeline de Acciones -->
+        <div class="gradient-card p-6 rounded-xl">
+          <h3 class="text-xl font-semibold mb-6 flex items-center">
+            <i class="fas fa-timeline mr-2"></i>
+            Timeline de Acciones
+          </h3>
+          <div id="historial-timeline" class="space-y-4">
+            ${accionesOrdenadas.length > 0
+              ? accionesOrdenadas.map(accion => this.renderTimelineItem(accion)).join('')
+              : '<div class="text-center text-slate-400 py-8">No hay acciones registradas aún</div>'
+            }
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  calcularEstadisticasHistorial(acciones) {
+    const total = acciones.length
+    const completadas = acciones.filter(a => a.estado === 'completada').length
+    const enProgreso = acciones.filter(a => a.estado === 'en_progreso').length
+    const pendientes = acciones.filter(a => a.estado === 'pendiente').length
+    const canceladas = acciones.filter(a => a.estado === 'cancelada').length
+
+    // Calcular promedio de días para completar
+    const completadasConFechas = acciones.filter(a =>
+      a.estado === 'completada' && a.created_at && a.fecha_completada
+    )
+
+    let promedioDias = 0
+    if (completadasConFechas.length > 0) {
+      const totalDias = completadasConFechas.reduce((sum, accion) => {
+        const inicio = new Date(accion.created_at)
+        const fin = new Date(accion.fecha_completada)
+        const dias = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24))
+        return sum + dias
+      }, 0)
+      promedioDias = Math.round(totalDias / completadasConFechas.length)
+    }
+
+    // Calcular racha más larga
+    const rachaActual = this.calcularRachaMasLarga(acciones)
+
+    return {
+      total,
+      completadas,
+      enProgreso,
+      pendientes,
+      canceladas,
+      promedioDias,
+      rachaActual,
+      tasaCompletado: total > 0 ? Math.round((completadas / total) * 100) : 0
+    }
+  },
+
+  calcularRachaMasLarga(acciones) {
+    const completadas = acciones
+      .filter(a => a.estado === 'completada' && a.fecha_completada)
+      .sort((a, b) => new Date(a.fecha_completada) - new Date(b.fecha_completada))
+
+    if (completadas.length === 0) return 0
+
+    let rachaActual = 1
+    let rachaMaxima = 1
+
+    for (let i = 1; i < completadas.length; i++) {
+      const fechaAnterior = new Date(completadas[i - 1].fecha_completada)
+      const fechaActual = new Date(completadas[i].fecha_completada)
+      const diferenciaDias = Math.ceil((fechaActual - fechaAnterior) / (1000 * 60 * 60 * 24))
+
+      if (diferenciaDias <= 7) {
+        rachaActual++
+        rachaMaxima = Math.max(rachaMaxima, rachaActual)
+      } else {
+        rachaActual = 1
+      }
+    }
+
+    return rachaMaxima
+  },
+
+  renderEstadisticasHistorial(stats) {
+    return `
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="gradient-card p-4 rounded-xl text-center">
+          <div class="text-3xl font-bold text-white mb-1">${stats.total}</div>
+          <div class="text-slate-300 text-sm">Acciones Totales</div>
+        </div>
+        <div class="gradient-card p-4 rounded-xl text-center">
+          <div class="text-3xl font-bold text-accent-green mb-1">${stats.tasaCompletado}%</div>
+          <div class="text-slate-300 text-sm">Tasa de Éxito</div>
+        </div>
+        <div class="gradient-card p-4 rounded-xl text-center">
+          <div class="text-3xl font-bold text-accent-blue mb-1">${stats.promedioDias}</div>
+          <div class="text-slate-300 text-sm">Días Promedio</div>
+        </div>
+        <div class="gradient-card p-4 rounded-xl text-center">
+          <div class="text-3xl font-bold text-accent-orange mb-1">${stats.rachaActual}</div>
+          <div class="text-slate-300 text-sm">Racha Máxima</div>
+        </div>
+      </div>
+    `
+  },
+
+  renderTimelineItem(accion) {
+    const estadoConfig = {
+      completada: { icon: 'fa-check-circle', color: 'text-green-400', bgColor: 'bg-green-900/30', borderColor: 'border-green-600/50' },
+      en_progreso: { icon: 'fa-spinner', color: 'text-blue-400', bgColor: 'bg-blue-900/30', borderColor: 'border-blue-600/50' },
+      pendiente: { icon: 'fa-clock', color: 'text-orange-400', bgColor: 'bg-orange-900/30', borderColor: 'border-orange-600/50' },
+      cancelada: { icon: 'fa-times-circle', color: 'text-red-400', bgColor: 'bg-red-900/30', borderColor: 'border-red-600/50' }
+    }
+
+    const config = estadoConfig[accion.estado] || estadoConfig.pendiente
+    const tipoIcon = accion.tipo === 'primaria' ? '🌟' : '📅'
+    const fecha = accion.fecha_completada || accion.fecha_hora || accion.created_at
+    const fechaFormateada = fecha ? new Date(fecha).toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }) : 'Sin fecha'
+
+    return `
+      <div class="timeline-item ${config.bgColor} ${config.borderColor} border-l-4 pl-6 py-4 rounded-r-lg relative hover:shadow-lg transition-all duration-300" data-accion-id="${accion.id}" data-estado="${accion.estado}" data-tipo="${accion.tipo}" data-fecha="${fecha}">
+        <!-- Punto en la línea de tiempo -->
+        <div class="absolute -left-3 top-6 w-6 h-6 ${config.color} bg-slate-900 rounded-full flex items-center justify-center border-2 border-current">
+          <i class="fas ${config.icon} text-xs"></i>
+        </div>
+
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-2xl">${tipoIcon}</span>
+              <span class="text-sm font-semibold ${config.color} uppercase">${accion.tipo}</span>
+              <span class="text-xs text-slate-400">${fechaFormateada}</span>
+            </div>
+            <h4 class="text-lg font-semibold text-white mb-1">${accion.titulo}</h4>
+            ${accion.que_hacer ? `<p class="text-slate-300 text-sm mb-2">${accion.que_hacer}</p>` : ''}
+            ${accion.notas ? `<div class="text-slate-400 text-xs italic mt-2">📝 ${accion.notas}</div>` : ''}
+          </div>
+          <div class="text-right ml-4">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold ${config.color} ${config.bgColor} border ${config.borderColor}">
+              ${this.getEstadoLabel(accion.estado)}
+            </span>
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  getEstadoLabel(estado) {
+    const labels = {
+      completada: '✅ Completada',
+      en_progreso: '⏳ En Progreso',
+      pendiente: '⏸️ Pendiente',
+      cancelada: '❌ Cancelada'
+    }
+    return labels[estado] || estado
+  },
+
+  filtrarHistorial() {
+    const searchText = document.getElementById('historial-search')?.value.toLowerCase() || ''
+    const filterEstado = document.getElementById('historial-filter-estado')?.value || 'todas'
+    const filterTipo = document.getElementById('historial-filter-tipo')?.value || 'todas'
+    const filterFecha = document.getElementById('historial-filter-fecha')?.value || 'todas'
+
+    const now = new Date()
+    const timeline = document.querySelectorAll('#historial-timeline .timeline-item')
+
+    timeline.forEach(item => {
+      const texto = item.textContent.toLowerCase()
+      const estado = item.dataset.estado
+      const tipo = item.dataset.tipo
+      const fecha = new Date(item.dataset.fecha)
+
+      let mostrar = true
+
+      // Filtro de búsqueda
+      if (searchText && !texto.includes(searchText)) {
+        mostrar = false
+      }
+
+      // Filtro de estado
+      if (filterEstado !== 'todas' && estado !== filterEstado) {
+        mostrar = false
+      }
+
+      // Filtro de tipo
+      if (filterTipo !== 'todas' && tipo !== filterTipo) {
+        mostrar = false
+      }
+
+      // Filtro de fecha
+      if (filterFecha !== 'todas' && fecha) {
+        const diffDays = Math.ceil((now - fecha) / (1000 * 60 * 60 * 24))
+
+        if (filterFecha === 'semana' && diffDays > 7) {
+          mostrar = false
+        } else if (filterFecha === 'mes' && diffDays > 30) {
+          mostrar = false
+        } else if (filterFecha === '3meses' && diffDays > 90) {
+          mostrar = false
+        }
+      }
+
+      item.style.display = mostrar ? 'block' : 'none'
+    })
   },
 
   async generarImagenVisualizacion(decretoId) {
@@ -3249,15 +3844,6 @@ Preparar presentación para próxima reunión"
       })
     }
 
-    // Botón de sugerir con IA
-    const btnSuggestAI = document.getElementById('btnSuggestAI')
-    if (btnSuggestAI) {
-      const decretoId = btnSuggestAI.dataset.decretoId
-      btnSuggestAI.addEventListener('click', () => {
-        console.log('🔘 Click en botón de IA para decreto:', decretoId)
-        this.suggestAccionesWithAI(decretoId)
-      })
-    }
   },
 
   // 📖 Mostrar modal de ayuda sobre acciones primarias y secundarias
@@ -3437,6 +4023,22 @@ Preparar presentación para próxima reunión"
     document.body.insertAdjacentHTML('beforeend', modalHTML)
   },
 
+  // 🤖 Abrir modal de sugerencias IA desde el modal universal
+  openAISuggestModalFromUniversal() {
+    // Obtener el decreto_id del modal actual
+    const decretoId = document.getElementById('universalDecretoId')?.value
+
+    if (!decretoId) {
+      Utils.showToast('Error: No se encontró el ID del decreto', 'error')
+      return
+    }
+
+    console.log('🔘 Abriendo sugerencias IA desde modal universal para decreto:', decretoId)
+
+    // Llamar a la función de sugerencias con IA
+    this.suggestAccionesWithAI(decretoId)
+  },
+
   // 🤖 Sugerir acciones con IA (Helene)
   async suggestAccionesWithAI(decretoId) {
     try {
@@ -3461,33 +4063,8 @@ Preparar presentación para próxima reunión"
       // Mostrar loading
       Utils.showToast('🤖 Helene está analizando tu decreto...', 'info')
 
-      // Llamar al chatbot con un prompt especial
-      const prompt = `Analiza este decreto y sugiere acciones PRIMARIAS y SECUNDARIAS según el método SPEC:
-
-DECRETO: "${decreto.titulo}"
-DESCRIPCIÓN: "${decreto.descripcion}"
-CATEGORÍA: ${decreto.categoria}
-FECHA LÍMITE: ${decreto.fecha_limite || 'No especificada'}
-
-INSTRUCCIONES:
-- Sugiere 3 ACCIONES PRIMARIAS (semanales, estratégicas, que requieren tiempo)
-- Sugiere 5 ACCIONES SECUNDARIAS (diarias, rápidas, para mantener fe/expectativa)
-- Usa mi metodología SPEC (PROJECT para primarias, EXPECT para secundarias)
-- Sé específica y práctica
-
-FORMATO DE RESPUESTA (JSON):
-{
-  "primarias": [
-    {"titulo": "...", "descripcion": "...", "dia_sugerido": "lunes|miércoles|viernes"},
-    ...
-  ],
-  "secundarias": [
-    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"},
-    ...
-  ]
-}`
-
-      const response = await API.chatbot.sendMessage(prompt, [])
+      // Llamar al nuevo endpoint especializado para sugerencias
+      const response = await API.request('/chatbot/suggest', { method: 'POST', data: { decreto } })
 
       console.log('📨 Response de chatbot:', response)
 
@@ -3496,7 +4073,7 @@ FORMATO DE RESPUESTA (JSON):
       }
 
       // Intentar parsear el JSON de la respuesta
-      const message = response.data.message
+      const message = response.data?.message || response.message
       console.log('💬 Mensaje de Helene:', message)
 
       let suggestions

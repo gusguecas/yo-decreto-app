@@ -163,11 +163,31 @@ decretosRoutes.put('/:id', async (c) => {
   }
 })
 
+// Cambiar estado del decreto (activo/standby)
+decretosRoutes.put('/:id/estado', async (c) => {
+  try {
+    const decretoId = c.req.param('id')
+    const { estado } = await c.req.json()
+
+    if (!estado || !['activo', 'standby'].includes(estado)) {
+      return c.json({ success: false, error: 'Estado debe ser "activo" o "standby"' }, 400)
+    }
+
+    await c.env.DB.prepare(
+      'UPDATE decretos SET estado = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+    ).bind(estado, decretoId).run()
+
+    return c.json({ success: true })
+  } catch (error) {
+    return c.json({ success: false, error: 'Error al cambiar estado del decreto' }, 500)
+  }
+})
+
 // Eliminar decreto y todo lo asociado
 decretosRoutes.delete('/:id', async (c) => {
   try {
     const decretoId = c.req.param('id')
-    
+
     // Eliminar en cascada (configurado en FK)
     await c.env.DB.prepare('DELETE FROM decretos WHERE id = ?').bind(decretoId).run()
 

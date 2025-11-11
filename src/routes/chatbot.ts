@@ -590,28 +590,32 @@ Sé proactiva y usa las herramientas cuando sea apropiado para ayudar mejor al u
       }
     ]
 
-    console.log('🤖 Enviando mensaje a Gemini con function calling...')
+    console.log('🤖 Enviando mensaje a Groq con Llama 3.1...')
 
-    const GOOGLE_AI_KEY = (c.env as any).GEMINI_API_KEY || ''
+    const GROQ_API_KEY = (c.env as any).GROQ_API_KEY || ''
 
-    if (!GOOGLE_AI_KEY) {
+    if (!GROQ_API_KEY) {
       return c.json({
         success: false,
-        error: 'API key no configurada'
+        error: 'API key de Groq no configurada'
       }, 500)
     }
 
-    // Convertir herramientas al formato de Gemini (solo si está autenticado)
-    const geminiTools = isAuthenticated ? [{
-      functionDeclarations: HELENE_TOOLS.map(tool => ({
+    // Convertir herramientas al formato de Groq/OpenAI (solo si está autenticado)
+    const groqTools = isAuthenticated ? HELENE_TOOLS.map(tool => ({
+      type: 'function',
+      function: {
         name: tool.name,
         description: tool.description,
         parameters: tool.parameters
-      }))
-    }] : undefined
+      }
+    })) : undefined
 
     // Loop de function calling
-    let currentMessages = messages
+    let groqMessages = messages.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }))
     let finalResponse = ''
     let maxIterations = 5
     let iteration = 0
@@ -620,49 +624,35 @@ Sé proactiva y usa las herramientas cuando sea apropiado para ayudar mejor al u
     while (iteration < maxIterations) {
       iteration++
 
-      // Preparar el body de la request
+      // Preparar el body de la request para Groq (formato OpenAI)
       const requestBody: any = {
-        contents: currentMessages.map(msg => ({
-          role: msg.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: msg.content }]
-        })),
-        generationConfig: {
-          temperature: 0.9,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        },
-        safetySettings: [
-          {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          }
-        ]
+        model: 'llama-3.3-70b-versatile',
+        messages: groqMessages,
+        temperature: 0.9,
+        max_tokens: 2048,
+        top_p: 0.95,
       }
 
-      // Solo agregar tools si el usuario está autenticado
-      if (geminiTools) {
-        requestBody.tools = geminiTools
+      // IMPORTANTE: No usar tools si el mensaje menciona "sugiere acciones" o "Analiza este decreto"
+      // Esto es para la función "Sugerir con IA" que solo necesita generar texto JSON
+      const lastUserMessage = groqMessages[groqMessages.length - 1]?.content || ''
+      const isSuggestionRequest = lastUserMessage.includes('Analiza este decreto') ||
+                                  lastUserMessage.includes('sugiere acciones') ||
+                                  lastUserMessage.includes('FORMATO DE RESPUESTA (JSON)')
+
+      // Solo agregar tools si está autenticado Y NO es una petición de sugerencias
+      if (groqTools && groqTools.length > 0 && !isSuggestionRequest) {
+        requestBody.tools = groqTools
+        requestBody.tool_choice = 'auto'
       }
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_AI_KEY}`,
+        'https://api.groq.com/openai/v1/chat/completions',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GROQ_API_KEY}`
           },
           body: JSON.stringify(requestBody)
         }
@@ -671,7 +661,7 @@ Sé proactiva y usa las herramientas cuando sea apropiado para ayudar mejor al u
       const data = await response.json()
 
       if (!response.ok) {
-        console.error('❌ Error de Gemini:', data)
+        console.error('❌ Error de Groq:', data)
         return c.json({
           success: false,
           error: 'Error al procesar mensaje con IA',
@@ -679,31 +669,32 @@ Sé proactiva y usa las herramientas cuando sea apropiado para ayudar mejor al u
         }, 500)
       }
 
-      const candidate = data.candidates[0]
-      const content = candidate.content
+      const choice = data.choices[0]
+      const assistantMessage = choice.message
 
-      // Verificar si hay function calls
-      const functionCalls = content.parts?.filter((part: any) => part.functionCall)
+      // Verificar si hay tool calls
+      if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+        console.log(`🔧 Helene quiere usar ${assistantMessage.tool_calls.length} herramienta(s)`)
 
-      if (functionCalls && functionCalls.length > 0) {
-        console.log(`🔧 Helene quiere usar ${functionCalls.length} herramienta(s)`)
+        // Agregar mensaje del asistente al historial
+        groqMessages.push(assistantMessage)
 
-        // Ejecutar cada function call
-        const toolResponses = []
-
-        for (const fc of functionCalls) {
-          const toolName = fc.functionCall.name
-          const toolArgs = fc.functionCall.args || {}
+        // Ejecutar cada tool call
+        for (const toolCall of assistantMessage.tool_calls) {
+          const toolName = toolCall.function.name
+          const toolArgs = JSON.parse(toolCall.function.arguments || '{}')
 
           console.log(`   Ejecutando: ${toolName}`, toolArgs)
 
           try {
             const result = await executeTool(toolName, toolArgs, c.env.DB, userId)
-            toolResponses.push({
-              functionResponse: {
-                name: toolName,
-                response: result
-              }
+
+            // Agregar resultado al historial
+            groqMessages.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              name: toolName,
+              content: JSON.stringify(result)
             })
 
             toolCalls.push({
@@ -713,35 +704,22 @@ Sé proactiva y usa las herramientas cuando sea apropiado para ayudar mejor al u
             })
           } catch (error) {
             console.error(`❌ Error ejecutando ${toolName}:`, error)
-            toolResponses.push({
-              functionResponse: {
-                name: toolName,
-                response: { error: error instanceof Error ? error.message : 'Error desconocido' }
-              }
+            groqMessages.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              name: toolName,
+              content: JSON.stringify({ error: error instanceof Error ? error.message : 'Error desconocido' })
             })
           }
         }
 
-        // Agregar la respuesta con function calls al historial
-        currentMessages.push({
-          role: 'assistant',
-          content: JSON.stringify(content.parts)
-        })
-
-        // Agregar los resultados de las function calls
-        currentMessages.push({
-          role: 'user',
-          content: JSON.stringify(toolResponses)
-        })
-
-        // Continuar el loop para que Gemini genere una respuesta con los resultados
+        // Continuar el loop para que Groq genere una respuesta con los resultados
         continue
       }
 
-      // Si no hay function calls, extraer la respuesta de texto
-      const textPart = content.parts?.find((part: any) => part.text)
-      if (textPart) {
-        finalResponse = textPart.text
+      // Si no hay tool calls, extraer la respuesta de texto
+      if (assistantMessage.content) {
+        finalResponse = assistantMessage.content
         break
       }
 
@@ -831,5 +809,153 @@ chatbotRoutes.delete('/history', async (c) => {
   } catch (error) {
     console.error('❌ Error al limpiar historial:', error)
     return c.json({ success: false, error: 'Error al limpiar historial' }, 500)
+  }
+})
+
+// Ruta especializada SOLO para sugerir acciones (sin el prompt largo de Helene)
+chatbotRoutes.post('/suggest', async (c) => {
+  try {
+    const { decreto } = await c.req.json()
+
+    if (!decreto) {
+      return c.json({ success: false, error: 'Decreto requerido' }, 400)
+    }
+
+    // Prompt corto y enfocado solo en generar sugerencias
+    const promptCorto = `Eres Helene Hadsell, experta en el método SPEC. Analiza este decreto y sugiere acciones concretas:
+
+DECRETO: "${decreto.titulo}"
+DESCRIPCIÓN: "${decreto.descripcion}"
+CATEGORÍA: ${decreto.categoria}
+
+Sugiere:
+- 3 ACCIONES PRIMARIAS (semanales, estratégicas, 1-3 horas)
+- 5 ACCIONES SECUNDARIAS (diarias, 5-30 min, mantienen fe)
+
+RESPONDE SOLO CON JSON (sin texto adicional):
+{
+  "primarias": [
+    {"titulo": "...", "descripcion": "...", "dia_sugerido": "lunes|miércoles|viernes"}
+  ],
+  "secundarias": [
+    {"titulo": "...", "descripcion": "...", "momento": "mañana|tarde|noche"}
+  ]
+}`
+
+    const GROQ_API_KEY = (c.env as any).GROQ_API_KEY || ''
+
+    if (!GROQ_API_KEY) {
+      return c.json({
+        success: false,
+        error: 'API key de Groq no configurada'
+      }, 500)
+    }
+
+    const response = await fetch(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            {
+              role: 'user',
+              content: promptCorto
+            }
+          ],
+          temperature: 0.9,
+          max_tokens: 2048,
+        })
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      console.error('❌ Error de Groq:', data)
+      return c.json({
+        success: false,
+        error: 'Error al procesar sugerencias con IA',
+        details: data
+      }, 500)
+    }
+
+    const message = data.choices[0]?.message?.content || ''
+
+    return c.json({
+      success: true,
+      data: {
+        message
+      }
+    })
+
+  } catch (error) {
+    console.error('❌ Error en suggest:', error)
+    return c.json({
+      success: false,
+      error: 'Error interno del servidor',
+      details: error instanceof Error ? error.message : String(error)
+    }, 500)
+  }
+})
+
+
+// Endpoint para ayudar a completar "¿Qué hacer?" en acciones
+chatbotRoutes.post('/accion-helper', async (c) => {
+  try {
+    const { decreto, tituloAccion } = await c.req.json()
+
+    if (!decreto || !tituloAccion) {
+      return c.json({ success: false, error: 'Decreto y título de acción requeridos' }, 400)
+    }
+
+    const GROQ_API_KEY = c.env.GROQ_API_KEY
+    if (!GROQ_API_KEY) {
+      return c.json({ success: false, error: 'API key no configurada' }, 500)
+    }
+
+    const promptHelper = `Eres Helene Hadsell, experta en manifestación. Un usuario está creando una acción para su decreto.
+
+DECRETO: "${decreto.titulo}"
+DESCRIPCIÓN: "${decreto.descripcion}"
+TÍTULO DE LA ACCIÓN: "${tituloAccion}"
+
+Genera un "¿Qué hacer?" específico, práctico y accionable (máximo 2-3 frases).
+Debe ser concreto y fácil de ejecutar.
+
+Responde SOLO con el texto del "qué hacer", sin explicaciones adicionales.`
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: promptHelper }],
+        temperature: 0.7,
+        max_tokens: 200,
+      })
+    })
+
+    const data = await response.json()
+    const sugerencia = data.choices[0]?.message?.content?.trim() || ''
+
+    return c.json({
+      success: true,
+      data: { sugerencia }
+    })
+  } catch (error) {
+    console.error('Error en accion-helper:', error)
+    return c.json({
+      success: false,
+      error: 'Error al generar sugerencia',
+      details: error instanceof Error ? error.message : String(error)
+    }, 500)
   }
 })
